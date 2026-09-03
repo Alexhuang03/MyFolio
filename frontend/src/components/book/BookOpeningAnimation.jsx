@@ -26,9 +26,9 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-md perspective-1000 overflow-hidden">
       {/* 3D Book Object */}
       <div
-        className="relative w-80 h-[480px] transition-all duration-700 ease-out transform-style-3d shadow-2xl"
+        className="relative w-64 sm:w-80 h-[390px] sm:h-[480px] max-w-[85vw] transition-all duration-700 ease-out transform-style-3d shadow-2xl"
         style={{
-          transform: isOpen ? 'scale(1.08)' : 'scale(0.85)',
+          transform: isOpen ? 'scale(1.05)' : 'scale(0.85)',
         }}
       >
         {/* Right Inside Pages (visible when cover swings open) */}

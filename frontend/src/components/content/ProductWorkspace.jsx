@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Layers, Sparkles, FolderOpen, Info } from 'lucide-react';
+import { Plus, Search, Layers, Sparkles, FolderOpen, Info, Menu } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { PIVOT_MODES } from '../../utils/pivotEngine';
 
@@ -12,18 +12,28 @@ export default function ProductWorkspace({
   onAddProduct,
   onEditProduct,
   onDeleteProduct,
+  onOpenMobileCategories,
 }) {
   const [filterQuery, setFilterQuery] = useState('');
   const isByLabel = pivotMode === PIVOT_MODES.BY_LABEL;
 
   if (!selectedPrimaryItem) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-12 text-center text-stone-400">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center text-stone-400">
         <FolderOpen className="w-12 h-12 stroke-1 mb-3 text-stone-300" />
         <h3 className="font-serif text-lg font-bold text-stone-700">Aucune catégorie sélectionnée</h3>
-        <p className="text-xs text-stone-400 mt-1">
-          Sélectionnez une catégorie à gauche pour afficher ses éléments.
+        <p className="text-xs text-stone-400 mt-1 mb-4">
+          Sélectionnez une catégorie pour afficher ses éléments.
         </p>
+        {onOpenMobileCategories && (
+          <button
+            onClick={onOpenMobileCategories}
+            className="md:hidden px-4 py-2 bg-stone-900 text-white rounded-xl text-xs font-semibold flex items-center gap-2"
+          >
+            <Menu className="w-4 h-4" />
+            <span>Voir les catégories</span>
+          </button>
+        )}
       </div>
     );
   }
@@ -45,57 +55,72 @@ export default function ProductWorkspace({
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#faf8f5]">
       {/* Workspace Top Header */}
-      <div className="px-8 py-5 border-b border-stone-200/80 bg-white/70 backdrop-blur-xs flex flex-wrap items-center justify-between gap-4 sticky top-0 z-10">
-        <div className="flex items-center gap-3.5">
-          <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-xs font-serif font-bold text-lg"
-            style={{ backgroundColor: selectedPrimaryItem.color || '#6366f1' }}
-          >
-            {selectedPrimaryItem.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-serif font-bold text-xl text-stone-900 leading-tight">
-                {selectedPrimaryItem.name}
-              </h2>
-              <span className="text-xs font-mono px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600 rounded-full font-medium">
-                {totalFilteredCount} élément{totalFilteredCount > 1 ? 's' : ''}
-              </span>
+      <div className="px-4 sm:px-8 py-3.5 sm:py-5 border-b border-stone-200/80 bg-white/70 backdrop-blur-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 sticky top-0 z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-xs font-serif font-bold text-base sm:text-lg flex-shrink-0"
+              style={{ backgroundColor: selectedPrimaryItem.color || '#6366f1' }}
+            >
+              {selectedPrimaryItem.name.charAt(0).toUpperCase()}
             </div>
-            <p className="text-xs text-stone-400 mt-0.5">
-              {isByLabel
-                ? 'Regroupement par sous-labels avec section Général'
-                : 'Regroupement par labels associés avec section Général'}
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-serif font-bold text-lg sm:text-xl text-stone-900 leading-tight">
+                  {selectedPrimaryItem.name}
+                </h2>
+                <span className="text-xs font-mono px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600 rounded-full font-medium">
+                  {totalFilteredCount} élément{totalFilteredCount > 1 ? 's' : ''}
+                </span>
+              </div>
+              <p className="text-[11px] sm:text-xs text-stone-400 mt-0.5 line-clamp-1">
+                {isByLabel
+                  ? 'Regroupement par sous-labels avec section Général'
+                  : 'Regroupement par labels associés avec section Général'}
+              </p>
+            </div>
           </div>
+
+          {/* Mobile Categories drawer toggle button */}
+          {onOpenMobileCategories && (
+            <button
+              onClick={onOpenMobileCategories}
+              className="md:hidden px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl text-xs font-medium text-stone-700 flex items-center gap-1.5 flex-shrink-0"
+              title="Changer de catégorie"
+            >
+              <Menu className="w-4 h-4" />
+              <span className="text-[11px]">Menu</span>
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Quick search */}
-          <div className="relative w-56">
+        <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
+          {/* Quick search with correct pl-10 */}
+          <div className="relative flex-1 sm:w-56">
             <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="Filtrer les éléments..."
-              className="w-full pl-8.5 pr-3 py-1.5 bg-stone-100/80 border border-stone-200 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+              className="w-full pl-10 pr-3 py-1.5 sm:py-2 bg-stone-100/80 border border-stone-200 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400"
             />
           </div>
 
           {/* Add Product Button */}
           <button
             onClick={() => onAddProduct(selectedPrimaryItem.id)}
-            className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5"
+            className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Ajouter un élément</span>
+            <span className="hidden xs:inline">Ajouter un élément</span>
+            <span className="xs:hidden">Ajouter</span>
           </button>
         </div>
       </div>
 
       {/* Sections & Products Workspace */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-10">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-10">
         {totalFilteredCount === 0 && (
           <div className="py-16 text-center bg-white/60 border border-dashed border-stone-200 rounded-2xl max-w-md mx-auto p-8">
             <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3">

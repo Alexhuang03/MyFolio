@@ -37,41 +37,55 @@ export default function LibraryView({
     <div className="min-h-screen bg-[#f7f5f0] text-stone-800 flex flex-col">
       {/* Top Header */}
       <header className="border-b border-stone-200/80 bg-white/70 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-6 h-18 flex items-center justify-between py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20">
-              <Library className="w-6 h-6" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 flex-shrink-0">
+                <Library className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div>
+                <h1 className="font-serif font-bold text-lg sm:text-2xl tracking-tight text-stone-900 flex items-center gap-2">
+                  MyFolio <span className="text-amber-700 text-xs sm:text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 rounded-full border border-amber-200">Bibliothèque</span>
+                </h1>
+                <p className="text-[11px] sm:text-xs text-stone-500 line-clamp-1">
+                  Vos collections organisées en livres interactifs
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-serif font-bold text-2xl tracking-tight text-stone-900 flex items-center gap-2">
-                MyFolio <span className="text-amber-700 text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 rounded-full border border-amber-200">Bibliothèque</span>
-              </h1>
-              <p className="text-xs text-stone-500">
-                Vos collections organisées en livres interactifs multidimensionnels
-              </p>
-            </div>
+
+            {/* Mobile Create Button in top bar */}
+            <button
+              onClick={() => {
+                setEditingBook(null);
+                setIsModalOpen(true);
+              }}
+              className="sm:hidden px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Créer</span>
+            </button>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Search Input */}
-            <div className="relative w-64 hidden sm:block">
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            {/* Search Input with correct pl-10 padding */}
+            <div className="relative flex-1 sm:w-64">
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Rechercher un livre..."
-                className="w-full pl-9.5 pr-4 py-2 bg-stone-100 border border-stone-200/80 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-stone-100 border border-stone-200/80 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400"
               />
             </div>
 
-            {/* Create Book Button */}
+            {/* Desktop Create Book Button */}
             <button
               onClick={() => {
                 setEditingBook(null);
                 setIsModalOpen(true);
               }}
-              className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-sm hover:shadow transition-all flex items-center gap-2"
+              className="hidden sm:flex px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all items-center gap-2 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Nouveau Livre</span>

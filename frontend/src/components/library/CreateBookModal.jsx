@@ -128,7 +128,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
             <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
               Design de Couverture Illustrée
             </label>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
               {COVERS.map((cover) => {
                 const isSelected = coverImage === cover.id;
                 return (

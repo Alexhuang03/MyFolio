@@ -26,6 +26,7 @@ export default function BookDetailView({
   // Pivot mode state: 100% client side
   const [pivotMode, setPivotMode] = useState(PIVOT_MODES.BY_LABEL);
   const [selectedPrimaryId, setSelectedPrimaryId] = useState(null);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Modals state
   const [tagModalConfig, setTagModalConfig] = useState(null); // { isOpen, tagType, initialTag }
@@ -93,49 +94,50 @@ export default function BookDetailView({
   return (
     <div className="h-screen w-screen flex flex-col bg-[#f5f2eb] overflow-hidden">
       {/* Top Application Bar (Inside Book) */}
-      <header className="h-16 px-6 bg-white/90 backdrop-blur-md border-b border-stone-200 flex items-center justify-between z-20 flex-shrink-0 shadow-2xs">
+      <header className="h-16 px-4 sm:px-6 bg-white/90 backdrop-blur-md border-b border-stone-200 flex items-center justify-between z-20 flex-shrink-0 shadow-2xs gap-2">
         {/* Left: Back to library & Book info */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={onBackToLibrary}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-all"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-all flex-shrink-0"
             title="Retour à la bibliothèque"
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">Bibliothèque</span>
           </button>
 
-          <div className="h-5 w-px bg-stone-200" />
+          <div className="h-5 w-px bg-stone-200 flex-shrink-0 hidden sm:block" />
 
           {/* Book title and mini cover icon */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div
-              className="w-7 h-9 rounded-sm overflow-hidden shadow-xs border border-stone-300 relative flex-shrink-0"
+              className="w-6 h-8 sm:w-7 sm:h-9 rounded-sm overflow-hidden shadow-xs border border-stone-300 relative flex-shrink-0"
               style={{ backgroundColor: book.colorTheme || '#3b82f6' }}
             >
               <img src={coverSrc} alt="" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h1 className="font-serif font-bold text-stone-900 text-sm sm:text-base leading-tight">
+            <div className="min-w-0">
+              <h1 className="font-serif font-bold text-stone-900 text-xs sm:text-base leading-tight truncate">
                 {book.title}
               </h1>
-              <p className="text-[11px] text-stone-400 leading-none mt-0.5">
-                {products.length} produit{products.length > 1 ? 's' : ''} au total
+              <p className="text-[10px] sm:text-[11px] text-stone-400 leading-none mt-0.5 truncate">
+                {products.length} élément{products.length > 1 ? 's' : ''}
               </p>
             </div>
           </div>
         </div>
 
         {/* Right: Quick actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {/* Prominent Pivot Toggle Button */}
           <button
             onClick={togglePivot}
-            className="px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-2"
+            className="px-2.5 sm:px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 sm:gap-2"
+            title="Inverser les dimensions de tri"
           >
             <Shuffle className="w-3.5 h-3.5 text-amber-700" />
-            <span className="hidden sm:inline">Axe :</span>
-            <span className="font-bold underline decoration-amber-400 underline-offset-2">
+            <span className="hidden md:inline">Axe :</span>
+            <span className="font-bold underline decoration-amber-400 underline-offset-2 text-[11px] sm:text-xs">
               {pivotMode === PIVOT_MODES.BY_LABEL ? 'Labels' : 'Sous-labels'}
             </span>
           </button>
@@ -143,16 +145,16 @@ export default function BookDetailView({
           {/* Add Product Button */}
           <button
             onClick={() => handleOpenAddProduct(activePrimaryId)}
-            className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1.5"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Produit</span>
+            <span className="hidden sm:inline">Élément</span>
           </button>
         </div>
       </header>
 
       {/* Main Split-Screen Interior */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         {/* Left Column : Navigation Categories */}
         <CategorySidebar
           pivotMode={pivotMode}
@@ -162,6 +164,8 @@ export default function BookDetailView({
           onSelectPrimary={(id) => setSelectedPrimaryId(id)}
           onAddTag={handleOpenAddTag}
           onEditTag={handleOpenEditTag}
+          isOpenMobile={isMobileSidebarOpen}
+          onCloseMobile={() => setIsMobileSidebarOpen(false)}
           onDeleteTag={(id, mode) => {
             if (pivotMode === PIVOT_MODES.BY_LABEL) {
               return onDeleteLabel(id, mode);
@@ -181,6 +185,7 @@ export default function BookDetailView({
           onAddProduct={handleOpenAddProduct}
           onEditProduct={handleOpenEditProduct}
           onDeleteProduct={onDeleteProduct}
+          onOpenMobileCategories={() => setIsMobileSidebarOpen(true)}
         />
       </div>
 
