@@ -54,7 +54,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la création du label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la création du label');
+    }
     return res.json();
   },
 
@@ -64,7 +67,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la modification du label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la modification du label');
+    }
     return res.json();
   },
 
@@ -72,7 +78,10 @@ export const api = {
     const res = await fetch(`${API_BASE}/labels/${id}?mode=${mode}`, {
       method: 'DELETE',
     });
-    if (!res.ok) throw new Error('Erreur lors de la suppression du label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la suppression du label');
+    }
     return res.json();
   },
 
@@ -83,7 +92,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la création du sous-label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la création du sous-label');
+    }
     return res.json();
   },
 
@@ -93,7 +105,10 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la modification du sous-label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la modification du sous-label');
+    }
     return res.json();
   },
 
@@ -101,7 +116,10 @@ export const api = {
     const res = await fetch(`${API_BASE}/sublabels/${id}?mode=${mode}`, {
       method: 'DELETE',
     });
-    if (!res.ok) throw new Error('Erreur lors de la suppression du sous-label');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la suppression du sous-label');
+    }
     return res.json();
   },
 

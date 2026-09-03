@@ -195,6 +195,7 @@ export default function BookDetailView({
           isOpen={tagModalConfig.isOpen}
           tagType={tagModalConfig.tagType}
           initialTag={tagModalConfig.initialTag}
+          existingTags={tagModalConfig.tagType === 'label' ? labels : subLabels}
           onClose={() => setTagModalConfig(null)}
           onSubmit={async (data) => {
             if (tagModalConfig.initialTag) {

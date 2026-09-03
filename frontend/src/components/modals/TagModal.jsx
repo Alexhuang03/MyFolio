@@ -19,6 +19,7 @@ export default function TagModal({
   onSubmit,
   tagType = 'label', // 'label' ou 'sublabel'
   initialTag = null,
+  existingTags = [],
 }) {
   const isEditing = Boolean(initialTag);
   const isLabel = tagType === 'label';
@@ -34,8 +35,22 @@ export default function TagModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim()) {
+    const trimmed = name.trim();
+    if (!trimmed) {
       setError('Veuillez spécifier un nom');
+      return;
+    }
+
+    // Vérification d'unicité côté client
+    const isDuplicate = existingTags.some(
+      (t) =>
+        (!initialTag || t._id !== initialTag._id) &&
+        t.name &&
+        t.name.trim().toLowerCase() === trimmed.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      setError(`Un ${isLabel ? 'label' : 'sous-label'} nommé "${trimmed}" existe déjà dans ce livre. Les noms doivent être uniques.`);
       return;
     }
 
@@ -43,7 +58,7 @@ export default function TagModal({
       setLoading(true);
       setError('');
       await onSubmit({
-        name: name.trim(),
+        name: trimmed,
         color,
       });
       onClose();

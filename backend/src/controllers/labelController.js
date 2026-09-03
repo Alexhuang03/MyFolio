@@ -1,6 +1,8 @@
 import Label from '../models/Label.js';
 import Product from '../models/Product.js';
 
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // Créer un label
 export const createLabel = async (req, res) => {
   try {
@@ -9,8 +11,20 @@ export const createLabel = async (req, res) => {
       return res.status(400).json({ message: 'Nom et bookId sont requis' });
     }
 
+    const trimmedName = name.trim();
+    const existing = await Label.findOne({
+      bookId,
+      name: { $regex: new RegExp(`^${escapeRegex(trimmedName)}$`, 'i') },
+    });
+
+    if (existing) {
+      return res.status(400).json({
+        message: `Un label nommé "${trimmedName}" existe déjà dans ce livre. Les noms doivent être uniques.`,
+      });
+    }
+
     const label = await Label.create({
-      name: name.trim(),
+      name: trimmedName,
       color: color || '#6366f1',
       bookId,
     });
@@ -25,19 +39,33 @@ export const createLabel = async (req, res) => {
 export const updateLabel = async (req, res) => {
   try {
     const { name, color } = req.body;
-    const label = await Label.findByIdAndUpdate(
-      req.params.id,
-      {
-        ...(name && { name: name.trim() }),
-        ...(color && { color }),
-      },
-      { new: true, runValidators: true }
-    );
+    const label = await Label.findById(req.params.id);
 
     if (!label) {
       return res.status(404).json({ message: 'Label introuvable' });
     }
 
+    if (name && name.trim()) {
+      const trimmedName = name.trim();
+      const existing = await Label.findOne({
+        _id: { $ne: req.params.id },
+        bookId: label.bookId,
+        name: { $regex: new RegExp(`^${escapeRegex(trimmedName)}$`, 'i') },
+      });
+
+      if (existing) {
+        return res.status(400).json({
+          message: `Un label nommé "${trimmedName}" existe déjà dans ce livre. Les noms doivent être uniques.`,
+        });
+      }
+      label.name = trimmedName;
+    }
+
+    if (color) {
+      label.color = color;
+    }
+
+    await label.save();
     res.json(label);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du label', error: error.message });
