@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="classicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="300" height="420" rx="8" fill="url(#classicGrad)"/>
+  
+  <!-- Spine shadow & Gold line -->
+  <rect x="0" y="0" width="22" height="420" fill="#000" opacity="0.3"/>
+  <line x1="22" y1="0" x2="22" y2="420" stroke="#fbbf24" stroke-width="2" opacity="0.7"/>
+  
+  <!-- Gold Double Borders -->
+  <rect x="36" y="24" width="236" height="372" rx="4" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.85"/>
+  <rect x="42" y="30" width="224" height="360" rx="2" fill="none" stroke="#fbbf24" stroke-width="1" opacity="0.45"/>
+  
+  <!-- Corner Ornaments -->
+  <path d="M 46,60 L 46,46 L 60,46" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M 254,60 L 254,46 L 240,46" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M 46,360 L 46,374 L 60,374" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  <path d="M 254,360 L 254,374 L 240,374" fill="none" stroke="#fbbf24" stroke-width="2"/>
+  
+  <!-- Center Medallion -->
+  <circle cx="150" cy="180" r="45" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.8"/>
+  <circle cx="150" cy="180" r="40" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" opacity="0.6"/>
+  <polygon points="150,150 162,175 140,165 160,165 138,175" fill="#fbbf24" opacity="0.9"/>
+  <path d="M 130,195 Q 150,210 170,195" fill="none" stroke="#fbbf24" stroke-width="2"/>
+</svg>

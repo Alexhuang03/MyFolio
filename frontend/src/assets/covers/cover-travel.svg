@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="travelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e7490"/>
+      <stop offset="100%" stop-color="#155e75"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="420" rx="8" fill="url(#travelGrad)"/>
+  
+  <rect x="0" y="0" width="22" height="420" fill="#000" opacity="0.25"/>
+  <line x1="22" y1="0" x2="22" y2="420" stroke="#bae6fd" stroke-dasharray="4,3" stroke-width="1.5" opacity="0.6"/>
+  
+  <rect x="36" y="24" width="236" height="372" rx="4" fill="none" stroke="#7dd3fc" stroke-width="1.5" opacity="0.6"/>
+  
+  <!-- Compass Rose -->
+  <g transform="translate(150, 185)">
+    <circle cx="0" cy="0" r="48" fill="none" stroke="#e0f2fe" stroke-width="1.5" opacity="0.5"/>
+    <circle cx="0" cy="0" r="42" fill="none" stroke="#bae6fd" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/>
+    
+    <!-- Compass Points -->
+    <!-- North Point (Red/Gold Accent) -->
+    <polygon points="0,-42 7,-8 0,0" fill="#f87171"/>
+    <polygon points="0,-42 -7,-8 0,0" fill="#fca5a5"/>
+    <!-- South -->
+    <polygon points="0,42 7,8 0,0" fill="#cbd5e1"/>
+    <polygon points="0,42 -7,8 0,0" fill="#f1f5f9"/>
+    <!-- East -->
+    <polygon points="42,0 8,7 0,0" fill="#cbd5e1"/>
+    <polygon points="42,0 8,-7 0,0" fill="#f1f5f9"/>
+    <!-- West -->
+    <polygon points="-42,0 -8,7 0,0" fill="#cbd5e1"/>
+    <polygon points="-42,0 -8,-7 0,0" fill="#f1f5f9"/>
+    
+    <circle cx="0" cy="0" r="4" fill="#0369a1" stroke="#fff" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Latitude / Longitude arc lines -->
+  <path d="M 60,340 Q 150,310 240,340" fill="none" stroke="#bae6fd" stroke-width="1" opacity="0.4"/>
+</svg>

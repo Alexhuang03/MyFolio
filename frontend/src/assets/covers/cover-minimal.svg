@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 420" width="100%" height="100%">
+  <defs>
+    <linearGradient id="minimalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="420" rx="8" fill="url(#minimalGrad)"/>
+  
+  <rect x="0" y="0" width="22" height="420" fill="#000" opacity="0.3"/>
+  <line x1="22" y1="0" x2="22" y2="420" stroke="#94a3b8" stroke-width="1.5" opacity="0.5"/>
+  
+  <!-- Minimalist Geometric Art -->
+  <g transform="translate(150, 185)">
+    <circle cx="0" cy="-20" r="38" fill="none" stroke="#f8fafc" stroke-width="2"/>
+    <rect x="-35" y="0" width="70" height="70" rx="4" fill="none" stroke="#38bdf8" stroke-width="2"/>
+    <line x1="-50" y1="35" x2="50" y2="35" stroke="#f43f5e" stroke-width="2"/>
+  </g>
+  
+  <!-- Modern Clean typography dashes -->
+  <line x1="120" y1="330" x2="180" y2="330" stroke="#94a3b8" stroke-width="2" stroke-linecap="round"/>
+  <line x1="135" y1="340" x2="165" y2="340" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+</svg>
