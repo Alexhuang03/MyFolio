@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit3, Trash2, Utensils, Tag } from 'lucide-react';
+import { Edit3, Trash2, Package, Tag } from 'lucide-react';
 
 export default function ProductCard({
   product,
@@ -41,8 +41,8 @@ export default function ProductCard({
             product.image ? 'hidden' : 'flex'
           }`}
         >
-          <Utensils className="w-8 h-8 stroke-1" />
-          <span className="text-[10px] mt-1 text-stone-400">Sans illustration</span>
+          <Package className="w-8 h-8 stroke-1 text-stone-400" />
+          <span className="text-[10px] mt-1 text-stone-400">Sans image</span>
         </div>
 
         {/* Price tag badge */}
@@ -57,14 +57,14 @@ export default function ProductCard({
           <button
             onClick={() => onEdit(product)}
             className="p-1.5 bg-white/90 hover:bg-white text-stone-700 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
-            title="Modifier le produit"
+            title="Modifier l'élément"
           >
             <Edit3 className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => onDelete(product)}
             className="p-1.5 bg-white/90 hover:bg-rose-50 text-rose-600 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
-            title="Supprimer le produit"
+            title="Supprimer l'élément"
           >
             <Trash2 className="w-3.5 h-3.5" />
           </button>

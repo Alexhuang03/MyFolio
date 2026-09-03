@@ -64,7 +64,7 @@ export default function ProductWorkspace({
             </div>
             <p className="text-xs text-stone-400 mt-0.5">
               {isByLabel
-                ? 'Regroupement par types de plat (sous-labels) avec section Général'
+                ? 'Regroupement par sous-labels avec section Général'
                 : 'Regroupement par labels associés avec section Général'}
             </p>
           </div>
@@ -78,7 +78,7 @@ export default function ProductWorkspace({
               type="text"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              placeholder="Filtrer ces produits..."
+              placeholder="Filtrer les éléments..."
               className="w-full pl-8.5 pr-3 py-1.5 bg-stone-100/80 border border-stone-200 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
             />
           </div>
@@ -89,7 +89,7 @@ export default function ProductWorkspace({
             className="px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Ajouter un produit</span>
+            <span>Ajouter un élément</span>
           </button>
         </div>
       </div>
@@ -102,16 +102,16 @@ export default function ProductWorkspace({
               <Plus className="w-6 h-6" />
             </div>
             <h4 className="font-serif font-bold text-stone-800 text-base mb-1">
-              Aucun produit dans "{selectedPrimaryItem.name}"
+              Aucun élément dans "{selectedPrimaryItem.name}"
             </h4>
             <p className="text-xs text-stone-400 mb-4">
-              Ajoutez votre premier produit en cliquant ci-dessous.
+              Ajoutez votre premier élément en cliquant ci-dessous.
             </p>
             <button
               onClick={() => onAddProduct(selectedPrimaryItem.id)}
               className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
             >
-              + Ajouter un produit
+              + Ajouter un élément
             </button>
           </div>
         )}
@@ -140,7 +140,7 @@ export default function ProductWorkspace({
                   </h3>
                 </div>
                 <span className="text-xs text-stone-400 font-mono">
-                  {section.products.length} plat{section.products.length > 1 ? 's' : ''}
+                  {section.products.length} élément{section.products.length > 1 ? 's' : ''}
                 </span>
               </div>
 
@@ -148,7 +148,7 @@ export default function ProductWorkspace({
               {section.products.length === 0 ? (
                 <div className="py-6 px-4 bg-stone-50/60 border border-dashed border-stone-200/80 rounded-xl text-center">
                   <p className="text-xs text-stone-400">
-                    Aucun produit dans cette sous-section pour le moment.
+                    Aucun élément dans cette sous-section pour le moment.
                   </p>
                 </div>
               ) : (

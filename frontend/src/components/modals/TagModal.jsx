@@ -73,7 +73,7 @@ export default function TagModal({
                   : `Nouveau ${isLabel ? 'Label' : 'Sous-label'}`}
               </h3>
               <p className="text-xs text-stone-500">
-                {isLabel ? 'Ex: Pays, Catégorie principale...' : 'Ex: Type de plat, Époque, Format...'}
+                {isLabel ? 'Ex: Genre, Univers, Marque, Origine...' : 'Ex: Format, Plateforme, Statut, Rareté...'}
               </p>
             </div>
           </div>
@@ -104,7 +104,7 @@ export default function TagModal({
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={isLabel ? 'Ex: France, Japon, USA...' : 'Ex: Entrée, Plat, Dessert...'}
+              placeholder={isLabel ? 'Ex: Science-Fiction, Nintendo, Vintage, Manga...' : 'Ex: Terminé, En cours, Coup de cœur, Collector...'}
               className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
             />
           </div>

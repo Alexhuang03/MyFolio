@@ -7,26 +7,20 @@ import coverMinimal from './cover-minimal.svg';
 
 export const COVERS = [
   {
-    id: 'cover-culinary.svg',
-    name: 'Recettes & Gastronomie',
-    src: coverCulinary,
-    defaultColor: '#f97316',
-  },
-  {
     id: 'cover-classic.svg',
     name: 'Vintage Classique & Or',
     src: coverClassic,
     defaultColor: '#1e3a8a',
   },
   {
-    id: 'cover-botanical.svg',
-    name: 'Herbier & Botanique',
-    src: coverBotanical,
-    defaultColor: '#059669',
+    id: 'cover-minimal.svg',
+    name: 'Minimaliste & Moderne',
+    src: coverMinimal,
+    defaultColor: '#334155',
   },
   {
     id: 'cover-fantasy.svg',
-    name: 'Grimoire Arcanique',
+    name: 'Grimoire & Imaginaire',
     src: coverFantasy,
     defaultColor: '#7c3aed',
   },
@@ -37,10 +31,16 @@ export const COVERS = [
     defaultColor: '#0284c7',
   },
   {
-    id: 'cover-minimal.svg',
-    name: 'Minimaliste Moderne',
-    src: coverMinimal,
-    defaultColor: '#334155',
+    id: 'cover-botanical.svg',
+    name: 'Herbier & Nature',
+    src: coverBotanical,
+    defaultColor: '#059669',
+  },
+  {
+    id: 'cover-culinary.svg',
+    name: 'Gastronomie & Recettes',
+    src: coverCulinary,
+    defaultColor: '#f97316',
   },
 ];
 

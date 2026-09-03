@@ -50,14 +50,6 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    // Auto-seed if database is empty
-    const bookCount = await Book.countDocuments();
-    if (bookCount === 0) {
-      console.log('[Server] Database is empty. Auto-seeding demo "Menu Gourmand" book...');
-      const { seedData } = await import('./seeds/seedData.js');
-      await seedData();
-    }
-
     app.listen(PORT, HOST, () => {
       console.log(`[Server] MyFolio API running on http://127.0.0.1:${PORT}`);
     });

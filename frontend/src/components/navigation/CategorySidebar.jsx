@@ -60,7 +60,7 @@ export default function CategorySidebar({
         <div className="flex items-center gap-2">
           <Tag className="w-3.5 h-3.5 text-stone-400" />
           <h2 className="text-xs font-bold uppercase tracking-wider text-stone-500">
-            {isByLabel ? 'Labels (ex: Pays)' : 'Sous-labels (ex: Types)'}
+            {isByLabel ? 'Labels (ex: Genres, Thèmes)' : 'Sous-labels (ex: Formats, Statuts)'}
           </h2>
         </div>
 
