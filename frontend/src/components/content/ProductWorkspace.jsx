@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Search, Layers, Sparkles, FolderOpen, Info, Menu } from 'lucide-react';
 import ProductCard from './ProductCard';
 import { PIVOT_MODES } from '../../utils/pivotEngine';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function ProductWorkspace({
   pivotMode,
@@ -14,24 +15,25 @@ export default function ProductWorkspace({
   onDeleteProduct,
   onOpenMobileCategories,
 }) {
+  const { t } = useLanguage();
   const [filterQuery, setFilterQuery] = useState('');
   const isByLabel = pivotMode === PIVOT_MODES.BY_LABEL;
 
   if (!selectedPrimaryItem) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center text-stone-400">
-        <FolderOpen className="w-12 h-12 stroke-1 mb-3 text-stone-300" />
-        <h3 className="font-serif text-lg font-bold text-stone-700">Aucune catégorie sélectionnée</h3>
-        <p className="text-xs text-stone-400 mt-1 mb-4">
-          Sélectionnez une catégorie pour afficher ses éléments.
+      <div className="flex-1 flex flex-col items-center justify-center p-8 sm:p-12 text-center text-stone-400 dark:text-stone-500 bg-[#faf8f5] dark:bg-stone-950">
+        <FolderOpen className="w-12 h-12 stroke-1 mb-3 text-stone-300 dark:text-stone-600" />
+        <h3 className="font-serif text-lg font-bold text-stone-700 dark:text-stone-200">{t('no_category_selected')}</h3>
+        <p className="text-xs text-stone-400 dark:text-stone-400 mt-1 mb-4">
+          {t('select_category')}
         </p>
         {onOpenMobileCategories && (
           <button
             onClick={onOpenMobileCategories}
-            className="md:hidden px-4 py-2 bg-stone-900 text-white rounded-xl text-xs font-semibold flex items-center gap-2"
+            className="md:hidden px-4 py-2 bg-stone-900 dark:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-2"
           >
             <Menu className="w-4 h-4" />
-            <span>Voir les catégories</span>
+            <span>{t('view_categories')}</span>
           </button>
         )}
       </div>
@@ -53,9 +55,9 @@ export default function ProductWorkspace({
   );
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#faf8f5]">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-[#faf8f5] dark:bg-stone-950 transition-colors duration-200">
       {/* Workspace Top Header */}
-      <div className="px-4 sm:px-8 py-3.5 sm:py-5 border-b border-stone-200/80 bg-white/70 backdrop-blur-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 sticky top-0 z-10">
+      <div className="px-4 sm:px-8 py-3.5 sm:py-5 border-b border-stone-200/80 dark:border-stone-850 bg-white/70 dark:bg-stone-900/80 backdrop-blur-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -66,17 +68,17 @@ export default function ProductWorkspace({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-serif font-bold text-lg sm:text-xl text-stone-900 leading-tight">
+                <h2 className="font-serif font-bold text-lg sm:text-xl text-stone-900 dark:text-stone-100 leading-tight">
                   {selectedPrimaryItem.name}
                 </h2>
-                <span className="text-xs font-mono px-2 py-0.5 bg-stone-100 border border-stone-200 text-stone-600 rounded-full font-medium">
-                  {totalFilteredCount} élément{totalFilteredCount > 1 ? 's' : ''}
+                <span className="text-xs font-mono px-2 py-0.5 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 rounded-full font-medium">
+                  {totalFilteredCount} {totalFilteredCount > 1 ? t('elements') : t('element')}
                 </span>
               </div>
-              <p className="text-[11px] sm:text-xs text-stone-400 mt-0.5 line-clamp-1">
+              <p className="text-[11px] sm:text-xs text-stone-400 dark:text-stone-400 mt-0.5 line-clamp-1">
                 {isByLabel
-                  ? 'Regroupement par sous-labels avec section Général'
-                  : 'Regroupement par labels associés avec section Général'}
+                  ? t('grouped_by_sublabels')
+                  : t('grouped_by_labels')}
               </p>
             </div>
           </div>
@@ -85,11 +87,11 @@ export default function ProductWorkspace({
           {onOpenMobileCategories && (
             <button
               onClick={onOpenMobileCategories}
-              className="md:hidden px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl text-xs font-medium text-stone-700 flex items-center gap-1.5 flex-shrink-0"
-              title="Changer de catégorie"
+              className="md:hidden px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-200 flex items-center gap-1.5 flex-shrink-0"
+              title={t('change_category')}
             >
               <Menu className="w-4 h-4" />
-              <span className="text-[11px]">Menu</span>
+              <span className="text-[11px]">{t('menu')}</span>
             </button>
           )}
         </div>
@@ -97,13 +99,13 @@ export default function ProductWorkspace({
         <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
           {/* Quick search with correct pl-10 */}
           <div className="relative flex-1 sm:w-56">
-            <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Search className="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
-              placeholder="Filtrer les éléments..."
-              className="w-full pl-10 pr-3 py-1.5 sm:py-2 bg-stone-100/80 border border-stone-200 rounded-xl text-xs text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400"
+              placeholder={t('filter_elements')}
+              className="w-full pl-10 pr-3 py-1.5 sm:py-2 bg-stone-100/80 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
@@ -113,8 +115,8 @@ export default function ProductWorkspace({
             className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 flex-shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span className="hidden xs:inline">Ajouter un élément</span>
-            <span className="xs:hidden">Ajouter</span>
+            <span className="hidden xs:inline">{t('add_element')}</span>
+            <span className="xs:hidden">{t('add_short')}</span>
           </button>
         </div>
       </div>
@@ -122,21 +124,21 @@ export default function ProductWorkspace({
       {/* Sections & Products Workspace */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 sm:space-y-10">
         {totalFilteredCount === 0 && (
-          <div className="py-16 text-center bg-white/60 border border-dashed border-stone-200 rounded-2xl max-w-md mx-auto p-8">
-            <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3">
+          <div className="py-16 text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-200 dark:border-stone-800 rounded-2xl max-w-md mx-auto p-8">
+            <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-3">
               <Plus className="w-6 h-6" />
             </div>
-            <h4 className="font-serif font-bold text-stone-800 text-base mb-1">
-              Aucun élément dans "{selectedPrimaryItem.name}"
+            <h4 className="font-serif font-bold text-stone-800 dark:text-stone-100 text-base mb-1">
+              {t('no_element_in')} "{selectedPrimaryItem.name}"
             </h4>
-            <p className="text-xs text-stone-400 mb-4">
-              Ajoutez votre premier élément en cliquant ci-dessous.
+            <p className="text-xs text-stone-400 dark:text-stone-400 mb-4">
+              {t('add_first_element')}
             </p>
             <button
               onClick={() => onAddProduct(selectedPrimaryItem.id)}
               className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
             >
-              + Ajouter un élément
+              {t('add_element_btn')}
             </button>
           </div>
         )}
@@ -149,31 +151,31 @@ export default function ProductWorkspace({
           return (
             <div key={section.id} className="space-y-4">
               {/* Section Header */}
-              <div className="flex items-center justify-between pb-2 border-b border-stone-200/60">
+              <div className="flex items-center justify-between pb-2 border-b border-stone-200/60 dark:border-stone-800">
                 <div className="flex items-center gap-2.5">
                   <span
                     className="w-2.5 h-2.5 rounded-full"
                     style={{ backgroundColor: section.color }}
                   />
-                  <h3 className="font-serif font-bold text-stone-800 text-base flex items-center gap-2">
+                  <h3 className="font-serif font-bold text-stone-800 dark:text-stone-100 text-base flex items-center gap-2">
                     {section.name}
                     {section.isGeneral && (
-                      <span className="text-[10px] font-sans font-normal text-stone-400 bg-stone-100 px-2 py-0.5 rounded-md flex items-center gap-1">
-                        <Info className="w-3 h-3" /> Orphelins / Non spécifié
+                      <span className="text-[10px] font-sans font-normal text-stone-400 dark:text-stone-400 bg-stone-100 dark:bg-stone-800 px-2 py-0.5 rounded-md flex items-center gap-1">
+                        <Info className="w-3 h-3" /> {t('orphans')}
                       </span>
                     )}
                   </h3>
                 </div>
-                <span className="text-xs text-stone-400 font-mono">
-                  {section.products.length} élément{section.products.length > 1 ? 's' : ''}
+                <span className="text-xs text-stone-400 dark:text-stone-500 font-mono">
+                  {section.products.length} {section.products.length > 1 ? t('elements') : t('element')}
                 </span>
               </div>
 
               {/* Products in this section */}
               {section.products.length === 0 ? (
-                <div className="py-6 px-4 bg-stone-50/60 border border-dashed border-stone-200/80 rounded-xl text-center">
-                  <p className="text-xs text-stone-400">
-                    Aucun élément dans cette sous-section pour le moment.
+                <div className="py-6 px-4 bg-stone-50/60 dark:bg-stone-900/40 border border-dashed border-stone-200/80 dark:border-stone-800 rounded-xl text-center">
+                  <p className="text-xs text-stone-400 dark:text-stone-500">
+                    {t('no_element_subsection')}
                   </p>
                 </div>
               ) : (

@@ -3,6 +3,7 @@ import { api } from './services/api';
 import LibraryView from './components/library/LibraryView';
 import BookDetailView from './components/book/BookDetailView';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { useLanguage } from './i18n/LanguageContext';
 
 export default function App() {
   const [books, setBooks] = useState([]);
@@ -13,6 +14,8 @@ export default function App() {
     subLabels: [],
     products: [],
   });
+
+  const { t } = useLanguage();
 
   // Notification Toast
   const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
@@ -68,7 +71,7 @@ export default function App() {
   const handleCreateBook = async (bookData) => {
     const newBook = await api.createBook(bookData);
     setBooks((prev) => [newBook, ...prev]);
-    showToast(`Le livre "${newBook.title}" a été créé avec succès.`);
+    showToast(t('book_created', { title: newBook.title }));
   };
 
   const handleUpdateBook = async (id, bookData) => {
@@ -77,13 +80,13 @@ export default function App() {
     if (selectedBook && selectedBook._id === id) {
       setSelectedBook(updated);
     }
-    showToast('Livre mis à jour.');
+    showToast(t('book_updated'));
   };
 
   const handleDeleteBook = async (book) => {
     if (
       window.confirm(
-        `Êtes-vous sûr de vouloir supprimer définitivement le livre "${book.title}" et l'ensemble de ses collections ?`
+        t('delete_book_confirm', { title: book.title })
       )
     ) {
       try {
@@ -92,7 +95,7 @@ export default function App() {
         if (selectedBook && selectedBook._id === book._id) {
           setSelectedBook(null);
         }
-        showToast(`Livre "${book.title}" supprimé.`);
+        showToast(t('book_deleted', { title: book.title }));
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -107,7 +110,7 @@ export default function App() {
         ...prev,
         labels: [...prev.labels, newLabel],
       }));
-      showToast(`Label "${newLabel.name}" créé.`);
+      showToast(t('label_created', { name: newLabel.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -120,7 +123,7 @@ export default function App() {
         ...prev,
         labels: prev.labels.map((l) => (l._id === id ? updated : l)),
       }));
-      showToast(`Label "${updated.name}" mis à jour.`);
+      showToast(t('label_updated', { name: updated.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -155,8 +158,8 @@ export default function App() {
 
       showToast(
         mode === 'cascade' && res.deletedProductsCount > 0
-          ? `Label supprimé avec ${res.deletedProductsCount} produit(s) associé(s).`
-          : 'Label supprimé.'
+          ? t('label_deleted_cascade', { count: res.deletedProductsCount })
+          : t('label_deleted')
       );
     } catch (err) {
       showToast(err.message, 'error');
@@ -171,7 +174,7 @@ export default function App() {
         ...prev,
         subLabels: [...prev.subLabels, newSub],
       }));
-      showToast(`Sous-label "${newSub.name}" créé.`);
+      showToast(t('sublabel_created', { name: newSub.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -184,7 +187,7 @@ export default function App() {
         ...prev,
         subLabels: prev.subLabels.map((s) => (s._id === id ? updated : s)),
       }));
-      showToast(`Sous-label "${updated.name}" mis à jour.`);
+      showToast(t('sublabel_updated', { name: updated.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -217,8 +220,8 @@ export default function App() {
 
       showToast(
         mode === 'cascade' && res.deletedProductsCount > 0
-          ? `Sous-label supprimé avec ${res.deletedProductsCount} produit(s) associé(s).`
-          : 'Sous-label supprimé.'
+          ? t('sublabel_deleted_cascade', { count: res.deletedProductsCount })
+          : t('sublabel_deleted')
       );
     } catch (err) {
       showToast(err.message, 'error');
@@ -233,7 +236,7 @@ export default function App() {
         ...prev,
         products: [newProduct, ...prev.products],
       }));
-      showToast(`"${newProduct.name}" ajouté au livre.`);
+      showToast(t('product_added', { name: newProduct.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
@@ -246,21 +249,21 @@ export default function App() {
         ...prev,
         products: prev.products.map((p) => (p._id === id ? updated : p)),
       }));
-      showToast(`"${updated.name}" mis à jour.`);
+      showToast(t('product_updated', { name: updated.name }));
     } catch (err) {
       showToast(err.message, 'error');
     }
   };
 
   const handleDeleteProduct = async (product) => {
-    if (window.confirm(`Supprimer "${product.name}" ?`)) {
+    if (window.confirm(t('delete_product_confirm', { name: product.name }))) {
       try {
         await api.deleteProduct(product._id);
         setBookContent((prev) => ({
           ...prev,
           products: prev.products.filter((p) => p._id !== product._id),
         }));
-        showToast(`"${product.name}" supprimé.`);
+        showToast(t('product_deleted', { name: product.name }));
       } catch (err) {
         showToast(err.message, 'error');
       }
@@ -268,19 +271,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-stone-100 font-sans text-stone-900">
+    <div className="min-h-screen bg-stone-100 dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200">
       {/* Toast Notification Banner */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md animate-slide-up bg-white/95 text-xs font-medium border-stone-200">
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md animate-slide-up bg-white/95 dark:bg-stone-900/95 text-xs font-medium border-stone-200 dark:border-stone-700">
           {toast.type === 'error' ? (
             <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
           ) : (
             <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
           )}
-          <span className="text-stone-800">{toast.message}</span>
+          <span className="text-stone-800 dark:text-stone-100">{toast.message}</span>
           <button
             onClick={() => setToast(null)}
-            className="p-1 text-stone-400 hover:text-stone-700 ml-2"
+            className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 ml-2"
           >
             <X className="w-3.5 h-3.5" />
           </button>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Upload, Image as ImageIcon, Check, DollarSign } from 'lucide-react';
 import { api } from '../../services/api';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function ProductModal({
   isOpen,
@@ -13,6 +14,7 @@ export default function ProductModal({
   defaultSubLabelId = null,
 }) {
   const isEditing = Boolean(initialProduct);
+  const { t } = useLanguage();
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -69,7 +71,7 @@ export default function ProductModal({
       const res = await api.uploadImage(file);
       setImage(res.url);
     } catch (err) {
-      setError("Échec du téléversement de l'image");
+      setError(t('upload_error'));
     } finally {
       setUploading(false);
     }
@@ -78,7 +80,7 @@ export default function ProductModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Le nom de l’élément est obligatoire');
+      setError(t('name_required_product'));
       return;
     }
 
@@ -92,10 +94,10 @@ export default function ProductModal({
         image: image.trim(),
         labelIds: selectedLabelIds,
         subLabelIds: selectedSubLabelIds,
-      });
+        });
       onClose();
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err.message || t('generic_error'));
     } finally {
       setLoading(false);
     }
@@ -103,20 +105,20 @@ export default function ProductModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 animate-scale-up">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
           <div>
-            <h3 className="text-lg font-serif font-bold text-stone-800">
-              {isEditing ? 'Modifier l’élément' : 'Ajouter un élément'}
+            <h3 className="text-lg font-serif font-bold text-stone-800 dark:text-stone-100">
+              {isEditing ? t('edit_element_title') : t('add_element_title')}
             </h3>
-            <p className="text-xs text-stone-500">
-              Associez-le à un ou plusieurs labels et sous-labels
+            <p className="text-xs text-stone-500 dark:text-stone-400">
+              {t('associate_tags')}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+            className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -125,7 +127,7 @@ export default function ProductModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           {error && (
-            <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-700 rounded-lg">
+            <div className="p-3 text-xs bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-lg">
               {error}
             </div>
           )}
@@ -133,8 +135,8 @@ export default function ProductModal({
           {/* Name & Price */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                Nom *
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+                {t('name_label')}
               </label>
               <input
                 type="text"
@@ -142,59 +144,59 @@ export default function ProductModal({
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ex: The Legend of Zelda, Veste en cuir vintage, Inception, Dune..."
-                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                placeholder={t('name_placeholder')}
+                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-                Prix / Valeur (€)
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+                {t('price_label')}
               </label>
               <input
                 type="number"
                 step="0.1"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="Ex: 29.90"
-                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                placeholder={t('price_placeholder')}
+                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-              Description
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+              {t('description')}
             </label>
             <textarea
               rows={2}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Notes, caractéristiques, créateur, détails..."
-              className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none"
+              placeholder={t('description_placeholder_product')}
+              className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
           {/* Image (URL ou Upload) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
-                Illustration / Photo
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                {t('illustration')}
               </label>
               <div className="flex items-center gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => setImageType('url')}
-                  className={`px-2 py-0.5 rounded ${imageType === 'url' ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-stone-500 hover:text-stone-700'}`}
+                  className={`px-2 py-0.5 rounded ${imageType === 'url' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                 >
-                  Lien URL
+                  {t('url_link')}
                 </button>
                 <button
                   type="button"
                   onClick={() => setImageType('file')}
-                  className={`px-2 py-0.5 rounded ${imageType === 'file' ? 'bg-amber-100 text-amber-800 font-semibold' : 'text-stone-500 hover:text-stone-700'}`}
+                  className={`px-2 py-0.5 rounded ${imageType === 'file' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                 >
-                  Fichier local
+                  {t('local_file')}
                 </button>
               </div>
             </div>
@@ -205,13 +207,13 @@ export default function ProductModal({
                 value={image}
                 onChange={(e) => setImage(e.target.value)}
                 placeholder="https://images.unsplash.com/..."
-                className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             ) : (
               <div className="flex items-center gap-3">
-                <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 hover:border-stone-400 rounded-xl cursor-pointer bg-stone-50 hover:bg-stone-100/60 transition-all text-xs font-medium text-stone-600">
-                  <Upload className="w-4 h-4 text-stone-500" />
-                  <span>{uploading ? 'Téléversement...' : 'Sélectionner une photo'}</span>
+                <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300">
+                  <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                  <span>{uploading ? t('uploading') : t('select_photo')}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -224,20 +226,20 @@ export default function ProductModal({
             )}
 
             {image && (
-              <div className="mt-2 flex items-center gap-3 p-2 bg-stone-50 rounded-xl border border-stone-200">
+              <div className="mt-2 flex items-center gap-3 p-2 bg-stone-50 dark:bg-stone-800/80 rounded-xl border border-stone-200 dark:border-stone-700">
                 <img
                   src={image}
-                  alt="Aperçu"
+                  alt={t('preview')}
                   className="w-12 h-12 object-cover rounded-lg shadow-sm"
                   onError={(e) => {
                     e.target.style.display = 'none';
                   }}
                 />
-                <span className="text-xs text-stone-500 truncate flex-1">{image}</span>
+                <span className="text-xs text-stone-500 dark:text-stone-400 truncate flex-1">{image}</span>
                 <button
                   type="button"
                   onClick={() => setImage('')}
-                  className="p-1 text-stone-400 hover:text-rose-600"
+                  className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -248,15 +250,15 @@ export default function ProductModal({
           {/* Multi-Tagging : Labels (ex: Pays) */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
-                Labels (Multi-tagging)
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                {t('labels_multi')}
               </label>
-              <span className="text-[11px] text-stone-400">
-                {selectedLabelIds.length} sélectionné(s)
+              <span className="text-[11px] text-stone-400 dark:text-stone-400">
+                {selectedLabelIds.length} {t('selected')}
               </span>
             </div>
             {labels.length === 0 ? (
-              <p className="text-xs text-stone-400 italic">Aucun label créé pour le moment</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 italic">{t('no_labels_yet')}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {labels.map((lbl) => {
@@ -269,10 +271,10 @@ export default function ProductModal({
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
                         isChecked
                           ? 'shadow-sm ring-1 ring-offset-1'
-                          : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                          : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
                       }`}
                       style={{
-                        backgroundColor: isChecked ? `${lbl.color}15` : undefined,
+                        backgroundColor: isChecked ? `${lbl.color}22` : undefined,
                         borderColor: isChecked ? lbl.color : undefined,
                         color: isChecked ? lbl.color : undefined,
                       }}
@@ -293,15 +295,15 @@ export default function ProductModal({
           {/* Multi-Tagging : Sous-labels */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider">
-                Sous-labels (ex: Format, Plateforme, Statut...)
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                {t('sublabels_multi')}
               </label>
-              <span className="text-[11px] text-stone-400">
-                {selectedSubLabelIds.length} sélectionné(s)
+              <span className="text-[11px] text-stone-400 dark:text-stone-400">
+                {selectedSubLabelIds.length} {t('selected')}
               </span>
             </div>
             {subLabels.length === 0 ? (
-              <p className="text-xs text-stone-400 italic">Aucun sous-label créé pour le moment</p>
+              <p className="text-xs text-stone-400 dark:text-stone-500 italic">{t('no_sublabels_yet')}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {subLabels.map((sub) => {
@@ -314,10 +316,10 @@ export default function ProductModal({
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
                         isChecked
                           ? 'shadow-sm ring-1 ring-offset-1'
-                          : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                          : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
                       }`}
                       style={{
-                        backgroundColor: isChecked ? `${sub.color}15` : undefined,
+                        backgroundColor: isChecked ? `${sub.color}22` : undefined,
                         borderColor: isChecked ? sub.color : undefined,
                         color: isChecked ? sub.color : undefined,
                       }}
@@ -333,26 +335,26 @@ export default function ProductModal({
                 })}
               </div>
             )}
-            <p className="mt-1 text-[11px] text-stone-400">
-              Si aucun sous-label n'est coché, l'élément apparaîtra dans la section "Général".
+            <p className="mt-1 text-[11px] text-stone-400 dark:text-stone-500">
+              {t('general_section_note')}
             </p>
           </div>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
             >
-              Annuler
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
-              {loading ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Ajouter au livre'}
+              {loading ? t('saving') : isEditing ? t('update') : t('add_to_book')}
             </button>
           </div>
         </form>

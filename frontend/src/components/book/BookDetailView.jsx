@@ -6,6 +6,9 @@ import TagModal from '../modals/TagModal';
 import ProductModal from '../modals/ProductModal';
 import { PIVOT_MODES, getPivotViewData } from '../../utils/pivotEngine';
 import { getCoverSrc } from '../../assets/covers';
+import { useLanguage } from '../../i18n/LanguageContext';
+import LanguageSwitcher from '../settings/LanguageSwitcher';
+import ThemeToggle from '../settings/ThemeToggle';
 
 export default function BookDetailView({
   book,
@@ -23,6 +26,7 @@ export default function BookDetailView({
   onUpdateProduct,
   onDeleteProduct,
 }) {
+  const { t } = useLanguage();
   // Pivot mode state: 100% client side
   const [pivotMode, setPivotMode] = useState(PIVOT_MODES.BY_LABEL);
   const [selectedPrimaryId, setSelectedPrimaryId] = useState(null);
@@ -92,36 +96,36 @@ export default function BookDetailView({
   const coverSrc = getCoverSrc(book.coverImage);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#f5f2eb] overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-[#f5f2eb] dark:bg-stone-950 overflow-hidden transition-colors duration-200">
       {/* Top Application Bar (Inside Book) */}
-      <header className="h-16 px-4 sm:px-6 bg-white/90 backdrop-blur-md border-b border-stone-200 flex items-center justify-between z-20 flex-shrink-0 shadow-2xs gap-2">
+      <header className="h-16 px-4 sm:px-6 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex items-center justify-between z-20 flex-shrink-0 shadow-2xs gap-2">
         {/* Left: Back to library & Book info */}
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={onBackToLibrary}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-xl transition-all flex-shrink-0"
-            title="Retour à la bibliothèque"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all flex-shrink-0"
+            title={t('back_library_tooltip')}
           >
             <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Bibliothèque</span>
+            <span className="hidden sm:inline">{t('back_library')}</span>
           </button>
 
-          <div className="h-5 w-px bg-stone-200 flex-shrink-0 hidden sm:block" />
+          <div className="h-5 w-px bg-stone-200 dark:bg-stone-700 flex-shrink-0 hidden sm:block" />
 
           {/* Book title and mini cover icon */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div
-              className="w-6 h-8 sm:w-7 sm:h-9 rounded-sm overflow-hidden shadow-xs border border-stone-300 relative flex-shrink-0"
+              className="w-6 h-8 sm:w-7 sm:h-9 rounded-sm overflow-hidden shadow-xs border border-stone-300 dark:border-stone-700 relative flex-shrink-0"
               style={{ backgroundColor: book.colorTheme || '#3b82f6' }}
             >
               <img src={coverSrc} alt="" className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0">
-              <h1 className="font-serif font-bold text-stone-900 text-xs sm:text-base leading-tight truncate">
+              <h1 className="font-serif font-bold text-stone-900 dark:text-stone-100 text-xs sm:text-base leading-tight truncate">
                 {book.title}
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-stone-400 leading-none mt-0.5 truncate">
-                {products.length} élément{products.length > 1 ? 's' : ''}
+              <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 leading-none mt-0.5 truncate">
+                {products.length} {products.length > 1 ? t('elements') : t('element')}
               </p>
             </div>
           </div>
@@ -129,26 +133,29 @@ export default function BookDetailView({
 
         {/* Right: Quick actions */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <ThemeToggle />
+          <LanguageSwitcher />
+
           {/* Prominent Pivot Toggle Button */}
           <button
             onClick={togglePivot}
-            className="px-2.5 sm:px-3 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 sm:gap-2"
-            title="Inverser les dimensions de tri"
+            className="px-2.5 sm:px-3 py-1.5 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 sm:gap-2"
+            title={t('reverse_sort_tooltip')}
           >
-            <Shuffle className="w-3.5 h-3.5 text-amber-700" />
-            <span className="hidden md:inline">Axe :</span>
+            <Shuffle className="w-3.5 h-3.5 text-amber-700 dark:text-amber-400" />
+            <span className="hidden md:inline">{t('axis')}</span>
             <span className="font-bold underline decoration-amber-400 underline-offset-2 text-[11px] sm:text-xs">
-              {pivotMode === PIVOT_MODES.BY_LABEL ? 'Labels' : 'Sous-labels'}
+              {pivotMode === PIVOT_MODES.BY_LABEL ? t('labels') : t('sublabels')}
             </span>
           </button>
 
           {/* Add Product Button */}
           <button
             onClick={() => handleOpenAddProduct(activePrimaryId)}
-            className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
+            className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Élément</span>
+            <span className="hidden sm:inline">{t('element_btn')}</span>
           </button>
         </div>
       </header>

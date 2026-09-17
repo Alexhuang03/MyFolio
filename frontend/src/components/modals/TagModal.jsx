@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Tag, Check } from 'lucide-react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 const TAG_COLORS = [
   '#3b82f6', // Bleu
@@ -23,6 +24,7 @@ export default function TagModal({
 }) {
   const isEditing = Boolean(initialTag);
   const isLabel = tagType === 'label';
+  const { t } = useLanguage();
 
   const [name, setName] = useState(initialTag ? initialTag.name : '');
   const [color, setColor] = useState(
@@ -37,20 +39,20 @@ export default function TagModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('Veuillez spécifier un nom');
+      setError(t('name_required'));
       return;
     }
 
     // Vérification d'unicité côté client
     const isDuplicate = existingTags.some(
-      (t) =>
-        (!initialTag || t._id !== initialTag._id) &&
-        t.name &&
-        t.name.trim().toLowerCase() === trimmed.toLowerCase()
+      (tItem) =>
+        (!initialTag || tItem._id !== initialTag._id) &&
+        tItem.name &&
+        tItem.name.trim().toLowerCase() === trimmed.toLowerCase()
     );
 
     if (isDuplicate) {
-      setError(`Un ${isLabel ? 'label' : 'sous-label'} nommé "${trimmed}" existe déjà dans ce livre. Les noms doivent être uniques.`);
+      setError(t(isLabel ? 'label_duplicate' : 'sublabel_duplicate', { name: trimmed }));
       return;
     }
 
@@ -63,7 +65,7 @@ export default function TagModal({
       });
       onClose();
     } catch (err) {
-      setError(err.message || 'Une erreur est survenue');
+      setError(err.message || t('generic_error'));
     } finally {
       setLoading(false);
     }
@@ -71,9 +73,9 @@ export default function TagModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 animate-scale-up">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
           <div className="flex items-center gap-2.5">
             <div
               className="w-8 h-8 rounded-lg flex items-center justify-center text-white"
@@ -82,19 +84,17 @@ export default function TagModal({
               <Tag className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-base font-serif font-bold text-stone-800">
-                {isEditing
-                  ? `Modifier le ${isLabel ? 'Label' : 'Sous-label'}`
-                  : `Nouveau ${isLabel ? 'Label' : 'Sous-label'}`}
+              <h3 className="text-base font-serif font-bold text-stone-800 dark:text-stone-100">
+                {t(isEditing ? (isLabel ? 'edit_label' : 'edit_sublabel') : (isLabel ? 'new_label' : 'new_sublabel'))}
               </h3>
-              <p className="text-xs text-stone-500">
-                {isLabel ? 'Ex: Genre, Univers, Marque, Origine...' : 'Ex: Format, Plateforme, Statut, Rareté...'}
+              <p className="text-xs text-stone-500 dark:text-stone-400">
+                {isLabel ? t('label_examples') : t('sublabel_examples')}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"
+            className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -103,15 +103,15 @@ export default function TagModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {error && (
-            <div className="p-3 text-xs bg-rose-50 border border-rose-200 text-rose-700 rounded-lg">
+            <div className="p-3 text-xs bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-lg">
               {error}
             </div>
           )}
 
           {/* Name */}
           <div>
-            <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
-              Nom du {isLabel ? 'label' : 'sous-label'} *
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+              {isLabel ? t('tag_name_label') : t('tag_name_sublabel')}
             </label>
             <input
               type="text"
@@ -119,15 +119,15 @@ export default function TagModal({
               autoFocus
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={isLabel ? 'Ex: Science-Fiction, Nintendo, Vintage, Manga...' : 'Ex: Terminé, En cours, Coup de cœur, Collector...'}
-              className="w-full px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-stone-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+              placeholder={isLabel ? t('tag_name_placeholder_label') : t('tag_name_placeholder_sublabel')}
+              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
           {/* Color */}
           <div>
-            <label className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-2">
-              Couleur associée
+            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">
+              {t('tag_color')}
             </label>
             <div className="flex items-center gap-2 flex-wrap">
               {TAG_COLORS.map((c) => (
@@ -136,7 +136,7 @@ export default function TagModal({
                   type="button"
                   onClick={() => setColor(c)}
                   className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
-                    color === c ? 'scale-110 ring-2 ring-offset-2 ring-stone-600' : 'hover:scale-105'
+                    color === c ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400' : 'hover:scale-105'
                   }`}
                   style={{ backgroundColor: c }}
                 >
@@ -149,27 +149,27 @@ export default function TagModal({
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
                   className="w-7 h-7 rounded-full border-0 p-0 cursor-pointer"
-                  title="Couleur sur-mesure"
+                  title={t('custom_color_tag')}
                 />
               </div>
             </div>
           </div>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-stone-100 flex items-center justify-end gap-3">
+          <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-medium text-stone-600 hover:bg-stone-100 rounded-xl transition-colors"
+              className="px-4 py-2 text-xs font-medium text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-colors"
             >
-              Annuler
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="px-5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 rounded-xl shadow-sm transition-all disabled:opacity-50"
             >
-              {loading ? 'Enregistrement...' : isEditing ? 'Mettre à jour' : 'Créer'}
+              {loading ? t('saving') : isEditing ? t('update') : t('create')}
             </button>
           </div>
         </form>
