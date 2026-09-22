@@ -7,8 +7,12 @@ import {
   deleteBook,
   getBookContent,
 } from '../controllers/bookController.js';
+import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+
+// Toutes les routes des livres sont strictement protégées par authentification
+router.use(authMiddleware);
 
 router.get('/', getBooks);
 router.post('/', createBook);

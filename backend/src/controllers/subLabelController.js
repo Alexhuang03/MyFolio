@@ -1,5 +1,6 @@
 import SubLabel from '../models/SubLabel.js';
 import Product from '../models/Product.js';
+import Book from '../models/Book.js';
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -9,6 +10,12 @@ export const createSubLabel = async (req, res) => {
     const { name, color, bookId } = req.body;
     if (!name || !name.trim() || !bookId) {
       return res.status(400).json({ message: 'Nom et bookId sont requis' });
+    }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: bookId, userId: req.userId });
+    if (!book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
     }
 
     const trimmedName = name.trim();
@@ -43,6 +50,12 @@ export const updateSubLabel = async (req, res) => {
 
     if (!subLabel) {
       return res.status(404).json({ message: 'Sous-label introuvable' });
+    }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: subLabel.bookId, userId: req.userId });
+    if (!book) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
 
     if (name && name.trim()) {
@@ -81,6 +94,12 @@ export const deleteSubLabel = async (req, res) => {
     const subLabel = await SubLabel.findById(subLabelId);
     if (!subLabel) {
       return res.status(404).json({ message: 'Sous-label introuvable' });
+    }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: subLabel.bookId, userId: req.userId });
+    if (!book) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
     }
 
     let deletedProductsCount = 0;

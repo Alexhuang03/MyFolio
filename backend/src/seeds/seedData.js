@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { connectDB, closeDB } from '../config/db.js';
+import User from '../models/User.js';
 import Book from '../models/Book.js';
 import Label from '../models/Label.js';
 import SubLabel from '../models/SubLabel.js';
@@ -17,12 +18,24 @@ export const seedData = async () => {
     await SubLabel.deleteMany({});
     await Product.deleteMany({});
 
+    console.log('[Seed] Ensuring demo user exists...');
+    let demoUser = await User.findOne({ email: 'demo@myfolio.com' });
+    if (!demoUser) {
+      demoUser = await User.create({
+        name: 'Utilisateur Démo',
+        email: 'demo@myfolio.com',
+        passwordHash: 'password123',
+        termsAcceptedAt: new Date(),
+      });
+    }
+
     console.log('[Seed] Creating demo Book: Le Menu Gourmand...');
     const book = await Book.create({
       title: 'Le Menu Gourmand',
       description: 'Carte des spécialités culinaires internationales et créations fusion.',
       coverImage: 'cover-culinary.svg',
       colorTheme: '#f97316', // Orange chaleureux
+      userId: demoUser._id,
     });
 
     console.log('[Seed] Creating Labels (Pays)...');

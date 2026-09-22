@@ -1,4 +1,5 @@
 import Product from '../models/Product.js';
+import Book from '../models/Book.js';
 
 // Créer un produit
 export const createProduct = async (req, res) => {
@@ -7,6 +8,12 @@ export const createProduct = async (req, res) => {
 
     if (!name || !name.trim() || !bookId) {
       return res.status(400).json({ message: 'Le nom du produit et bookId sont requis' });
+    }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: bookId, userId: req.userId });
+    if (!book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
     }
 
     const product = await Product.create({
@@ -30,6 +37,17 @@ export const updateProduct = async (req, res) => {
   try {
     const { name, description, image, price, labelIds, subLabelIds } = req.body;
 
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Produit introuvable' });
+    }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: product.bookId, userId: req.userId });
+    if (!book) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+
     const updateData = {
       ...(name && { name: name.trim() }),
       ...(description !== undefined && { description: description.trim() }),
@@ -39,17 +57,13 @@ export const updateProduct = async (req, res) => {
       ...(subLabelIds !== undefined && { subLabelIds: Array.isArray(subLabelIds) ? subLabelIds : [] }),
     };
 
-    const product = await Product.findByIdAndUpdate(
+    const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
       updateData,
       { new: true, runValidators: true }
     );
 
-    if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable' });
-    }
-
-    res.json(product);
+    res.json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du produit', error: error.message });
   }
@@ -58,10 +72,18 @@ export const updateProduct = async (req, res) => {
 // Supprimer un produit
 export const deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Produit introuvable' });
     }
+
+    // Vérifier l'appartenance du livre à l'utilisateur connecté
+    const book = await Book.findOne({ _id: product.bookId, userId: req.userId });
+    if (!book) {
+      return res.status(403).json({ message: 'Accès non autorisé' });
+    }
+
+    await Product.findByIdAndDelete(req.params.id);
     res.json({ message: 'Produit supprimé avec succès', productId: req.params.id });
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la suppression du produit', error: error.message });

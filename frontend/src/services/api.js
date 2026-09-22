@@ -70,7 +70,7 @@ export const api = {
   async createLabel(data) {
     const res = await fetch(`${API_BASE}/labels`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -83,7 +83,7 @@ export const api = {
   async updateLabel(id, data) {
     const res = await fetch(`${API_BASE}/labels/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -96,6 +96,7 @@ export const api = {
   async deleteLabel(id, mode = 'cascade') {
     const res = await fetch(`${API_BASE}/labels/${id}?mode=${mode}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -108,7 +109,7 @@ export const api = {
   async createSubLabel(data) {
     const res = await fetch(`${API_BASE}/sublabels`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -121,7 +122,7 @@ export const api = {
   async updateSubLabel(id, data) {
     const res = await fetch(`${API_BASE}/sublabels/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -134,6 +135,7 @@ export const api = {
   async deleteSubLabel(id, mode = 'cascade') {
     const res = await fetch(`${API_BASE}/sublabels/${id}?mode=${mode}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -146,28 +148,38 @@ export const api = {
   async createProduct(data) {
     const res = await fetch(`${API_BASE}/products`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la création du produit');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la création du produit');
+    }
     return res.json();
   },
 
   async updateProduct(id, data) {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur lors de la mise à jour du produit');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la mise à jour du produit');
+    }
     return res.json();
   },
 
   async deleteProduct(id) {
     const res = await fetch(`${API_BASE}/products/${id}`, {
       method: 'DELETE',
+      headers: getAuthHeaders(),
     });
-    if (!res.ok) throw new Error('Erreur lors de la suppression du produit');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la suppression du produit');
+    }
     return res.json();
   },
 
@@ -177,9 +189,13 @@ export const api = {
     formData.append('image', file);
     const res = await fetch(`${API_BASE}/products/upload`, {
       method: 'POST',
+      headers: getAuthHeaders(),
       body: formData,
     });
-    if (!res.ok) throw new Error("Erreur lors de l'upload de l'image");
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || "Erreur lors de l'upload de l'image");
+    }
     return res.json();
   },
 };

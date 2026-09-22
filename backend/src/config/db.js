@@ -7,7 +7,8 @@ let mongoServer = null;
 
 export const connectDB = async () => {
   const uri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/myfolio';
-  const allowFallback = process.env.USE_IN_MEMORY_DB_FALLBACK !== 'false';
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowFallback = !isProduction && process.env.USE_IN_MEMORY_DB_FALLBACK !== 'false';
 
   try {
     console.log(`[DB] Attempting connection to MongoDB at: ${uri}`);

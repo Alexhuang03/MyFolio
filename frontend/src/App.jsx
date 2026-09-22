@@ -46,8 +46,14 @@ export default function App() {
   useEffect(() => {
     if (user) {
       loadBooks();
+    } else {
+      setBooks([]);
+      setSelectedBook(null);
+      setBookContent({ labels: [], subLabels: [], products: [] });
+      setLoading(false);
     }
   }, [user]);
+
 
 
   // Ouvrir un livre (Mega-Fetch)

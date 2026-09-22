@@ -3,20 +3,20 @@ import Label from '../models/Label.js';
 import SubLabel from '../models/SubLabel.js';
 import Product from '../models/Product.js';
 
-// Récupérer tous les livres
+// Récupérer tous les livres de l'utilisateur connecté
 export const getBooks = async (req, res) => {
   try {
-    const books = await Book.find().sort({ updatedAt: -1 });
+    const books = await Book.find({ userId: req.userId }).sort({ updatedAt: -1 });
     res.json(books);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la récupération des livres', error: error.message });
   }
 };
 
-// Récupérer un livre par ID
+// Récupérer un livre par ID pour l'utilisateur connecté
 export const getBookById = async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id);
+    const book = await Book.findOne({ _id: req.params.id, userId: req.userId });
     if (!book) {
       return res.status(404).json({ message: 'Livre introuvable' });
     }
@@ -26,7 +26,7 @@ export const getBookById = async (req, res) => {
   }
 };
 
-// Créer un nouveau livre
+// Créer un nouveau livre rattaché à l'utilisateur connecté
 export const createBook = async (req, res) => {
   try {
     const { title, description, coverImage, colorTheme, isFavorite } = req.body;
@@ -40,6 +40,7 @@ export const createBook = async (req, res) => {
       coverImage: coverImage || 'cover-classic.svg',
       colorTheme: colorTheme || '#3b82f6',
       isFavorite: Boolean(isFavorite),
+      userId: req.userId,
     });
 
     res.status(201).json(book);
@@ -48,12 +49,12 @@ export const createBook = async (req, res) => {
   }
 };
 
-// Modifier un livre
+// Modifier un livre de l'utilisateur connecté
 export const updateBook = async (req, res) => {
   try {
     const { title, description, coverImage, colorTheme, isFavorite } = req.body;
-    const book = await Book.findByIdAndUpdate(
-      req.params.id,
+    const book = await Book.findOneAndUpdate(
+      { _id: req.params.id, userId: req.userId },
       {
         ...(title && { title: title.trim() }),
         ...(description !== undefined && { description: description.trim() }),
@@ -77,7 +78,7 @@ export const updateBook = async (req, res) => {
 export const deleteBook = async (req, res) => {
   try {
     const bookId = req.params.id;
-    const book = await Book.findByIdAndDelete(bookId);
+    const book = await Book.findOneAndDelete({ _id: bookId, userId: req.userId });
     if (!book) {
       return res.status(404).json({ message: 'Livre introuvable' });
     }
@@ -98,7 +99,7 @@ export const deleteBook = async (req, res) => {
 export const getBookContent = async (req, res) => {
   try {
     const bookId = req.params.id;
-    const book = await Book.findById(bookId);
+    const book = await Book.findOne({ _id: bookId, userId: req.userId });
 
     if (!book) {
       return res.status(404).json({ message: 'Livre introuvable' });

@@ -1,10 +1,20 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import rateLimit from 'express-rate-limit';
 import User from '../models/User.js';
-import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { authMiddleware, getJwtSecret } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
+
+// Rate limiter strict pour prévenir le brute-force et le spam
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 tentatives max par IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Trop de tentatives d'authentification. Veuillez patienter 15 minutes." },
+});
 
 function isValidEmail(email) {
   return typeof email === 'string' &&
@@ -13,7 +23,7 @@ function isValidEmail(email) {
 }
 
 // POST /api/auth/register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     const { name, email, password, termsAccepted } = req.body;
 
@@ -50,7 +60,7 @@ router.post('/register', async (req, res) => {
     });
     await user.save();
 
-    const secret = process.env.JWT_SECRET || 'myfolio_super_secret_jwt_key_2026';
+    const secret = getJwtSecret();
     const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
 
     res.status(201).json({ token, user });
@@ -61,7 +71,7 @@ router.post('/register', async (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -75,7 +85,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Identifiants incorrects' });
     }
 
-    const secret = process.env.JWT_SECRET || 'myfolio_super_secret_jwt_key_2026';
+    const secret = getJwtSecret();
     const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
 
     res.json({ token, user });
@@ -105,7 +115,7 @@ router.get('/me', authMiddleware, async (req, res) => {
 });
 
 // POST /api/auth/forgot-password
-router.post('/forgot-password', async (req, res) => {
+router.post('/forgot-password', authLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email || typeof email !== 'string') {
@@ -143,7 +153,7 @@ router.post('/forgot-password', async (req, res) => {
 });
 
 // POST /api/auth/reset-password/:token
-router.post('/reset-password/:token', async (req, res) => {
+router.post('/reset-password/:token', authLimiter, async (req, res) => {
   try {
     const { token } = req.params;
     const { password } = req.body;
