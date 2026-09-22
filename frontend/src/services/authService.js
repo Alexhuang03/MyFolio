@@ -9,31 +9,51 @@ function getAuthHeaders() {
   return headers;
 }
 
+async function request(url, options = {}, defaultErrMsg = 'Une erreur est survenue') {
+  let res;
+  try {
+    res = await fetch(url, options);
+  } catch (err) {
+    const error = new Error('NETWORK_ERROR');
+    error.originalError = err;
+    throw error;
+  }
+
+  let data = null;
+  try {
+    data = await res.json();
+  } catch (_) {}
+
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || defaultErrMsg);
+  }
+
+  return data;
+}
+
 export const authService = {
   async register(userData) {
-    const res = await fetch(`${API_BASE}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Erreur lors de la création du compte');
-    }
-    return data;
+    return request(
+      `${API_BASE}/register`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(userData),
+      },
+      'Erreur lors de la création du compte'
+    );
   },
 
   async login(credentials) {
-    const res = await fetch(`${API_BASE}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(credentials),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Erreur lors de la connexion');
-    }
-    return data;
+    return request(
+      `${API_BASE}/login`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials),
+      },
+      'Erreur lors de la connexion'
+    );
   },
 
   async logout() {
@@ -46,41 +66,39 @@ export const authService = {
   },
 
   async getMe() {
-    const res = await fetch(`${API_BASE}/me`, {
-      method: 'GET',
-      headers: getAuthHeaders(),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Session expirée');
-    }
+    const data = await request(
+      `${API_BASE}/me`,
+      {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      },
+      'Session expirée'
+    );
     return data.user;
   },
 
   async forgotPassword(email) {
-    const res = await fetch(`${API_BASE}/forgot-password`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Erreur lors de la demande de réinitialisation');
-    }
-    return data;
+    return request(
+      `${API_BASE}/forgot-password`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      },
+      'Erreur lors de la demande de réinitialisation'
+    );
   },
 
   async resetPassword(token, password) {
-    const res = await fetch(`${API_BASE}/reset-password/${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      throw new Error(data.error || 'Erreur lors de la réinitialisation du mot de passe');
-    }
-    return data;
+    return request(
+      `${API_BASE}/reset-password/${token}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      },
+      'Erreur lors de la réinitialisation du mot de passe'
+    );
   },
 };
 

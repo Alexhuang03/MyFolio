@@ -226,6 +226,7 @@ const translations = {
     terms_btn_close: "J'ai compris",
     logout_btn: 'Se déconnecter',
     user_greeting: 'Bonjour, {name}',
+    network_error: 'Impossible de joindre le serveur. Assurez-vous que le serveur backend est bien démarré.',
   },
 
 
@@ -430,6 +431,7 @@ const translations = {
     terms_btn_close: 'Understood',
     logout_btn: 'Logout',
     user_greeting: 'Hello, {name}',
+    network_error: 'Unable to reach the server. Please make sure the backend server is running.',
   },
 
 
@@ -635,6 +637,7 @@ const translations = {
     terms_btn_close: '我知道了',
     logout_btn: '退出登录',
     user_greeting: '你好，{name}',
+    network_error: '无法连接到服务器，请确保后端服务正在运行。',
   },
 };
 

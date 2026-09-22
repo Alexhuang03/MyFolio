@@ -76,6 +76,14 @@ export default function AuthScreen() {
     setIsLegalModalOpen(true);
   };
 
+  // Helper to format errors (including network errors)
+  const formatAuthError = (err, defaultMsg) => {
+    if (err.message === 'NETWORK_ERROR' || err.name === 'TypeError' || err.message?.includes('fetch')) {
+      return t('network_error');
+    }
+    return err.message || defaultMsg;
+  };
+
   // --- SUBMIT HANDLERS ---
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -85,7 +93,7 @@ export default function AuthScreen() {
     try {
       await login(loginEmail.trim(), loginPassword);
     } catch (err) {
-      setErrorMsg(err.message || 'Identifiants incorrects');
+      setErrorMsg(formatAuthError(err, 'Identifiants incorrects'));
     } finally {
       setIsSubmitting(false);
     }
@@ -109,7 +117,7 @@ export default function AuthScreen() {
     try {
       await register(regName.trim(), regEmail.trim(), regPassword, true);
     } catch (err) {
-      setErrorMsg(err.message || "Erreur lors de l'inscription");
+      setErrorMsg(formatAuthError(err, "Erreur lors de l'inscription"));
     } finally {
       setIsSubmitting(false);
     }
@@ -129,7 +137,7 @@ export default function AuthScreen() {
       setForgotEmail('');
     } catch (err) {
       setForgotFeedback({
-        message: err.message || "Erreur lors de l'envoi du lien",
+        message: formatAuthError(err, "Erreur lors de l'envoi du lien"),
         isSuccess: false,
       });
     } finally {
@@ -166,7 +174,7 @@ export default function AuthScreen() {
       }, 2000);
     } catch (err) {
       setResetFeedback({
-        message: err.message || 'Lien de réinitialisation invalide ou expiré.',
+        message: formatAuthError(err, 'Lien de réinitialisation invalide ou expiré.'),
         isSuccess: false,
       });
     } finally {
