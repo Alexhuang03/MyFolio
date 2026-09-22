@@ -214,21 +214,24 @@ export default function LibraryView({
       )}
 
       {/* Modal Création / Edition Livre */}
-      <CreateBookModal
-        isOpen={isModalOpen}
-        initialBook={editingBook}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingBook(null);
-        }}
-        onSubmit={async (data) => {
-          if (editingBook) {
-            await onUpdateBook(editingBook._id, data);
-          } else {
-            await onCreateBook(data);
-          }
-        }}
-      />
+      {isModalOpen && (
+        <CreateBookModal
+          key={editingBook ? editingBook._id : 'new-book'}
+          isOpen={isModalOpen}
+          initialBook={editingBook}
+          onClose={() => {
+            setIsModalOpen(false);
+            setEditingBook(null);
+          }}
+          onSubmit={async (data) => {
+            if (editingBook) {
+              await onUpdateBook(editingBook._id, data);
+            } else {
+              await onCreateBook(data);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }

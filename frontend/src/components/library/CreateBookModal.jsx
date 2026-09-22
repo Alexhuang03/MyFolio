@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, BookPlus, Check } from 'lucide-react';
 import { COVERS } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -28,6 +28,23 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialBook) {
+        setTitle(initialBook.title || '');
+        setDescription(initialBook.description || '');
+        setCoverImage(initialBook.coverImage || COVERS[0].id);
+        setColorTheme(initialBook.colorTheme || COVERS[0].defaultColor);
+      } else {
+        setTitle('');
+        setDescription('');
+        setCoverImage(COVERS[0].id);
+        setColorTheme(COVERS[0].defaultColor);
+      }
+      setError('');
+    }
+  }, [isOpen, initialBook]);
 
   if (!isOpen) return null;
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Tag, Check } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -32,6 +32,19 @@ export default function TagModal({
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialTag) {
+        setName(initialTag.name || '');
+        setColor(initialTag.color || (isLabel ? '#3b82f6' : '#10b981'));
+      } else {
+        setName('');
+        setColor(isLabel ? '#3b82f6' : '#10b981');
+      }
+      setError('');
+    }
+  }, [isOpen, initialTag, isLabel]);
 
   if (!isOpen) return null;
 
