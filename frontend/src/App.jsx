@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { api } from './services/api';
 import LibraryView from './components/library/LibraryView';
 import BookDetailView from './components/book/BookDetailView';
+import AuthScreen from './components/auth/AuthScreen';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
+import { useAuth } from './context/AuthContext';
 
 export default function App() {
+  const { user, loading: authLoading } = useAuth();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState(null);
@@ -27,7 +30,7 @@ export default function App() {
     }, 4000);
   };
 
-  // Charger la liste des livres au démarrage
+  // Charger la liste des livres au démarrage quand l'utilisateur est connecté
   const loadBooks = async () => {
     try {
       setLoading(true);
@@ -41,8 +44,11 @@ export default function App() {
   };
 
   useEffect(() => {
-    loadBooks();
-  }, []);
+    if (user) {
+      loadBooks();
+    }
+  }, [user]);
+
 
   // Ouvrir un livre (Mega-Fetch)
   const handleSelectBook = async (book) => {
@@ -270,8 +276,21 @@ export default function App() {
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-100 dark:bg-stone-950">
+        <div className="w-10 h-10 border-3 border-amber-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthScreen />;
+  }
+
   return (
     <div className="min-h-screen bg-stone-100 dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200">
+
       {/* Toast Notification Banner */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl border backdrop-blur-md animate-slide-up bg-white/95 dark:bg-stone-900/95 text-xs font-medium border-stone-200 dark:border-stone-700">

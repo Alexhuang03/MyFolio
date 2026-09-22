@@ -1,15 +1,28 @@
 const API_BASE = '/api';
 
+function getAuthHeaders(extra = {}) {
+  const headers = { ...extra };
+  const token = localStorage.getItem('myfolio_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
+
 export const api = {
   // Books
   async getBooks() {
-    const res = await fetch(`${API_BASE}/books`);
+    const res = await fetch(`${API_BASE}/books`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error('Impossible de charger les livres');
     return res.json();
   },
 
   async getBookById(id) {
-    const res = await fetch(`${API_BASE}/books/${id}`);
+    const res = await fetch(`${API_BASE}/books/${id}`, {
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error('Impossible de charger le livre');
     return res.json();
   },
@@ -17,7 +30,7 @@ export const api = {
   async createBook(data) {
     const res = await fetch(`${API_BASE}/books`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Erreur lors de la création du livre');
@@ -27,7 +40,7 @@ export const api = {
   async updateBook(id, data) {
     const res = await fetch(`${API_BASE}/books/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Erreur lors de la modification du livre');
@@ -35,14 +48,20 @@ export const api = {
   },
 
   async deleteBook(id) {
-    const res = await fetch(`${API_BASE}/books/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_BASE}/books/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
     if (!res.ok) throw new Error('Erreur lors de la suppression du livre');
     return res.json();
   },
 
   // Mega-Fetch : Récupère tout le livre (labels, subLabels, products)
   async getBookContent(bookId) {
-    const res = await fetch(`${API_BASE}/books/${bookId}/content`);
+    const res = await fetch(`${API_BASE}/books/${bookId}/content`, {
+      headers: getAuthHeaders(),
+    });
+
     if (!res.ok) throw new Error('Impossible de charger le contenu du livre');
     return res.json();
   },

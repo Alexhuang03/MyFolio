@@ -61,3 +61,59 @@
 .book-gutter-shadow {
   box-shadow: inset -15px 0 20px -10px rgba(0, 0, 0, 0.07);
 }
+
+/* Auth Floating shapes */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-25px) scale(1.05);
+  }
+}
+
+.auth-floating-shapes .shape {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.38;
+  animation: float 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.auth-floating-shapes .shape-1 {
+  width: 320px;
+  height: 320px;
+  background: #d97706; /* amber */
+  top: -40px;
+  right: -60px;
+  animation-delay: 0s;
+}
+
+.auth-floating-shapes .shape-2 {
+  width: 240px;
+  height: 240px;
+  background: #e11d48; /* rose */
+  bottom: 12%;
+  left: -40px;
+  animation-delay: -3.5s;
+}
+
+.auth-floating-shapes .shape-3 {
+  width: 280px;
+  height: 280px;
+  background: #0d9488; /* teal */
+  top: 45%;
+  right: 15%;
+  animation-delay: -7s;
+}
+
+.auth-floating-shapes .shape-4 {
+  width: 220px;
+  height: 220px;
+  background: #b45309; /* amber-700 */
+  bottom: -40px;
+  right: 35%;
+  animation-delay: -10.5s;
+}
+

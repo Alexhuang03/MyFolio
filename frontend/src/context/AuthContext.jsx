@@ -1,0 +1,90 @@
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { authService } from '../services/authService';
+
+const AuthContext = createContext(null);
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(() => localStorage.getItem('myfolio_token') || null);
+  const [loading, setLoading] = useState(true);
+
+  // Vérifier la session au démarrage
+  useEffect(() => {
+    async function checkAuth() {
+      const storedToken = localStorage.getItem('myfolio_token');
+      if (!storedToken) {
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userData = await authService.getMe();
+        setUser(userData);
+      } catch (err) {
+        console.warn('[AuthContext] Session invalide ou expirée:', err.message);
+        localStorage.removeItem('myfolio_token');
+        setToken(null);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+  }, []);
+
+  const login = useCallback(async (email, password) => {
+    const data = await authService.login({ email, password });
+    localStorage.setItem('myfolio_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  const register = useCallback(async (name, email, password, termsAccepted) => {
+    const data = await authService.register({ name, email, password, termsAccepted });
+    localStorage.setItem('myfolio_token', data.token);
+    setToken(data.token);
+    setUser(data.user);
+    return data.user;
+  }, []);
+
+  const logout = useCallback(async () => {
+    await authService.logout();
+    localStorage.removeItem('myfolio_token');
+    setToken(null);
+    setUser(null);
+  }, []);
+
+  const forgotPassword = useCallback(async (email) => {
+    return await authService.forgotPassword(email);
+  }, []);
+
+  const resetPassword = useCallback(async (resetToken, password) => {
+    return await authService.resetPassword(resetToken, password);
+  }, []);
+
+  const value = {
+    user,
+    token,
+    loading,
+    isAuthenticated: !!user,
+    login,
+    register,
+    logout,
+    forgotPassword,
+    resetPassword,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
+

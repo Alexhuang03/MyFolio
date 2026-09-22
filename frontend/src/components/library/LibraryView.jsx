@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { BookOpen, Plus, Search, Sparkles, BookMarked, Library } from 'lucide-react';
+import { BookOpen, Plus, Search, Sparkles, BookMarked, Library, LogOut } from 'lucide-react';
 import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
 import BookOpeningAnimation from '../book/BookOpeningAnimation';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 import LanguageSwitcher from '../settings/LanguageSwitcher';
 import ThemeToggle from '../settings/ThemeToggle';
 
@@ -21,6 +22,8 @@ export default function LibraryView({
   const [openingBook, setOpeningBook] = useState(null);
 
   const { t } = useLanguage();
+  const { user, logout } = useAuth();
+
 
   const filteredBooks = books.filter((book) =>
     book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -71,6 +74,15 @@ export default function LibraryView({
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('create')}</span>
               </button>
+              {user && (
+                <button
+                  onClick={logout}
+                  className="p-1.5 text-stone-500 hover:text-rose-600 dark:text-stone-400 dark:hover:text-rose-400 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  title={t('logout_btn')}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -104,9 +116,30 @@ export default function LibraryView({
               <Plus className="w-4 h-4" />
               <span>{t('new_book')}</span>
             </button>
+
+            {/* Desktop User Profile & Logout */}
+            {user && (
+              <div className="hidden sm:flex items-center gap-2 pl-1 border-l border-stone-200 dark:border-stone-800">
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700/60 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300"
+                  title={user.email}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="max-w-[100px] truncate">{user.name}</span>
+                </div>
+                <button
+                  onClick={logout}
+                  className="p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all"
+                  title={t('logout_btn')}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>
+
 
       {/* Main Content / Shelf */}
       <main className="flex-1 max-w-7xl mx-auto px-6 py-10 w-full">

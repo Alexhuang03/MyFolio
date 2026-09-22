@@ -8,6 +8,7 @@ import bookRoutes from './routes/bookRoutes.js';
 import labelRoutes from './routes/labelRoutes.js';
 import subLabelRoutes from './routes/subLabelRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 import Book from './models/Book.js';
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Routes API
+app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/labels', labelRoutes);
 app.use('/api/sublabels', subLabelRoutes);
