@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Plus, Search, Sparkles, BookMarked, Library, LogOut } from 'lucide-react';
+import { Plus, Search, BookMarked, Library, LogOut, Bookmark } from 'lucide-react';
 import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
 import BookOpeningAnimation from '../book/BookOpeningAnimation';
@@ -15,8 +15,10 @@ export default function LibraryView({
   onUpdateBook,
   onDeleteBook,
   onSelectBook,
+  onToggleFavoriteBook,
 }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterFavorites, setFilterFavorites] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [openingBook, setOpeningBook] = useState(null);
@@ -24,11 +26,15 @@ export default function LibraryView({
   const { t } = useLanguage();
   const { user, logout } = useAuth();
 
+  const favoritesCount = books.filter((b) => b.isFavorite).length;
 
-  const filteredBooks = books.filter((book) =>
-    book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (book.description && book.description.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredBooks = books.filter((book) => {
+    const matchesSearch =
+      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (book.description && book.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesFavorite = !filterFavorites || Boolean(book.isFavorite);
+    return matchesSearch && matchesFavorite;
+  });
 
   const handleBookClick = (book) => {
     setOpeningBook(book);
@@ -151,36 +157,77 @@ export default function LibraryView({
         ) : filteredBooks.length === 0 ? (
           <div className="py-20 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-300 dark:border-stone-800 rounded-3xl p-12 max-w-lg mx-auto shadow-sm">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
-              <BookMarked className="w-8 h-8" />
+              {filterFavorites ? <Bookmark className="w-8 h-8" /> : <BookMarked className="w-8 h-8" />}
             </div>
             <h3 className="font-serif font-bold text-xl text-stone-800 dark:text-stone-100 mb-2">
-              {searchQuery ? t('no_results') : t('library_empty')}
+              {filterFavorites
+                ? t('no_favorites')
+                : searchQuery
+                ? t('no_results')
+                : t('library_empty')}
             </h3>
             <p className="text-xs text-stone-500 dark:text-stone-400 mb-6 max-w-sm">
-              {searchQuery
+              {filterFavorites
+                ? t('no_favorites_desc')
+                : searchQuery
                 ? t('try_other_terms')
                 : t('create_first_book')}
             </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setIsModalOpen(true);
-              }}
-              className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/20 transition-all flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>{t('create_book_btn')}</span>
-            </button>
+            {filterFavorites ? (
+              <button
+                onClick={() => setFilterFavorites(false)}
+                className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-700 dark:hover:bg-stone-600 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-2"
+              >
+                <span>{t('all_books')}</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setIsModalOpen(true);
+                }}
+                className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/20 transition-all flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                <span>{t('create_book_btn')}</span>
+              </button>
+            )}
           </div>
         ) : (
           <div>
             {/* Shelf Banner */}
-            <div className="flex items-center justify-between mb-8 pb-3 border-b border-stone-300/60 dark:border-stone-800">
-              <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 pb-3 border-b border-stone-300/60 dark:border-stone-800">
+              <div className="flex items-center gap-3">
                 <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                   {t('collections')} ({filteredBooks.length})
                 </span>
+
+                {/* Filter Favorites Pill */}
+                <button
+                  onClick={() => setFilterFavorites(!filterFavorites)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                    filterFavorites
+                      ? 'bg-amber-500 text-white shadow-xs'
+                      : 'bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-600 dark:text-stone-300'
+                  }`}
+                  title={t('filter_favorites')}
+                >
+                  <Bookmark className={`w-3.5 h-3.5 ${filterFavorites ? 'fill-current' : ''}`} />
+                  <span>{t('favorites')}</span>
+                  {favoritesCount > 0 && (
+                    <span
+                      className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                        filterFavorites
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-stone-300 dark:bg-stone-700 text-stone-700 dark:text-stone-300'
+                      }`}
+                    >
+                      {favoritesCount}
+                    </span>
+                  )}
+                </button>
               </div>
+
               <span className="text-xs text-stone-400 dark:text-stone-500 italic">
                 {t('click_to_open')}
               </span>
@@ -198,6 +245,7 @@ export default function LibraryView({
                     setIsModalOpen(true);
                   }}
                   onDelete={onDeleteBook}
+                  onToggleFavorite={onToggleFavoriteBook}
                 />
               ))}
             </div>

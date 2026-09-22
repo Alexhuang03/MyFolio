@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, BookPlus, Check } from 'lucide-react';
+import { X, BookPlus, Check, Bookmark } from 'lucide-react';
 import { COVERS } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -26,6 +26,9 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
   const [colorTheme, setColorTheme] = useState(
     initialBook ? initialBook.colorTheme : COVERS[0].defaultColor
   );
+  const [isFavorite, setIsFavorite] = useState(
+    initialBook ? Boolean(initialBook.isFavorite) : false
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,11 +39,13 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
         setDescription(initialBook.description || '');
         setCoverImage(initialBook.coverImage || COVERS[0].id);
         setColorTheme(initialBook.colorTheme || COVERS[0].defaultColor);
+        setIsFavorite(Boolean(initialBook.isFavorite));
       } else {
         setTitle('');
         setDescription('');
         setCoverImage(COVERS[0].id);
         setColorTheme(COVERS[0].defaultColor);
+        setIsFavorite(false);
       }
       setError('');
     }
@@ -63,6 +68,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
         description: description.trim(),
         coverImage,
         colorTheme,
+        isFavorite,
       });
       onClose();
     } catch (err) {
@@ -211,6 +217,52 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                 />
               </div>
             </div>
+          </div>
+
+          {/* Option Favori */}
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setIsFavorite(!isFavorite)}
+              className={`w-full flex items-center justify-between p-3.5 rounded-xl border transition-all text-left ${
+                isFavorite
+                  ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/30 ring-1 ring-amber-500/20'
+                  : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 bg-stone-50 dark:bg-stone-800/40'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                    isFavorite
+                      ? 'bg-amber-500 text-white shadow-sm'
+                      : 'bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400'
+                  }`}
+                >
+                  <Bookmark className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
+                </div>
+                <div>
+                  <span className="text-xs font-semibold text-stone-800 dark:text-stone-100 block">
+                    {t('favorite_book_label')}
+                  </span>
+                  <span className="text-[11px] text-stone-500 dark:text-stone-400 block">
+                    {t('favorite_book_desc')}
+                  </span>
+                </div>
+              </div>
+
+              {/* Toggle switch */}
+              <div
+                className={`w-10 h-5 flex items-center rounded-full p-0.5 transition-colors ${
+                  isFavorite ? 'bg-amber-500' : 'bg-stone-300 dark:bg-stone-700'
+                }`}
+              >
+                <div
+                  className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform ${
+                    isFavorite ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </div>
+            </button>
           </div>
 
           {/* Modal Footer */}

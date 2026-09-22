@@ -20,6 +20,10 @@ const BookSchema = new mongoose.Schema(
       type: String,
       default: '#3b82f6', // Tailwind blue-500
     },
+    isFavorite: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

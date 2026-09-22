@@ -89,6 +89,24 @@ export default function App() {
     showToast(t('book_updated'));
   };
 
+  const handleToggleFavoriteBook = async (book) => {
+    try {
+      const nextFavorite = !book.isFavorite;
+      const updated = await api.updateBook(book._id, { isFavorite: nextFavorite });
+      setBooks((prev) => prev.map((b) => (b._id === book._id ? updated : b)));
+      if (selectedBook && selectedBook._id === book._id) {
+        setSelectedBook(updated);
+      }
+      showToast(
+        nextFavorite
+          ? t('book_favorited', { title: book.title })
+          : t('book_unfavorited', { title: book.title })
+      );
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   const handleDeleteBook = async (book) => {
     if (
       window.confirm(
@@ -335,6 +353,7 @@ export default function App() {
           onUpdateBook={handleUpdateBook}
           onDeleteBook={handleDeleteBook}
           onSelectBook={handleSelectBook}
+          onToggleFavoriteBook={handleToggleFavoriteBook}
         />
       )}
     </div>

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { BookOpen, MoreVertical, Trash2, Edit3, Layers } from 'lucide-react';
+import { BookOpen, MoreVertical, Trash2, Edit3, Bookmark } from 'lucide-react';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function BookCard({ book, onOpen, onDelete, onEdit }) {
+export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavorite }) {
   const [showMenu, setShowMenu] = useState(false);
   const coverSrc = getCoverSrc(book.coverImage);
   const { t, lang } = useLanguage();
@@ -29,14 +29,17 @@ export default function BookCard({ book, onOpen, onDelete, onEdit }) {
         {/* Book spine left 3D gradient overlay */}
         <div className="absolute left-0 top-0 bottom-0 w-6 book-spine-left pointer-events-none" />
 
-        {/* Bookmark ribbon accent */}
-        <div
-          className="absolute top-0 right-6 w-5 h-12 shadow-sm pointer-events-none"
-          style={{
-            backgroundColor: book.colorTheme || '#e11d48',
-            clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 75%, 0% 100%)',
-          }}
-        />
+        {/* Bookmark ribbon accent (uniquement si favori) */}
+        {book.isFavorite && (
+          <div
+            className="absolute top-0 right-6 w-5 h-12 shadow-md pointer-events-none transition-all duration-300 animate-in fade-in"
+            style={{
+              backgroundColor: book.colorTheme || '#e11d48',
+              clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 75%, 0% 100%)',
+            }}
+            title={t('favorite')}
+          />
+        )}
 
         {/* Spine stitches */}
         <div className="absolute left-5 top-0 bottom-0 w-px border-r border-amber-100/30 pointer-events-none" />
@@ -72,53 +75,82 @@ export default function BookCard({ book, onOpen, onDelete, onEdit }) {
           </p>
         </div>
 
-        <div className="relative">
+        <div className="flex items-center gap-0.5">
+          {/* Quick Favorite Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setShowMenu(!showMenu);
+              onToggleFavorite && onToggleFavorite(book);
             }}
-            className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-full transition-colors"
-            title={t('book_options')}
+            className={`p-1.5 rounded-full transition-colors ${
+              book.isFavorite
+                ? 'text-amber-500 hover:text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40'
+                : 'text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800'
+            }`}
+            title={book.isFavorite ? t('remove_favorite') : t('add_favorite')}
           >
-            <MoreVertical className="w-4 h-4" />
+            <Bookmark className={`w-4 h-4 ${book.isFavorite ? 'fill-current' : ''}`} />
           </button>
 
-          {showMenu && (
-            <>
-              <div
-                className="fixed inset-0 z-20"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowMenu(false);
-                }}
-              />
-              <div className="absolute right-0 bottom-full mb-1 w-44 bg-white dark:bg-stone-900 rounded-lg shadow-xl border border-stone-200 dark:border-stone-700 py-1 z-30 text-sm">
-                <button
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-1.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-800 rounded-full transition-colors"
+              title={t('book_options')}
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+
+            {showMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-20"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowMenu(false);
-                    onEdit && onEdit(book);
                   }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-                >
-                  <Edit3 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                  <span>{t('edit')}</span>
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowMenu(false);
-                    onDelete(book);
-                  }}
-                  className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>{t('delete')}</span>
-                </button>
-              </div>
-            </>
-          )}
+                />
+                <div className="absolute right-0 bottom-full mb-1 w-44 bg-white dark:bg-stone-900 rounded-lg shadow-xl border border-stone-200 dark:border-stone-700 py-1 z-30 text-sm">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      onToggleFavorite && onToggleFavorite(book);
+                    }}
+                    className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  >
+                    <Bookmark className={`w-4 h-4 ${book.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-stone-500 dark:text-stone-400'}`} />
+                    <span>{book.isFavorite ? t('remove_favorite') : t('add_favorite')}</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      onEdit && onEdit(book);
+                    }}
+                    className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  >
+                    <Edit3 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                    <span>{t('edit')}</span>
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowMenu(false);
+                      onDelete(book);
+                    }}
+                    className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>{t('delete')}</span>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

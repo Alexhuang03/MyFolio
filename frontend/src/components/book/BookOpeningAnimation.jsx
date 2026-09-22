@@ -63,6 +63,17 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
           {/* Left Spine texture */}
           <div className="absolute left-0 top-0 bottom-0 w-8 book-spine-left pointer-events-none" />
 
+          {/* Bookmark ribbon accent (favori) */}
+          {book.isFavorite && (
+            <div
+              className="absolute top-0 right-8 w-6 h-14 shadow-md pointer-events-none"
+              style={{
+                backgroundColor: book.colorTheme || '#e11d48',
+                clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 75%, 0% 100%)',
+              }}
+            />
+          )}
+
           {/* Title plate on cover */}
           <div className="absolute inset-x-8 top-20 bg-white/95 backdrop-blur-sm p-4 rounded-md shadow-lg text-center border border-amber-900/10">
             <h3 className="font-serif font-bold text-stone-900 text-xl leading-snug">

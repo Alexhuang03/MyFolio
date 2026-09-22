@@ -29,7 +29,7 @@ export const getBookById = async (req, res) => {
 // Créer un nouveau livre
 export const createBook = async (req, res) => {
   try {
-    const { title, description, coverImage, colorTheme } = req.body;
+    const { title, description, coverImage, colorTheme, isFavorite } = req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ message: 'Le titre est obligatoire' });
     }
@@ -39,6 +39,7 @@ export const createBook = async (req, res) => {
       description: description ? description.trim() : '',
       coverImage: coverImage || 'cover-classic.svg',
       colorTheme: colorTheme || '#3b82f6',
+      isFavorite: Boolean(isFavorite),
     });
 
     res.status(201).json(book);
@@ -50,7 +51,7 @@ export const createBook = async (req, res) => {
 // Modifier un livre
 export const updateBook = async (req, res) => {
   try {
-    const { title, description, coverImage, colorTheme } = req.body;
+    const { title, description, coverImage, colorTheme, isFavorite } = req.body;
     const book = await Book.findByIdAndUpdate(
       req.params.id,
       {
@@ -58,6 +59,7 @@ export const updateBook = async (req, res) => {
         ...(description !== undefined && { description: description.trim() }),
         ...(coverImage && { coverImage }),
         ...(colorTheme && { colorTheme }),
+        ...(isFavorite !== undefined && { isFavorite: Boolean(isFavorite) }),
       },
       { new: true, runValidators: true }
     );
