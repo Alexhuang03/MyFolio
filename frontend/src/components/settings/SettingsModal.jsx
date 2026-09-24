@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../i18n/LanguageContext';
-import { useWallpaper } from '../../theme/WallpaperContext';
+import { useWallpaper, compressImage } from '../../theme/WallpaperContext';
 
 export default function SettingsModal({ isOpen, onClose }) {
   const { user, updateProfile, changePassword } = useAuth();
@@ -119,18 +119,27 @@ export default function SettingsModal({ isOpen, onClose }) {
     }
   };
 
-  const handleCustomImageUpload = (e) => {
+  const handleCustomImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const dataUrl = event.target?.result;
+
+    try {
+      const dataUrl = await compressImage(file, 1920, 1080, 0.82);
       if (dataUrl) {
         setCustomWallpaper(dataUrl);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      console.warn('[Settings] Failed to compress image, using raw dataUrl fallback:', err);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result;
+        if (dataUrl) {
+          setCustomWallpaper(dataUrl);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const tabs = [

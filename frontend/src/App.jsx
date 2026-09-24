@@ -549,18 +549,6 @@ export default function App() {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-100 dark:bg-stone-950">
-        <div className="w-10 h-10 border-3 border-amber-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <AuthScreen />;
-  }
-
   return (
     <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200 relative">
       {/* Illustrated Wallpaper: Chat Bibliophile (fond.png cropped and transparent) */}
@@ -600,9 +588,15 @@ export default function App() {
         </div>
       )}
 
-      {/* Main View router */}
+      {/* Main View router or loading/auth screen */}
       <div className="relative z-10">
-        {selectedBook ? (
+        {authLoading ? (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="w-10 h-10 border-3 border-amber-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : !user ? (
+          <AuthScreen />
+        ) : selectedBook ? (
           <BookDetailView
             book={selectedBook}
             labels={bookContent.labels}

@@ -21,6 +21,11 @@
             document.documentElement.classList.remove('dark');
             document.documentElement.style.colorScheme = 'light';
           }
+
+          var savedWallpaper = localStorage.getItem('myfolio-wallpaper');
+          if (savedWallpaper && savedWallpaper !== 'default') {
+            document.documentElement.classList.add('wallpaper-' + savedWallpaper);
+          }
         } catch (e) {}
       })();
     </script>

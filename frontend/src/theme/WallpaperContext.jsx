@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/authService';
 
 const WallpaperContext = createContext();
 
@@ -69,9 +70,69 @@ export const IMAGE_PRESETS = [
 
 export const WALLPAPER_PRESETS = [...AMBIANCE_PRESETS, ...IMAGE_PRESETS];
 
+/**
+ * Compresse une image importée pour garantir qu'elle ne dépasse jamais le quota de localStorage (< 300 Ko).
+ */
+export function compressImage(file, maxWidth = 1920, maxHeight = 1080, quality = 0.82) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(compressedDataUrl);
+      };
+      img.onerror = (err) => reject(err);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
+function applyDomClasses(activeWallpaper, customUrl) {
+  const body = document.body;
+  const root = document.documentElement;
+
+  const allIds = [...WALLPAPER_PRESETS.map((p) => p.id), 'custom'];
+  allIds.forEach((id) => {
+    body.classList.remove(`wallpaper-${id}`);
+    root.classList.remove(`wallpaper-${id}`);
+  });
+
+  if (activeWallpaper && activeWallpaper !== 'default') {
+    body.classList.add(`wallpaper-${activeWallpaper}`);
+    root.classList.add(`wallpaper-${activeWallpaper}`);
+  }
+
+  if (activeWallpaper === 'custom' && customUrl) {
+    root.style.setProperty('--custom-wallpaper-url', `url('${customUrl}')`);
+  } else {
+    root.style.removeProperty('--custom-wallpaper-url');
+  }
+}
+
 export function WallpaperProvider({ children }) {
   const { user, updateProfile } = useAuth();
-  const userSyncedRef = useRef(false);
+  const userSyncedIdRef = useRef(null);
 
   const [wallpaper, setWallpaperState] = useState(() => {
     try {
@@ -90,39 +151,43 @@ export function WallpaperProvider({ children }) {
     }
   });
 
-  // Sync with user's saved wallpaper in database once when user profile loads
+  // Synchronisation intelligente avec la base de données :
+  // Ne JAMAIS écraser un choix utilisateur local avec 'default' !
   useEffect(() => {
-    if (user?.wallpaper && !userSyncedRef.current) {
-      userSyncedRef.current = true;
-      setWallpaperState(user.wallpaper);
+    if (!user?._id) {
+      userSyncedIdRef.current = null;
+      return;
+    }
+
+    if (userSyncedIdRef.current === user._id) {
+      return;
+    }
+    userSyncedIdRef.current = user._id;
+
+    const savedLocal = localStorage.getItem(STORAGE_KEY);
+    const dbWallpaper = user.wallpaper;
+
+    if (dbWallpaper && dbWallpaper !== 'default') {
+      // Le profil utilisateur en base possède une préférence explicite
+      setWallpaperState(dbWallpaper);
       try {
-        localStorage.setItem(STORAGE_KEY, user.wallpaper);
+        localStorage.setItem(STORAGE_KEY, dbWallpaper);
       } catch {}
+    } else if ((!dbWallpaper || dbWallpaper === 'default') && savedLocal && savedLocal !== 'default') {
+      // L'utilisateur avait déjà sélectionné un fond en local, mais la base avait 'default' :
+      // On conserve le choix local et on le synchronise vers la base de données.
+      setWallpaperState(savedLocal);
+      if (updateProfile) {
+        updateProfile({ wallpaper: savedLocal }).catch((err) => {
+          console.warn('[Wallpaper] Échec synchronisation fond vers profil:', err);
+        });
+      }
     }
-  }, [user?.wallpaper]);
+  }, [user?._id, user?.wallpaper, updateProfile]);
 
-  // Apply class and custom CSS variables to body and documentElement
+  // Applique les classes CSS et variables DOM
   useEffect(() => {
-    const body = document.body;
-    const root = document.documentElement;
-
-    const allIds = [...WALLPAPER_PRESETS.map((p) => p.id), 'custom'];
-    allIds.forEach((id) => {
-      body.classList.remove(`wallpaper-${id}`);
-      root.classList.remove(`wallpaper-${id}`);
-    });
-
-    if (wallpaper && wallpaper !== 'default') {
-      body.classList.add(`wallpaper-${wallpaper}`);
-      root.classList.add(`wallpaper-${wallpaper}`);
-    }
-
-    if (wallpaper === 'custom' && customWallpaperUrl) {
-      root.style.setProperty('--custom-wallpaper-url', `url('${customWallpaperUrl}')`);
-    } else {
-      root.style.removeProperty('--custom-wallpaper-url');
-    }
-
+    applyDomClasses(wallpaper, customWallpaperUrl);
     try {
       localStorage.setItem(STORAGE_KEY, wallpaper);
     } catch {}
@@ -133,14 +198,28 @@ export function WallpaperProvider({ children }) {
       setWallpaperState(newWallpaper);
       try {
         localStorage.setItem(STORAGE_KEY, newWallpaper);
-        if (user && updateProfile) {
+      } catch (err) {
+        console.warn('[Wallpaper] Erreur sauvegarde localStorage:', err);
+      }
+
+      // Application synchrone immédiate sur le DOM pour une réactivité instantanée
+      applyDomClasses(newWallpaper, customWallpaperUrl);
+
+      // Persistance dans le profil utilisateur en base de données
+      try {
+        if (updateProfile) {
           await updateProfile({ wallpaper: newWallpaper });
+        } else {
+          const token = localStorage.getItem('myfolio_token');
+          if (token) {
+            await authService.updateProfile({ wallpaper: newWallpaper });
+          }
         }
       } catch (err) {
-        console.warn('[Wallpaper] Could not save preference to backend:', err);
+        console.warn('[Wallpaper] Impossible de sauvegarder la préférence en base:', err);
       }
     },
-    [user, updateProfile]
+    [updateProfile, customWallpaperUrl]
   );
 
   const setCustomWallpaper = useCallback(
@@ -148,7 +227,7 @@ export function WallpaperProvider({ children }) {
       try {
         localStorage.setItem(CUSTOM_IMG_KEY, dataUrl);
       } catch (e) {
-        console.warn('[Wallpaper] LocalStorage save failed for custom image:', e);
+        console.warn('[Wallpaper] Erreur sauvegarde image personnalisée:', e);
       }
       setCustomWallpaperUrl(dataUrl);
       await changeWallpaper('custom');
