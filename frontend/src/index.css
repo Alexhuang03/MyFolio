@@ -90,6 +90,26 @@ body.wallpaper-emerald, html.wallpaper-emerald {
   background-attachment: fixed !important;
 }
 
+/* Illustrated Wallpaper: Chat Bibliophile (fond.jpeg) */
+body.wallpaper-fond, html.wallpaper-fond {
+  background-color: #faf8f5 !important;
+}
+.dark body.wallpaper-fond,
+html.dark.wallpaper-fond,
+.dark.wallpaper-fond {
+  background-color: #0c0a09 !important;
+}
+
+/* Custom User Uploaded Wallpaper */
+body.wallpaper-custom, html.wallpaper-custom {
+  background-color: #f5f5f4 !important;
+}
+.dark body.wallpaper-custom,
+html.dark.wallpaper-custom,
+.dark.wallpaper-custom {
+  background-color: #0c0a09 !important;
+}
+
 /* Custom book scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

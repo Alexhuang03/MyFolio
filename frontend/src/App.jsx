@@ -6,6 +6,7 @@ import AuthScreen from './components/auth/AuthScreen';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
 import { useAuth } from './context/AuthContext';
+import { useWallpaper } from './theme/WallpaperContext';
 
 export default function App() {
   const { user, loading: authLoading } = useAuth();
@@ -19,6 +20,7 @@ export default function App() {
   });
 
   const { t } = useLanguage();
+  const { wallpaper, customWallpaperUrl } = useWallpaper();
 
   // Notification Toast
   const [toast, setToast] = useState(null); // { type: 'success' | 'error', message: string }
@@ -313,7 +315,25 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200">
+    <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200 relative">
+      {/* Illustrated Wallpaper: Chat Bibliophile (fond.png cropped and transparent) */}
+      {wallpaper === 'fond' && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden flex items-end justify-center pb-0 sm:pb-1 select-none">
+          <img
+            src="/img/fond.png"
+            alt="Fond d'écran Chat Bibliophile"
+            className="w-auto h-auto max-w-[min(560px,90vw)] max-h-[44vh] sm:max-h-[58vh] md:max-h-[72vh] object-contain opacity-85 dark:opacity-75 dark:invert dark:hue-rotate-180 transition-all duration-700 pointer-events-none"
+          />
+        </div>
+      )}
+
+      {/* Custom User Uploaded Wallpaper */}
+      {wallpaper === 'custom' && customWallpaperUrl && (
+        <div
+          className="fixed inset-0 pointer-events-none z-0 bg-cover bg-center transition-opacity duration-700 opacity-90 dark:opacity-75"
+          style={{ backgroundImage: `url('${customWallpaperUrl}')` }}
+        />
+      )}
 
       {/* Toast Notification Banner */}
       {toast && (
@@ -334,34 +354,36 @@ export default function App() {
       )}
 
       {/* Main View router */}
-      {selectedBook ? (
-        <BookDetailView
-          book={selectedBook}
-          labels={bookContent.labels}
-          subLabels={bookContent.subLabels}
-          products={bookContent.products}
-          onBackToLibrary={handleBackToLibrary}
-          onCreateLabel={handleCreateLabel}
-          onUpdateLabel={handleUpdateLabel}
-          onDeleteLabel={handleDeleteLabel}
-          onCreateSubLabel={handleCreateSubLabel}
-          onUpdateSubLabel={handleUpdateSubLabel}
-          onDeleteSubLabel={handleDeleteSubLabel}
-          onCreateProduct={handleCreateProduct}
-          onUpdateProduct={handleUpdateProduct}
-          onDeleteProduct={handleDeleteProduct}
-        />
-      ) : (
-        <LibraryView
-          books={books}
-          loading={loading}
-          onCreateBook={handleCreateBook}
-          onUpdateBook={handleUpdateBook}
-          onDeleteBook={handleDeleteBook}
-          onSelectBook={handleSelectBook}
-          onToggleFavoriteBook={handleToggleFavoriteBook}
-        />
-      )}
+      <div className="relative z-10">
+        {selectedBook ? (
+          <BookDetailView
+            book={selectedBook}
+            labels={bookContent.labels}
+            subLabels={bookContent.subLabels}
+            products={bookContent.products}
+            onBackToLibrary={handleBackToLibrary}
+            onCreateLabel={handleCreateLabel}
+            onUpdateLabel={handleUpdateLabel}
+            onDeleteLabel={handleDeleteLabel}
+            onCreateSubLabel={handleCreateSubLabel}
+            onUpdateSubLabel={handleUpdateSubLabel}
+            onDeleteSubLabel={handleDeleteSubLabel}
+            onCreateProduct={handleCreateProduct}
+            onUpdateProduct={handleUpdateProduct}
+            onDeleteProduct={handleDeleteProduct}
+          />
+        ) : (
+          <LibraryView
+            books={books}
+            loading={loading}
+            onCreateBook={handleCreateBook}
+            onUpdateBook={handleUpdateBook}
+            onDeleteBook={handleDeleteBook}
+            onSelectBook={handleSelectBook}
+            onToggleFavoriteBook={handleToggleFavoriteBook}
+          />
+        )}
+      </div>
     </div>
   );
 }

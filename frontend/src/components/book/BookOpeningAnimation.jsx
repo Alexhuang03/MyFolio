@@ -28,15 +28,15 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-md perspective-1000 overflow-hidden">
       {/* 3D Book Object */}
       <div
-        className="relative w-64 sm:w-80 h-[390px] sm:h-[480px] max-w-[85vw] transition-all duration-700 ease-out transform-style-3d shadow-2xl"
+        className="relative w-56 sm:w-80 h-[340px] sm:h-[480px] max-w-[85vw] transition-all duration-700 ease-out transform-style-3d shadow-2xl"
         style={{
           transform: isOpen ? 'scale(1.05)' : 'scale(0.85)',
         }}
       >
         {/* Right Inside Pages (visible when cover swings open) */}
-        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-900 rounded-r-lg border border-stone-200 dark:border-stone-800 shadow-inner flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-16 h-1 bg-amber-500/40 mb-6 rounded-full" />
-          <h2 className="font-serif text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
+        <div className="absolute inset-0 bg-stone-50 dark:bg-stone-900 rounded-r-lg border border-stone-200 dark:border-stone-800 shadow-inner flex flex-col items-center justify-center p-5 sm:p-8 text-center">
+          <div className="w-16 h-1 bg-amber-500/40 mb-4 sm:mb-6 rounded-full" />
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-stone-800 dark:text-stone-100 mb-2">
             {book.title}
           </h2>
           <p className="text-xs text-stone-400 dark:text-stone-400 font-serif italic mb-6">
@@ -61,12 +61,12 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
           />
 
           {/* Left Spine texture */}
-          <div className="absolute left-0 top-0 bottom-0 w-8 book-spine-left pointer-events-none" />
+          <div className="absolute left-0 top-0 bottom-0 w-6 sm:w-8 book-spine-left pointer-events-none" />
 
           {/* Bookmark ribbon accent (favori) */}
           {book.isFavorite && (
             <div
-              className="absolute top-0 right-8 w-6 h-14 shadow-md pointer-events-none"
+              className="absolute top-0 right-5 sm:right-8 w-5 sm:w-6 h-10 sm:h-14 shadow-md pointer-events-none"
               style={{
                 backgroundColor: book.colorTheme || '#e11d48',
                 clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 50% 75%, 0% 100%)',
@@ -75,8 +75,8 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
           )}
 
           {/* Title plate on cover */}
-          <div className="absolute inset-x-8 top-20 bg-white/95 backdrop-blur-sm p-4 rounded-md shadow-lg text-center border border-amber-900/10">
-            <h3 className="font-serif font-bold text-stone-900 text-xl leading-snug">
+          <div className="absolute inset-x-5 sm:inset-x-8 top-12 sm:top-20 bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-md shadow-lg text-center border border-amber-900/10">
+            <h3 className="font-serif font-bold text-stone-900 text-base sm:text-xl leading-snug line-clamp-3">
               {book.title}
             </h3>
           </div>

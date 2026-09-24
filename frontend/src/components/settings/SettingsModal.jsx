@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   X,
   User,
@@ -14,6 +14,9 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
+  Image as ImageIcon,
+  Upload,
+  Trash2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -22,9 +25,21 @@ import { useWallpaper } from '../../theme/WallpaperContext';
 export default function SettingsModal({ isOpen, onClose }) {
   const { user, updateProfile, changePassword } = useAuth();
   const { t, lang, switchLanguage } = useLanguage();
-  const { wallpaper, setWallpaper, presets } = useWallpaper();
+  const {
+    wallpaper,
+    setWallpaper,
+    ambiancePresets,
+    imagePresets,
+    customWallpaperUrl,
+    setCustomWallpaper,
+    removeCustomWallpaper,
+  } = useWallpaper();
 
   const [activeTab, setActiveTab] = useState('account');
+  const [wallpaperCategory, setWallpaperCategory] = useState(() =>
+    wallpaper === 'fond' || wallpaper === 'custom' ? 'image' : 'ambiance'
+  );
+  const fileInputRef = useRef(null);
 
   // Account Tab State
   const [name, setName] = useState(user?.name || '');
@@ -104,6 +119,20 @@ export default function SettingsModal({ isOpen, onClose }) {
     }
   };
 
+  const handleCustomImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result;
+      if (dataUrl) {
+        setCustomWallpaper(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const tabs = [
     { id: 'account', label: t('tab_account'), icon: User },
     { id: 'security', label: t('tab_security'), icon: Shield },
@@ -112,10 +141,10 @@ export default function SettingsModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 flex items-center justify-center text-amber-700 dark:text-amber-400">
               <Sparkles className="w-5 h-5" />
@@ -138,7 +167,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-6 bg-stone-50/30 dark:bg-stone-850/30 overflow-x-auto gap-2 py-2">
+        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-4 sm:px-6 bg-stone-50/30 dark:bg-stone-850/30 overflow-x-auto gap-1.5 sm:gap-2 py-2">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -161,7 +190,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Body content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* TAB 1: ACCOUNT & PROFILE */}
           {activeTab === 'account' && (
             <div className="space-y-6 animate-fade-in">
@@ -347,9 +376,9 @@ export default function SettingsModal({ isOpen, onClose }) {
             </div>
           )}
 
-          {/* TAB 3: WALLPAPER (FOND D'ECRAN) */}
+          {/* TAB 3: WALLPAPER (FOND D'ECRAN & AMBIANCE) */}
           {activeTab === 'wallpaper' && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-6 animate-fade-in">
               <div>
                 <h4 className="text-sm font-serif font-bold text-stone-800 dark:text-stone-100">
                   {t('wallpaper_section_title')}
@@ -359,53 +388,232 @@ export default function SettingsModal({ isOpen, onClose }) {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                {presets.map((p) => {
-                  const isSelected = wallpaper === p.id;
-                  return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => setWallpaper(p.id)}
-                      className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 relative ${
-                        isSelected
+              {/* Segmented switch between Fond d'écran and Ambiance across full width */}
+              <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-stone-850 rounded-2xl border border-stone-200/80 dark:border-stone-750 w-full">
+                <button
+                  type="button"
+                  onClick={() => setWallpaperCategory('image')}
+                  className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    wallpaperCategory === 'image'
+                      ? 'bg-white dark:bg-stone-750 text-stone-900 dark:text-white shadow-xs'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>{t('wallpaper_section_wallpapers')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWallpaperCategory('ambiance')}
+                  className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                    wallpaperCategory === 'ambiance'
+                      ? 'bg-white dark:bg-stone-750 text-stone-900 dark:text-white shadow-xs'
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                  }`}
+                >
+                  <Palette className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>{t('wallpaper_section_ambiances')}</span>
+                </button>
+              </div>
+
+              {/* SECTION 1: FONDS D'ÉCRAN (IMAGES & ILLUSTRATIONS) */}
+              {wallpaperCategory === 'image' && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                      <ImageIcon className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-stone-800 dark:text-stone-100 uppercase tracking-wider">
+                        {t('wallpaper_section_wallpapers')}
+                      </h5>
+                    </div>
+                  </div>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    {t('wallpaper_section_wallpapers_desc')}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Presets d'images réelles (ex: fond.jpeg) */}
+                    {imagePresets.map((p) => {
+                      const isSelected = wallpaper === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setWallpaper(p.id)}
+                          className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative cursor-pointer group ${
+                            isSelected
+                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                              : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                          }`}
+                        >
+                          {/* Miniature de l'illustration */}
+                          <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-750 flex-shrink-0 relative overflow-hidden bg-white dark:bg-stone-900 flex items-center justify-center p-1">
+                            <img
+                              src={p.previewImage}
+                              alt=""
+                              className="w-full h-full object-contain dark:invert dark:hue-rotate-180 transition-transform group-hover:scale-105"
+                            />
+                          </div>
+
+                          <div className="flex-1 min-w-0 pr-6">
+                            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block">
+                              {t(p.nameKey)}
+                            </span>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">
+                              {t(p.descriptionKey)}
+                            </p>
+                          </div>
+
+                          {isSelected && (
+                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+
+                    {/* Carte Importer une image (style Google Chrome "Importer depuis l'appareil") */}
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative cursor-pointer group ${
+                        wallpaper === 'custom'
                           ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
-                          : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                          : 'border-dashed border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/30 hover:border-amber-500/60 dark:hover:border-amber-500/60'
                       }`}
                     >
-                      {/* Swatch preview */}
-                      <div
-                        className="w-12 h-12 rounded-xl shadow-xs border border-black/10 flex-shrink-0 flex items-center justify-center relative overflow-hidden"
-                        style={{
-                          backgroundColor: p.previewColor,
-                        }}
-                      >
-                        <div
-                          className="w-1/2 h-full absolute right-0 top-0 shadow-inner"
-                          style={{ backgroundColor: p.darkPreviewColor }}
-                        />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleCustomImageUpload}
+                        className="hidden"
+                      />
+
+                      <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-750 flex-shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-850 flex items-center justify-center">
+                        {customWallpaperUrl ? (
+                          <img
+                            src={customWallpaperUrl}
+                            alt=""
+                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                          />
+                        ) : (
+                          <Upload className="w-5 h-5 text-stone-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors" />
+                        )}
                       </div>
 
                       <div className="flex-1 min-w-0 pr-6">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block">
-                            {t(p.nameKey)}
-                          </span>
-                        </div>
+                        <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block">
+                          {t('wallpaper_custom')}
+                        </span>
                         <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">
-                          {t(p.descriptionKey)}
+                          {customWallpaperUrl ? t('wallpaper_custom_change') : t('wallpaper_custom_desc')}
                         </p>
+
+                        {customWallpaperUrl && (
+                          <div className="mt-2 flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                fileInputRef.current?.click();
+                              }}
+                              className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 hover:underline"
+                            >
+                              {t('wallpaper_custom_change')}
+                            </button>
+                            <span className="text-stone-300 dark:text-stone-700">•</span>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeCustomWallpaper();
+                              }}
+                              className="text-[10px] font-semibold text-rose-600 dark:text-rose-400 hover:underline flex items-center gap-1"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                              <span>{t('wallpaper_custom_remove')}</span>
+                            </button>
+                          </div>
+                        )}
                       </div>
 
-                      {isSelected && (
+                      {wallpaper === 'custom' && (
                         <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
                           <Check className="w-3 h-3 stroke-[3]" />
                         </div>
                       )}
-                    </button>
-                  );
-                })}
-              </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION 2: AMBIANCE (COULEURS, MATIÈRES & DÉGRADÉS) */}
+              {wallpaperCategory === 'ambiance' && (
+                <div className="space-y-3 pt-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 flex items-center justify-center">
+                      <Palette className="w-3.5 h-3.5" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-stone-800 dark:text-stone-100 uppercase tracking-wider">
+                        {t('wallpaper_section_ambiances')}
+                      </h5>
+                    </div>
+                  </div>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    {t('wallpaper_section_ambiances_desc')}
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {ambiancePresets.map((p) => {
+                      const isSelected = wallpaper === p.id;
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setWallpaper(p.id)}
+                          className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 relative cursor-pointer ${
+                            isSelected
+                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                              : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                          }`}
+                        >
+                          {/* Pastille double aperçu clair / sombre */}
+                          <div
+                            className="w-12 h-12 rounded-xl shadow-xs border border-black/10 flex-shrink-0 flex items-center justify-center relative overflow-hidden"
+                            style={{
+                              backgroundColor: p.previewColor,
+                            }}
+                          >
+                            <div
+                              className="w-1/2 h-full absolute right-0 top-0 shadow-inner"
+                              style={{ backgroundColor: p.darkPreviewColor }}
+                            />
+                          </div>
+
+                          <div className="flex-1 min-w-0 pr-6">
+                            <span className="text-xs font-bold text-stone-800 dark:text-stone-100 block">
+                              {t(p.nameKey)}
+                            </span>
+                            <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5 leading-snug">
+                              {t(p.descriptionKey)}
+                            </p>
+                          </div>
+
+                          {isSelected && (
+                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

@@ -142,14 +142,14 @@ export default function LibraryView({
 
 
       {/* Main Content / Shelf */}
-      <main className="flex-1 max-w-7xl mx-auto px-6 py-10 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-3.5 sm:px-6 py-6 sm:py-10 w-full">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-10 h-10 border-3 border-amber-600 border-t-transparent rounded-full animate-spin mb-4" />
             <p className="text-sm font-medium text-stone-600 dark:text-stone-300">{t('loading_library')}</p>
           </div>
         ) : filteredBooks.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-300 dark:border-stone-800 rounded-3xl p-12 max-w-lg mx-auto shadow-sm">
+          <div className="py-14 sm:py-20 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-300 dark:border-stone-800 rounded-3xl p-6 sm:p-12 max-w-lg mx-auto shadow-sm">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
               {filterFavorites ? <Bookmark className="w-8 h-8" /> : <BookMarked className="w-8 h-8" />}
             </div>
@@ -190,7 +190,7 @@ export default function LibraryView({
         ) : (
           <div>
             {/* Shelf Banner */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8 pb-3 border-b border-stone-300/60 dark:border-stone-800">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 sm:mb-8 pb-3 border-b border-stone-300/60 dark:border-stone-800">
               <div className="flex items-center gap-3">
                 <span className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
                   {t('collections')} ({filteredBooks.length})
@@ -235,7 +235,7 @@ export default function LibraryView({
             </div>
 
             {/* Books Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-y-12 gap-x-8 justify-items-center">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-7 sm:gap-y-10 gap-x-3 sm:gap-x-6 justify-items-center">
               {filteredBooks.map((book) => (
                 <BookCard
                   key={book._id}
