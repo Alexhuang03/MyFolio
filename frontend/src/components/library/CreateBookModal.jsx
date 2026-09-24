@@ -188,37 +188,6 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
             </div>
           </div>
 
-          {/* Couleur d'accentuation */}
-          <div>
-            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">
-              {t('color_theme_label')}
-            </label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {COLOR_PRESETS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setColorTheme(color)}
-                  className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
-                    colorTheme === color ? 'scale-110 ring-2 ring-offset-2 ring-amber-500' : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: color }}
-                >
-                  {colorTheme === color && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-                </button>
-              ))}
-              <div className="relative flex items-center">
-                <input
-                  type="color"
-                  value={colorTheme}
-                  onChange={(e) => setColorTheme(e.target.value)}
-                  className="w-7 h-7 rounded-full border-0 p-0 cursor-pointer overflow-hidden"
-                  title={t('custom_color')}
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Option Favori */}
           <div className="pt-1">
             <button
@@ -264,6 +233,63 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
               </div>
             </button>
           </div>
+
+          {/* Couleur d'accentuation (affichée uniquement quand le marque-page favori est activé) */}
+          {isFavorite && (
+            <div className="pt-1 animate-fade-in">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-2">
+                {t('color_theme_label')}
+              </label>
+              <div className="flex items-center gap-2 flex-wrap">
+                {COLOR_PRESETS.map((color) => {
+                  const isSelected = colorTheme?.toLowerCase() === color.toLowerCase();
+                  return (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setColorTheme(color)}
+                      className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
+                        isSelected
+                          ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
+                          : 'hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    >
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                    </button>
+                  );
+                })}
+                <label
+                  className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm relative cursor-pointer overflow-hidden ${
+                    !COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase())
+                      ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
+                      : 'hover:scale-105 border border-stone-300 dark:border-stone-600'
+                  }`}
+                  style={{
+                    backgroundColor: !COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase())
+                      ? colorTheme
+                      : undefined,
+                    backgroundImage: COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase())
+                      ? 'conic-gradient(from 180deg, #f43f5e, #8b5cf6, #3b82f6, #10b981, #f59e0b, #f43f5e)'
+                      : undefined,
+                  }}
+                  title={t('custom_color')}
+                >
+                  <input
+                    type="color"
+                    value={colorTheme}
+                    onChange={(e) => setColorTheme(e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                  {!COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase()) ? (
+                    <Check className="w-3.5 h-3.5 text-white stroke-[3] drop-shadow-sm pointer-events-none" />
+                  ) : (
+                    <span className="w-2 h-2 rounded-full bg-white shadow-sm pointer-events-none" />
+                  )}
+                </label>
+              </div>
+            </div>
+          )}
 
           {/* Modal Footer */}
           <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-3">

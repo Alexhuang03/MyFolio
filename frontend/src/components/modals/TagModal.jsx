@@ -143,28 +143,52 @@ export default function TagModal({
               {t('tag_color')}
             </label>
             <div className="flex items-center gap-2 flex-wrap">
-              {TAG_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
-                    color === c ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400' : 'hover:scale-105'
-                  }`}
-                  style={{ backgroundColor: c }}
-                >
-                  {color === c && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
-                </button>
-              ))}
-              <div className="relative flex items-center">
+              {TAG_COLORS.map((c) => {
+                const isSelected = color?.toLowerCase() === c.toLowerCase();
+                return (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
+                      isSelected
+                        ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
+                        : 'hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: c }}
+                  >
+                    {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                  </button>
+                );
+              })}
+              <label
+                className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm relative cursor-pointer overflow-hidden ${
+                  !TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase())
+                    ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
+                    : 'hover:scale-105 border border-stone-300 dark:border-stone-600'
+                }`}
+                style={{
+                  backgroundColor: !TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase())
+                    ? color
+                    : undefined,
+                  backgroundImage: TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase())
+                    ? 'conic-gradient(from 180deg, #f43f5e, #8b5cf6, #3b82f6, #10b981, #f59e0b, #f43f5e)'
+                    : undefined,
+                }}
+                title={t('custom_color_tag')}
+              >
                 <input
                   type="color"
                   value={color}
                   onChange={(e) => setColor(e.target.value)}
-                  className="w-7 h-7 rounded-full border-0 p-0 cursor-pointer"
-                  title={t('custom_color_tag')}
+                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
-              </div>
+                {!TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase()) ? (
+                  <Check className="w-3.5 h-3.5 text-white stroke-[3] drop-shadow-sm pointer-events-none" />
+                ) : (
+                  <span className="w-2 h-2 rounded-full bg-white shadow-sm pointer-events-none" />
+                )}
+              </label>
             </div>
           </div>
 
