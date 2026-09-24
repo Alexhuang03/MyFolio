@@ -56,6 +56,45 @@ export const api = {
     return res.json();
   },
 
+  // Sharing & Collaborators
+  async shareBook(bookId, { email, role }) {
+    const res = await fetch(`${API_BASE}/books/${bookId}/share`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ email, role }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors du partage du livre');
+    }
+    return res.json();
+  },
+
+  async updateCollaboratorRole(bookId, collaboratorId, role) {
+    const res = await fetch(`${API_BASE}/books/${bookId}/share/${collaboratorId}`, {
+      method: 'PATCH',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ role }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors de la modification du rôle');
+    }
+    return res.json();
+  },
+
+  async removeCollaborator(bookId, collaboratorId) {
+    const res = await fetch(`${API_BASE}/books/${bookId}/share/${collaboratorId}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors du retrait du collaborateur');
+    }
+    return res.json();
+  },
+
   // Mega-Fetch : Récupère tout le livre (labels, subLabels, products)
   async getBookContent(bookId) {
     const res = await fetch(`${API_BASE}/books/${bookId}/content`, {

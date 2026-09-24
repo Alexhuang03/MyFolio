@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
-import { BookOpen, MoreVertical, Trash2, Edit3, Bookmark } from 'lucide-react';
+import { BookOpen, MoreVertical, Trash2, Edit3, Bookmark, Share2, LogOut } from 'lucide-react';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavorite }) {
+export default function BookCard({
+  book,
+  onOpen,
+  onDelete,
+  onEdit,
+  onToggleFavorite,
+  onShare,
+}) {
   const [showMenu, setShowMenu] = useState(false);
   const coverSrc = getCoverSrc(book.coverImage);
   const { t, lang } = useLanguage();
   const localeMap = { fr: 'fr-FR', en: 'en-US', zh: 'zh-CN' };
+
+  const isOwner = book.isOwner !== false;
+  const isViewer = book.myRole === 'viewer';
+  const collabCount = book.collaboratorsCount || book.collaborators?.length || 0;
 
   return (
     <div className="group relative flex flex-col items-center">
@@ -28,6 +39,30 @@ export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavor
 
         {/* Book spine left 3D gradient overlay */}
         <div className="absolute left-0 top-0 bottom-0 w-4 sm:w-5 book-spine-left pointer-events-none" />
+
+        {/* Collaborators badge (👥 count) */}
+        {(collabCount > 0 || !isOwner) && (
+          <div
+            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-stone-900/80 dark:bg-black/85 backdrop-blur-xs text-white text-[11px] font-medium shadow-sm pointer-events-none"
+            title={t('shared_collaborators_count', {
+              count: collabCount,
+              plural: collabCount > 1 ? 's' : '',
+            })}
+          >
+            <span>👥</span>
+            <span>{collabCount}</span>
+          </div>
+        )}
+
+        {/* Read-only badge if viewer */}
+        {isViewer && (
+          <div
+            className="absolute top-8 left-2 z-10 px-1.5 py-0.5 rounded bg-amber-500/90 text-white text-[9px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none"
+            title={t('readonly_banner')}
+          >
+            {t('readonly_badge')}
+          </div>
+        )}
 
         {/* Bookmark ribbon accent (uniquement si favori) */}
         {book.isFavorite && (
@@ -67,11 +102,18 @@ export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavor
       <div className="mt-2 sm:mt-2.5 w-36 sm:w-44 flex items-center justify-between px-1">
         <div className="truncate pr-1.5 sm:pr-2">
           <p className="font-medium text-stone-800 dark:text-stone-100 text-xs truncate">{book.title}</p>
-          <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500">
-            {new Date(book.createdAt || Date.now()).toLocaleDateString(localeMap[lang] || 'fr-FR', {
-              month: 'short',
-              year: 'numeric',
-            })}
+          <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 flex items-center gap-1">
+            <span>
+              {new Date(book.createdAt || Date.now()).toLocaleDateString(localeMap[lang] || 'fr-FR', {
+                month: 'short',
+                year: 'numeric',
+              })}
+            </span>
+            {collabCount > 0 && (
+              <span className="inline-flex items-center gap-0.5 font-normal text-stone-400">
+                · 👥 {collabCount}
+              </span>
+            )}
           </p>
         </div>
 
@@ -114,6 +156,7 @@ export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavor
                   }}
                 />
                 <div className="absolute right-0 bottom-full mb-1 w-44 bg-white dark:bg-stone-900 rounded-lg shadow-xl border border-stone-200 dark:border-stone-700 py-1 z-30 text-sm">
+                  {/* Favori */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -125,17 +168,38 @@ export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavor
                     <Bookmark className={`w-4 h-4 ${book.isFavorite ? 'text-amber-500 fill-amber-500' : 'text-stone-500 dark:text-stone-400'}`} />
                     <span>{book.isFavorite ? t('remove_favorite') : t('add_favorite')}</span>
                   </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowMenu(false);
-                      onEdit && onEdit(book);
-                    }}
-                    className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
-                  >
-                    <Edit3 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                    <span>{t('edit')}</span>
-                  </button>
+
+                  {/* Modifier (only if owner or editor) */}
+                  {!isViewer && onEdit && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(false);
+                        onEdit(book);
+                      }}
+                      className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      <Edit3 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                      <span>{t('edit')}</span>
+                    </button>
+                  )}
+
+                  {/* Partager */}
+                  {onShare && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowMenu(false);
+                        onShare(book);
+                      }}
+                      className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                    >
+                      <Share2 className="w-4 h-4 text-blue-500" />
+                      <span>{t('share')}</span>
+                    </button>
+                  )}
+
+                  {/* Supprimer (propriétaire) OU Quitter le livre (collaborateur) */}
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -144,8 +208,17 @@ export default function BookCard({ book, onOpen, onDelete, onEdit, onToggleFavor
                     }}
                     className="w-full text-left px-3.5 py-2 flex items-center gap-2 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                   >
-                    <Trash2 className="w-4 h-4" />
-                    <span>{t('delete')}</span>
+                    {isOwner ? (
+                      <>
+                        <Trash2 className="w-4 h-4" />
+                        <span>{t('delete')}</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="w-4 h-4" />
+                        <span>{t('leave_book')}</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </>

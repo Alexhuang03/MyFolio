@@ -1,6 +1,7 @@
 import Label from '../models/Label.js';
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
+import { getBookAccess } from '../utils/permissionHelper.js';
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -12,10 +13,13 @@ export const createLabel = async (req, res) => {
       return res.status(400).json({ message: 'Nom et bookId sont requis' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: bookId, userId: req.userId });
-    if (!book) {
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(bookId, req.userId);
+    if (!hasAccess || !book) {
       return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     const trimmedName = name.trim();
@@ -52,10 +56,13 @@ export const updateLabel = async (req, res) => {
       return res.status(404).json({ message: 'Label introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: label.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(label.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     if (name && name.trim()) {
@@ -96,22 +103,23 @@ export const deleteLabel = async (req, res) => {
       return res.status(404).json({ message: 'Label introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: label.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(label.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     let deletedProductsCount = 0;
 
     if (mode === 'detach') {
-      // Retirer le label des produits sans les supprimer s'ils ont d'autres labels
       await Product.updateMany(
         { labelIds: labelId },
         { $pull: { labelIds: labelId } }
       );
     } else {
-      // Suppression en cascade stricte selon la spécification
       const deleteResult = await Product.deleteMany({ labelIds: labelId });
       deletedProductsCount = deleteResult.deletedCount;
     }

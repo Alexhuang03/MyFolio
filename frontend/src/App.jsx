@@ -116,21 +116,47 @@ export default function App() {
   };
 
   const handleDeleteBook = async (book) => {
-    if (
-      window.confirm(
-        t('delete_book_confirm', { title: book.title })
-      )
-    ) {
+    const isOwner = book.isOwner !== false;
+    const confirmMsg = isOwner
+      ? t('delete_book_confirm', { title: book.title })
+      : t('leave_book_confirm');
+
+    if (window.confirm(confirmMsg)) {
       try {
-        await api.deleteBook(book._id);
+        const res = await api.deleteBook(book._id);
         setBooks((prev) => prev.filter((b) => b._id !== book._id));
         if (selectedBook && selectedBook._id === book._id) {
           setSelectedBook(null);
         }
-        showToast(t('book_deleted', { title: book.title }));
+        showToast(
+          res.leftBook
+            ? t('left_book_success')
+            : t('book_deleted', { title: book.title })
+        );
       } catch (err) {
         showToast(err.message, 'error');
       }
+    }
+  };
+
+  const handleCollaboratorsUpdated = (bookId, updatedCollaborators) => {
+    setBooks((prev) =>
+      prev.map((b) =>
+        b._id === bookId
+          ? {
+              ...b,
+              collaborators: updatedCollaborators,
+              collaboratorsCount: updatedCollaborators.length,
+            }
+          : b
+      )
+    );
+    if (selectedBook && selectedBook._id === bookId) {
+      setSelectedBook((prev) => ({
+        ...prev,
+        collaborators: updatedCollaborators,
+        collaboratorsCount: updatedCollaborators.length,
+      }));
     }
   };
 
@@ -381,6 +407,7 @@ export default function App() {
             onDeleteBook={handleDeleteBook}
             onSelectBook={handleSelectBook}
             onToggleFavoriteBook={handleToggleFavoriteBook}
+            onCollaboratorsUpdated={handleCollaboratorsUpdated}
           />
         )}
       </div>

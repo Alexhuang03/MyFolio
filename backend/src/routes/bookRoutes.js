@@ -6,6 +6,9 @@ import {
   updateBook,
   deleteBook,
   getBookContent,
+  shareBook,
+  updateCollaboratorRole,
+  removeCollaborator,
 } from '../controllers/bookController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
@@ -20,5 +23,10 @@ router.get('/:id', getBookById);
 router.put('/:id', updateBook);
 router.delete('/:id', deleteBook);
 router.get('/:id/content', getBookContent);
+
+// Routes de partage et gestion des permissions (Google Docs style)
+router.post('/:id/share', shareBook);
+router.patch('/:id/share/:collaboratorId', updateCollaboratorRole);
+router.delete('/:id/share/:collaboratorId', removeCollaborator);
 
 export default router;

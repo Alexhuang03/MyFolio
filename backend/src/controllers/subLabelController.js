@@ -1,6 +1,7 @@
 import SubLabel from '../models/SubLabel.js';
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
+import { getBookAccess } from '../utils/permissionHelper.js';
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -12,10 +13,13 @@ export const createSubLabel = async (req, res) => {
       return res.status(400).json({ message: 'Nom et bookId sont requis' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: bookId, userId: req.userId });
-    if (!book) {
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(bookId, req.userId);
+    if (!hasAccess || !book) {
       return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     const trimmedName = name.trim();
@@ -52,10 +56,13 @@ export const updateSubLabel = async (req, res) => {
       return res.status(404).json({ message: 'Sous-label introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: subLabel.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(subLabel.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     if (name && name.trim()) {
@@ -96,10 +103,13 @@ export const deleteSubLabel = async (req, res) => {
       return res.status(404).json({ message: 'Sous-label introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: subLabel.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(subLabel.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     let deletedProductsCount = 0;

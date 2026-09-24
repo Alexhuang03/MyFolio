@@ -25,6 +25,7 @@ export default function CategorySidebar({
   onDeleteTag,
   isOpenMobile = false,
   onCloseMobile,
+  isReadOnly = false,
 }) {
   const { t } = useLanguage();
   const isByLabel = pivotMode === PIVOT_MODES.BY_LABEL;
@@ -85,15 +86,17 @@ export default function CategorySidebar({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Bouton Ajouter un Label / Sous-label */}
-            <button
-              onClick={onAddTag}
-              className="px-2.5 py-1 text-xs font-semibold bg-white dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 rounded-lg shadow-2xs hover:border-amber-400 transition-all flex items-center gap-1"
-              title={t(isByLabel ? 'add_label_tooltip' : 'add_sublabel_tooltip')}
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{t('add')}</span>
-            </button>
+            {/* Bouton Ajouter un Label / Sous-label (caché en lecture seule) */}
+            {!isReadOnly && (
+              <button
+                onClick={onAddTag}
+                className="px-2.5 py-1 text-xs font-semibold bg-white dark:bg-stone-800 hover:bg-amber-50 dark:hover:bg-amber-950/50 text-amber-800 dark:text-amber-300 border border-amber-200/80 dark:border-amber-800/80 rounded-lg shadow-2xs hover:border-amber-400 transition-all flex items-center gap-1"
+                title={t(isByLabel ? 'add_label_tooltip' : 'add_sublabel_tooltip')}
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t('add')}</span>
+              </button>
+            )}
 
             {/* Close button for mobile drawer */}
             {onCloseMobile && (
@@ -151,8 +154,8 @@ export default function CategorySidebar({
                     {item.count}
                   </span>
 
-                  {/* Actions for non-system items */}
-                  {!item.isSystem && (
+                  {/* Actions for non-system items (disabled in read-only) */}
+                  {!item.isSystem && !isReadOnly && (
                     <div className="relative">
                       <button
                         onClick={(e) => {

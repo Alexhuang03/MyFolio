@@ -15,6 +15,7 @@ export default function ProductWorkspace({
   onEditProduct,
   onDeleteProduct,
   onOpenMobileCategories,
+  isReadOnly = false,
 }) {
   const { t } = useLanguage();
   const [filterQuery, setFilterQuery] = useState('');
@@ -110,15 +111,17 @@ export default function ProductWorkspace({
             />
           </div>
 
-          {/* Add Product Button */}
-          <button
-            onClick={() => onAddProduct(selectedPrimaryItem.id)}
-            className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 flex-shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden xs:inline">{t('add_element')}</span>
-            <span className="xs:hidden">{t('add_short')}</span>
-          </button>
+          {/* Add Product Button (hidden in read-only) */}
+          {!isReadOnly && (
+            <button
+              onClick={() => onAddProduct(selectedPrimaryItem.id)}
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 flex-shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="hidden xs:inline">{t('add_element')}</span>
+              <span className="xs:hidden">{t('add_short')}</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -135,12 +138,14 @@ export default function ProductWorkspace({
             <p className="text-xs text-stone-400 dark:text-stone-400 mb-4">
               {t('add_first_element')}
             </p>
-            <button
-              onClick={() => onAddProduct(selectedPrimaryItem.id)}
-              className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
-            >
-              {t('add_element_btn')}
-            </button>
+            {!isReadOnly && (
+              <button
+                onClick={() => onAddProduct(selectedPrimaryItem.id)}
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
+              >
+                {t('add_element_btn')}
+              </button>
+            )}
           </div>
         )}
 
@@ -190,6 +195,7 @@ export default function ProductWorkspace({
                       fieldsConfig={fieldsConfig}
                       onEdit={onEditProduct}
                       onDelete={onDeleteProduct}
+                      isReadOnly={isReadOnly}
                     />
                   ))}
                 </div>

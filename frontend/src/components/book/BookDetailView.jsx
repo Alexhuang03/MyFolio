@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ArrowLeft, BookOpen, Shuffle, Plus, Layers, Settings, BookMarked } from 'lucide-react';
+import { ArrowLeft, BookOpen, Shuffle, Plus, Layers, Settings, BookMarked, Eye } from 'lucide-react';
 import CategorySidebar from '../navigation/CategorySidebar';
 import ProductWorkspace from '../content/ProductWorkspace';
 import TagModal from '../modals/TagModal';
@@ -27,6 +27,8 @@ export default function BookDetailView({
   onDeleteProduct,
 }) {
   const { t } = useLanguage();
+  const isReadOnly = book?.myRole === 'viewer';
+
   // Pivot mode state: 100% client side
   const [pivotMode, setPivotMode] = useState(PIVOT_MODES.BY_LABEL);
   const [selectedPrimaryId, setSelectedPrimaryId] = useState(null);
@@ -143,6 +145,14 @@ export default function BookDetailView({
             <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400" />
           </button>
 
+          {/* Read-only badge */}
+          {isReadOnly && (
+            <span className="px-2.5 py-1 rounded-xl bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-1.5 shadow-2xs">
+              <Eye className="w-3.5 h-3.5" />
+              <span>{t('readonly_badge')}</span>
+            </span>
+          )}
+
           {/* Prominent Pivot Toggle Button */}
           <button
             onClick={togglePivot}
@@ -156,14 +166,16 @@ export default function BookDetailView({
             </span>
           </button>
 
-          {/* Add Product Button */}
-          <button
-            onClick={() => handleOpenAddProduct(activePrimaryId)}
-            className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{t('element_btn')}</span>
-          </button>
+          {/* Add Product Button (hidden in read-only) */}
+          {!isReadOnly && (
+            <button
+              onClick={() => handleOpenAddProduct(activePrimaryId)}
+              className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('element_btn')}</span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -180,6 +192,7 @@ export default function BookDetailView({
           onEditTag={handleOpenEditTag}
           isOpenMobile={isMobileSidebarOpen}
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          isReadOnly={isReadOnly}
           onDeleteTag={(id, mode) => {
             if (pivotMode === PIVOT_MODES.BY_LABEL) {
               return onDeleteLabel(id, mode);
@@ -201,6 +214,7 @@ export default function BookDetailView({
           onEditProduct={handleOpenEditProduct}
           onDeleteProduct={onDeleteProduct}
           onOpenMobileCategories={() => setIsMobileSidebarOpen(true)}
+          isReadOnly={isReadOnly}
         />
       </div>
 

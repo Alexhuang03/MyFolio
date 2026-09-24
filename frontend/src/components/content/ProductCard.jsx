@@ -17,6 +17,7 @@ export default function ProductCard({
   fieldsConfig,
   onEdit,
   onDelete,
+  isReadOnly = false,
 }) {
   const { t } = useLanguage();
 
@@ -84,23 +85,25 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Floating action buttons on hover */}
-          <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => onEdit(product)}
-              className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-white dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
-              title={t('edit_element')}
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => onDelete(product)}
-              className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
-              title={t('delete_element')}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
+          {/* Floating action buttons on hover (hidden in read-only) */}
+          {!isReadOnly && (
+            <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={() => onEdit(product)}
+                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-white dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
+                title={t('edit_element')}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => onDelete(product)}
+                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
+                title={t('delete_element')}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -119,20 +122,24 @@ export default function ProductCard({
                     {Number(product.price).toFixed(2)} €
                   </span>
                 )}
-                <button
-                  onClick={() => onEdit(product)}
-                  className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md transition-colors"
-                  title={t('edit_element')}
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                </button>
-                <button
-                  onClick={() => onDelete(product)}
-                  className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-md transition-colors"
-                  title={t('delete_element')}
-                >
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
+                {!isReadOnly && (
+                  <>
+                    <button
+                      onClick={() => onEdit(product)}
+                      className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md transition-colors"
+                      title={t('edit_element')}
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => onDelete(product)}
+                      className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-md transition-colors"
+                      title={t('delete_element')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           ) : (

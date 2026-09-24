@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Plus, Search, BookMarked, Library, LogOut, Bookmark, Settings } from 'lucide-react';
 import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
+import ShareBookModal from './ShareBookModal';
 import SettingsModal from '../settings/SettingsModal';
 import BookOpeningAnimation from '../book/BookOpeningAnimation';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -16,6 +17,7 @@ export default function LibraryView({
   onDeleteBook,
   onSelectBook,
   onToggleFavoriteBook,
+  onCollaboratorsUpdated,
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterFavorites, setFilterFavorites] = useState(false);
@@ -23,6 +25,7 @@ export default function LibraryView({
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [openingBook, setOpeningBook] = useState(null);
+  const [sharingBook, setSharingBook] = useState(null);
 
   const { t } = useLanguage();
   const { user, logout } = useAuth();
@@ -227,6 +230,7 @@ export default function LibraryView({
                   }}
                   onDelete={onDeleteBook}
                   onToggleFavorite={onToggleFavoriteBook}
+                  onShare={(b) => setSharingBook(b)}
                 />
               ))}
             </div>
@@ -267,6 +271,29 @@ export default function LibraryView({
         <SettingsModal
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
+
+      {/* Share Book Modal */}
+      {sharingBook && (
+        <ShareBookModal
+          isOpen={Boolean(sharingBook)}
+          book={sharingBook}
+          onClose={() => setSharingBook(null)}
+          onCollaboratorsUpdated={(bookId, updatedCollaborators) => {
+            setSharingBook((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    collaborators: updatedCollaborators,
+                    collaboratorsCount: updatedCollaborators.length,
+                  }
+                : null
+            );
+            if (onCollaboratorsUpdated) {
+              onCollaboratorsUpdated(bookId, updatedCollaborators);
+            }
+          }}
         />
       )}
     </div>

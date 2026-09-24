@@ -1,5 +1,6 @@
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
+import { getBookAccess } from '../utils/permissionHelper.js';
 
 // Créer un produit
 export const createProduct = async (req, res) => {
@@ -23,10 +24,13 @@ export const createProduct = async (req, res) => {
       return res.status(400).json({ message: 'Le nom du produit et bookId sont requis' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: bookId, userId: req.userId });
-    if (!book) {
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(bookId, req.userId);
+    if (!hasAccess || !book) {
       return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     const product = await Product.create({
@@ -72,10 +76,13 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ message: 'Produit introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: product.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(product.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     const updateData = {
@@ -112,10 +119,13 @@ export const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: 'Produit introuvable' });
     }
 
-    // Vérifier l'appartenance du livre à l'utilisateur connecté
-    const book = await Book.findOne({ _id: product.bookId, userId: req.userId });
-    if (!book) {
-      return res.status(403).json({ message: 'Accès non autorisé' });
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(product.bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
     await Product.findByIdAndDelete(req.params.id);

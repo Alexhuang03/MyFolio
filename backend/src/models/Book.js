@@ -45,10 +45,42 @@ const BookSchema = new mongoose.Schema(
         },
       ],
     },
+    collaborators: [
+      {
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+          required: true,
+        },
+        email: {
+          type: String,
+          required: true,
+          lowercase: true,
+          trim: true,
+        },
+        name: {
+          type: String,
+          default: '',
+          trim: true,
+        },
+        role: {
+          type: String,
+          enum: ['viewer', 'editor'],
+          default: 'viewer',
+        },
+        sharedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
+
+BookSchema.index({ 'collaborators.userId': 1 });
+BookSchema.index({ 'collaborators.email': 1 });
 
 export default mongoose.model('Book', BookSchema);
