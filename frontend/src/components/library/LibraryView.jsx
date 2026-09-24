@@ -52,47 +52,61 @@ export default function LibraryView({
     <div className="min-h-screen text-stone-800 dark:text-stone-100 flex flex-col transition-colors duration-200">
       {/* Top Header */}
       <header className="border-b border-stone-200/80 dark:border-stone-850 bg-white/70 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 flex-shrink-0">
-                <Library className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <div>
-                <h1 className="font-serif font-bold text-lg sm:text-2xl tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
-                  MyFolio <span className="text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 dark:bg-amber-950/70 rounded-full border border-amber-200 dark:border-amber-800/80">{t('library_badge')}</span>
-                </h1>
-                <p className="text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 line-clamp-1">
-                  {t('library_subtitle')}
-                </p>
-              </div>
+        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-3 sm:py-3.5 flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5 sm:gap-4">
+          
+          {/* Brand Logo & Title (Left) */}
+          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 order-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 flex-shrink-0">
+              <Library className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
+            <div>
+              <h1 className="font-serif font-bold text-lg sm:text-2xl tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
+                MyFolio <span className="text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 dark:bg-amber-950/70 rounded-full border border-amber-200 dark:border-amber-800/80">{t('library_badge')}</span>
+              </h1>
+              <p className="hidden lg:block text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 line-clamp-1">
+                {t('library_subtitle')}
+              </p>
+            </div>
+          </div>
 
-            {/* Mobile Actions in top bar */}
-            <div className="flex items-center gap-1.5 sm:hidden">
-              <ThemeToggle />
-              <button
-                onClick={() => setIsSettingsOpen(true)}
-                className="p-1.5 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors border border-transparent hover:border-stone-200 dark:hover:border-stone-700"
-                title={t('settings')}
-              >
-                <Settings className="w-4 h-4" />
-              </button>
-              {user && (
+          {/* Unified Action Controls: Theme, Settings, User Profile, Logout (Always visible, Right aligned) */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 order-2 md:order-3">
+            <ThemeToggle />
+
+            {/* Settings Button */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-1.5 sm:px-3 sm:py-2 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-750 border border-stone-200/80 dark:border-stone-700 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer shadow-2xs"
+              title={t('settings')}
+            >
+              <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400 flex-shrink-0" />
+              <span className="hidden lg:inline">{t('settings')}</span>
+            </button>
+
+            {/* User Profile & Logout */}
+            {user && (
+              <div className="flex items-center gap-1 sm:gap-1.5 pl-1 sm:pl-2 border-l border-stone-200 dark:border-stone-800">
+                <div
+                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700/60 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300 flex-shrink-0"
+                  title={`${user.name} (${user.email})`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span className="hidden sm:inline-block max-w-[80px] lg:max-w-[120px] truncate">{user.name}</span>
+                </div>
                 <button
                   onClick={logout}
-                  className="p-1.5 text-stone-500 hover:text-rose-600 dark:text-stone-400 dark:hover:text-rose-400 rounded-lg hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
+                  className="p-1.5 sm:p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all flex-shrink-0 cursor-pointer"
                   title={t('logout_btn')}
                 >
                   <LogOut className="w-4 h-4" />
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
-            {/* Search Input with correct pl-10 padding */}
-            <div className="relative flex-1 sm:w-64">
+          {/* Search Input: spans full width on mobile/tablet (< md), occupies center flex space on desktop (>= md) */}
+          <div className="order-3 md:order-2 w-full md:w-auto md:flex-1 md:max-w-md md:mx-2 lg:mx-4">
+            <div className="relative w-full">
               <Search className="w-4 h-4 text-stone-400 dark:text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
@@ -102,40 +116,6 @@ export default function LibraryView({
                 className="w-full pl-10 pr-4 py-2 bg-stone-100 dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
-
-            <div className="hidden sm:flex items-center">
-              <ThemeToggle />
-            </div>
-
-            {/* Desktop Settings Button */}
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="hidden sm:flex px-3.5 py-2 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-750 border border-stone-200/80 dark:border-stone-700 rounded-xl text-xs font-semibold transition-all items-center gap-2 flex-shrink-0 cursor-pointer shadow-2xs"
-              title={t('settings')}
-            >
-              <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-              <span>{t('settings')}</span>
-            </button>
-
-            {/* Desktop User Profile & Logout */}
-            {user && (
-              <div className="hidden sm:flex items-center gap-2 pl-1 border-l border-stone-200 dark:border-stone-800">
-                <div
-                  className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700/60 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300"
-                  title={user.email}
-                >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="max-w-[100px] truncate">{user.name}</span>
-                </div>
-                <button
-                  onClick={logout}
-                  className="p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all"
-                  title={t('logout_btn')}
-                >
-                  <LogOut className="w-4 h-4" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </header>
