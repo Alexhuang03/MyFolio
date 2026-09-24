@@ -1,4 +1,7 @@
 import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -11,6 +14,8 @@ import labelRoutes from './routes/labelRoutes.js';
 import subLabelRoutes from './routes/subLabelRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import { setIO } from './utils/socketEmitter.js';
+import { getBookAccess } from './utils/permissionHelper.js';
 
 dotenv.config();
 
@@ -18,10 +23,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
+
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 
-// 1. En-têtes HTTP de sécurité avec Helmet & CSP
+// 1. En-têtes HTTP de sécurité avec Helmet & CSP (autorisant les WebSockets ws:/wss:)
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -31,7 +38,7 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
-        connectSrc: ["'self'"],
+        connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
       },
     },
     crossOriginEmbedderPolicy: false,
@@ -51,26 +58,84 @@ const allowedOrigins = [
   'http://127.0.0.1:3000',
 ].filter(Boolean);
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Autoriser les requêtes sans origine (CLI, mêmes domaines) ou dans la liste blanche, ou en dev
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(new Error('Origine non autorisée par la politique CORS'));
-      }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    credentials: true,
-  })
-);
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+      callback(null, true);
+    } else {
+      callback(new Error('Origine non autorisée par la politique CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  credentials: true,
+};
 
-// 3. Parsing du corps de requête avec limite stricte (Anti-DoS)
+app.use(cors(corsOptions));
+
+// 3. Initialisation de Socket.IO avec WebSocket et polling
+const io = new Server(server, {
+  cors: corsOptions,
+});
+
+setIO(io);
+
+// Middleware d'authentification pour les connexions Socket.IO
+io.use((socket, next) => {
+  try {
+    const token =
+      socket.handshake.auth?.token ||
+      socket.handshake.headers?.authorization?.replace('Bearer ', '');
+
+    if (!token) {
+      return next(new Error('Authentification requise pour WebSocket'));
+    }
+
+    const secret = process.env.JWT_SECRET || 'myfolio_super_secret_jwt_key_2026';
+    const decoded = jwt.verify(token, secret);
+    socket.userId = decoded.userId;
+    next();
+  } catch (err) {
+    next(new Error('Token invalide pour WebSocket'));
+  }
+});
+
+// Écoute des connexions Socket.IO
+io.on('connection', (socket) => {
+  const userIdStr = socket.userId?.toString();
+  if (userIdStr) {
+    socket.join(`user:${userIdStr}`);
+  }
+
+  // Rejoindre la salle de synchronisation d'un livre
+  socket.on('join_book', async (bookId) => {
+    try {
+      if (!bookId) return;
+      const { hasAccess } = await getBookAccess(bookId, socket.userId);
+      if (hasAccess) {
+        socket.join(`book:${bookId.toString()}`);
+      }
+    } catch (err) {
+      console.warn('[Socket] Erreur lors de join_book:', err.message);
+    }
+  });
+
+  // Quitter la salle d'un livre
+  socket.on('leave_book', (bookId) => {
+    if (bookId) {
+      socket.leave(`book:${bookId.toString()}`);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    // Nettoyage automatique des rooms par Socket.IO
+  });
+});
+
+// 4. Parsing du corps de requête avec limite stricte (Anti-DoS)
 app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 
-// 4. Rate Limiting global pour toutes les routes API (300 requêtes / 15 min par IP)
+// 5. Rate Limiting global pour toutes les routes API (300 requêtes / 15 min par IP)
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -80,7 +145,7 @@ const globalLimiter = rateLimit({
 });
 app.use('/api', globalLimiter);
 
-// 5. Fichiers statiques pour les uploads sécurisés (pas d'exécution, nosniff)
+// 6. Fichiers statiques pour les uploads sécurisés (pas d'exécution, nosniff)
 app.use(
   '/uploads',
   express.static(path.join(__dirname, '../uploads'), {
@@ -94,7 +159,7 @@ app.use(
   })
 );
 
-// 6. Routes API
+// 7. Routes API
 app.use('/api/auth', authRoutes);
 app.use('/api/books', bookRoutes);
 app.use('/api/labels', labelRoutes);
@@ -110,7 +175,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// 7. Middleware d'erreur global (masque les traces sensibles en production)
+// 8. Middleware d'erreur global (masque les traces sensibles en production)
 app.use((err, req, res, next) => {
   console.error('[Error Handler]', err.message || err);
 
@@ -131,8 +196,8 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    app.listen(PORT, HOST, () => {
-      console.log(`[Server] MyFolio API running on http://127.0.0.1:${PORT}`);
+    server.listen(PORT, HOST, () => {
+      console.log(`[Server] MyFolio API & WebSocket running on http://127.0.0.1:${PORT}`);
     });
   } catch (error) {
     console.error('[Server] Failed to start:', error);
@@ -144,5 +209,5 @@ if (process.env.NODE_ENV !== 'test') {
   startServer();
 }
 
-export { app, startServer };
+export { app, server, io, startServer };
 export default app;

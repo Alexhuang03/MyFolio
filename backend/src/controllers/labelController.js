@@ -2,6 +2,7 @@ import Label from '../models/Label.js';
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
 import { getBookAccess } from '../utils/permissionHelper.js';
+import { emitToBook } from '../utils/socketEmitter.js';
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -39,6 +40,9 @@ export const createLabel = async (req, res) => {
       color: color || '#6366f1',
       bookId,
     });
+
+    // Émettre en temps réel
+    emitToBook(bookId, 'label:created', label);
 
     res.status(201).json(label);
   } catch (error) {
@@ -86,6 +90,10 @@ export const updateLabel = async (req, res) => {
     }
 
     await label.save();
+
+    // Émettre en temps réel
+    emitToBook(label.bookId, 'label:updated', label);
+
     res.json(label);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du label', error: error.message });
@@ -113,6 +121,7 @@ export const deleteLabel = async (req, res) => {
     }
 
     let deletedProductsCount = 0;
+    const bookId = label.bookId;
 
     if (mode === 'detach') {
       await Product.updateMany(
@@ -125,6 +134,13 @@ export const deleteLabel = async (req, res) => {
     }
 
     await Label.findByIdAndDelete(labelId);
+
+    // Émettre en temps réel
+    emitToBook(bookId, 'label:deleted', {
+      labelId,
+      mode,
+      deletedProductsCount,
+    });
 
     res.json({
       message: 'Label supprimé avec succès',

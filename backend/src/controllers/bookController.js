@@ -4,6 +4,7 @@ import Label from '../models/Label.js';
 import SubLabel from '../models/SubLabel.js';
 import Product from '../models/Product.js';
 import { getBookAccess } from '../utils/permissionHelper.js';
+import { emitToBook, emitToUser } from '../utils/socketEmitter.js';
 
 // Récupérer tous les livres accessibles par l'utilisateur connecté (créés ou partagés)
 export const getBooks = async (req, res) => {
@@ -122,12 +123,17 @@ export const updateBook = async (req, res) => {
     await book.save();
 
     const bookObj = book.toObject();
-    res.json({
+    const result = {
       ...bookObj,
       isOwner,
       myRole: role,
       collaboratorsCount: book.collaborators?.length || 0,
-    });
+    };
+
+    // Émettre l'événement temps réel
+    emitToBook(book._id, 'book:updated', result);
+
+    res.json(result);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du livre', error: error.message });
   }
@@ -144,11 +150,21 @@ export const deleteBook = async (req, res) => {
     }
 
     if (isOwner) {
+      const formerCollaborators = book.collaborators || [];
+
       // Le propriétaire supprime le livre et l'ensemble de son contenu en cascade
       await Book.findByIdAndDelete(bookId);
       await Label.deleteMany({ bookId });
       await SubLabel.deleteMany({ bookId });
       await Product.deleteMany({ bookId });
+
+      // Émettre l'événement temps réel de suppression aux collaborateurs et à la room du livre
+      emitToBook(bookId, 'book:deleted', { bookId });
+      formerCollaborators.forEach((c) => {
+        if (c.userId) {
+          emitToUser(c.userId, 'book:removed', { bookId });
+        }
+      });
 
       return res.json({
         message: 'Livre et ensemble de son contenu supprimés avec succès',
@@ -163,6 +179,13 @@ export const deleteBook = async (req, res) => {
     );
     await book.save();
 
+    // Notifier le livre et son propriétaire du départ du collaborateur
+    emitToBook(bookId, 'collaborators:updated', {
+      bookId,
+      collaborators: book.collaborators,
+      collaboratorsCount: book.collaborators.length,
+    });
+
     return res.json({
       message: 'Vous avez quitté ce livre avec succès',
       leftBook: true,
@@ -174,7 +197,6 @@ export const deleteBook = async (req, res) => {
 };
 
 // Route "Mega-Fetch" (GET /api/books/:id/content)
-// Renvoie tout le contenu d'un livre d'un coup (Livre, Labels, Sous-labels, Produits)
 export const getBookContent = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -268,6 +290,25 @@ export const shareBook = async (req, res) => {
 
     await book.save();
 
+    const ownerUser = await User.findById(book.userId).select('name email');
+    const guestBookObj = {
+      ...book.toObject(),
+      isOwner: false,
+      myRole: role,
+      collaboratorsCount: book.collaborators.length,
+      ownerInfo: ownerUser ? { name: ownerUser.name, email: ownerUser.email } : null,
+    };
+
+    // Émettre en temps réel pour l'invité (son écran ajoute le livre en direct)
+    emitToUser(targetUser._id, 'book:shared', guestBookObj);
+
+    // Émettre en temps réel la mise à jour des collaborateurs
+    emitToBook(bookId, 'collaborators:updated', {
+      bookId,
+      collaborators: book.collaborators,
+      collaboratorsCount: book.collaborators.length,
+    });
+
     res.json({
       message: 'Livre partagé avec succès',
       collaborators: book.collaborators,
@@ -308,6 +349,16 @@ export const updateCollaboratorRole = async (req, res) => {
     collab.role = role;
     await book.save();
 
+    // Notifier le collaborateur de son changement de rôle en direct
+    emitToUser(collab.userId, 'role:updated', { bookId, role });
+
+    // Notifier la salle du livre de la mise à jour des collaborateurs
+    emitToBook(bookId, 'collaborators:updated', {
+      bookId,
+      collaborators: book.collaborators,
+      collaboratorsCount: book.collaborators.length,
+    });
+
     res.json({
       message: 'Rôle mis à jour avec succès',
       collaborators: book.collaborators,
@@ -332,10 +383,26 @@ export const removeCollaborator = async (req, res) => {
       return res.status(403).json({ message: 'Seul le propriétaire peut retirer un collaborateur' });
     }
 
+    const removedCollab = book.collaborators.find(
+      (c) => (c._id && c._id.toString() === collaboratorId) || (c.userId && c.userId.toString() === collaboratorId)
+    );
+
     book.collaborators = book.collaborators.filter(
       (c) => (c._id && c._id.toString() !== collaboratorId) && (c.userId && c.userId.toString() !== collaboratorId)
     );
     await book.save();
+
+    if (removedCollab?.userId) {
+      // Notifier le collaborateur retiré pour que le livre disparaisse de sa bibliothèque en direct
+      emitToUser(removedCollab.userId, 'book:removed', { bookId });
+    }
+
+    // Notifier la salle du livre
+    emitToBook(bookId, 'collaborators:updated', {
+      bookId,
+      collaborators: book.collaborators,
+      collaboratorsCount: book.collaborators.length,
+    });
 
     res.json({
       message: 'Collaborateur retiré avec succès',

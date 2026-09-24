@@ -2,6 +2,7 @@ import SubLabel from '../models/SubLabel.js';
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
 import { getBookAccess } from '../utils/permissionHelper.js';
+import { emitToBook } from '../utils/socketEmitter.js';
 
 const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -39,6 +40,9 @@ export const createSubLabel = async (req, res) => {
       color: color || '#10b981',
       bookId,
     });
+
+    // Émettre en temps réel
+    emitToBook(bookId, 'sublabel:created', subLabel);
 
     res.status(201).json(subLabel);
   } catch (error) {
@@ -86,6 +90,10 @@ export const updateSubLabel = async (req, res) => {
     }
 
     await subLabel.save();
+
+    // Émettre en temps réel
+    emitToBook(subLabel.bookId, 'sublabel:updated', subLabel);
+
     res.json(subLabel);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du sous-label', error: error.message });
@@ -113,6 +121,7 @@ export const deleteSubLabel = async (req, res) => {
     }
 
     let deletedProductsCount = 0;
+    const bookId = subLabel.bookId;
 
     if (mode === 'detach') {
       await Product.updateMany(
@@ -125,6 +134,13 @@ export const deleteSubLabel = async (req, res) => {
     }
 
     await SubLabel.findByIdAndDelete(subLabelId);
+
+    // Émettre en temps réel
+    emitToBook(bookId, 'sublabel:deleted', {
+      subLabelId,
+      mode,
+      deletedProductsCount,
+    });
 
     res.json({
       message: 'Sous-label supprimé avec succès',

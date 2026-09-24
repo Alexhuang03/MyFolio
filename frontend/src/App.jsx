@@ -7,6 +7,7 @@ import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
 import { useAuth } from './context/AuthContext';
 import { useWallpaper } from './theme/WallpaperContext';
+import { initSocket, getSocket, disconnectSocket, joinBookRoom, leaveBookRoom } from './services/socket';
 
 export default function App() {
   const { user, loading: authLoading } = useAuth();
@@ -48,13 +49,233 @@ export default function App() {
   useEffect(() => {
     if (user) {
       loadBooks();
+
+      const token = localStorage.getItem('myfolio_token');
+      const socket = initSocket(token);
+
+      if (socket) {
+        // Livre partagé avec l'utilisateur en direct
+        const onBookShared = (newBook) => {
+          setBooks((prev) => {
+            if (prev.some((b) => b._id === newBook._id)) {
+              return prev.map((b) => (b._id === newBook._id ? newBook : b));
+            }
+            return [newBook, ...prev];
+          });
+          showToast(t('book_shared_with_you', { title: newBook.title }));
+        };
+
+        // Accès retiré ou livre supprimé par le propriétaire
+        const onBookRemoved = ({ bookId }) => {
+          setBooks((prev) => prev.filter((b) => b._id !== bookId));
+          setSelectedBook((curr) => {
+            if (curr && curr._id === bookId) {
+              showToast(t('book_access_revoked'), 'error');
+              return null;
+            }
+            return curr;
+          });
+        };
+
+        socket.on('book:shared', onBookShared);
+        socket.on('book:removed', onBookRemoved);
+
+        return () => {
+          socket.off('book:shared', onBookShared);
+          socket.off('book:removed', onBookRemoved);
+        };
+      }
     } else {
       setBooks([]);
       setSelectedBook(null);
       setBookContent({ labels: [], subLabels: [], products: [] });
       setLoading(false);
+      disconnectSocket();
     }
   }, [user]);
+
+  // Synchronisation collaborative en temps réel à l'intérieur du livre actif
+  useEffect(() => {
+    if (!selectedBook?._id) return;
+
+    const bookId = selectedBook._id;
+    joinBookRoom(bookId);
+    const socket = getSocket();
+
+    if (!socket) return;
+
+    // Mise à jour des informations du livre en direct
+    const onBookUpdated = (updatedBook) => {
+      if (updatedBook._id === bookId) {
+        setSelectedBook((prev) => (prev ? { ...prev, ...updatedBook } : null));
+        setBooks((prev) =>
+          prev.map((b) => (b._id === bookId ? { ...b, ...updatedBook } : b))
+        );
+      }
+    };
+
+    // Livre supprimé par le propriétaire pendant qu'un collaborateur le consulte
+    const onBookDeleted = ({ bookId: deletedId }) => {
+      if (deletedId === bookId) {
+        setSelectedBook(null);
+        setBooks((prev) => prev.filter((b) => b._id !== deletedId));
+        showToast(t('book_deleted_by_owner'), 'error');
+      }
+    };
+
+    // Mise à jour de la liste des collaborateurs
+    const onCollaboratorsUpdated = ({ bookId: bId, collaborators, collaboratorsCount }) => {
+      if (bId === bookId) {
+        setSelectedBook((prev) =>
+          prev ? { ...prev, collaborators, collaboratorsCount } : null
+        );
+        setBooks((prev) =>
+          prev.map((b) => (b._id === bId ? { ...b, collaborators, collaboratorsCount } : b))
+        );
+      }
+    };
+
+    // Modification des droits de l'utilisateur actuel en direct
+    const onRoleUpdated = ({ bookId: bId, role }) => {
+      if (bId === bookId) {
+        setSelectedBook((prev) => (prev ? { ...prev, myRole: role } : null));
+        setBooks((prev) =>
+          prev.map((b) => (b._id === bId ? { ...b, myRole: role } : b))
+        );
+        showToast(t('your_role_updated'));
+      }
+    };
+
+    // Produits en direct (Création, Modification, Suppression)
+    const onProductCreated = (newProd) => {
+      if (newProd.bookId === bookId) {
+        setBookContent((prev) => {
+          if (prev.products.some((p) => p._id === newProd._id)) return prev;
+          return { ...prev, products: [newProd, ...prev.products] };
+        });
+      }
+    };
+
+    const onProductUpdated = (updatedProd) => {
+      if (updatedProd.bookId === bookId) {
+        setBookContent((prev) => ({
+          ...prev,
+          products: prev.products.map((p) => (p._id === updatedProd._id ? updatedProd : p)),
+        }));
+      }
+    };
+
+    const onProductDeleted = ({ productId }) => {
+      setBookContent((prev) => ({
+        ...prev,
+        products: prev.products.filter((p) => p._id !== productId),
+      }));
+    };
+
+    // Labels en direct
+    const onLabelCreated = (newLabel) => {
+      if (newLabel.bookId === bookId) {
+        setBookContent((prev) => {
+          if (prev.labels.some((l) => l._id === newLabel._id)) return prev;
+          return { ...prev, labels: [...prev.labels, newLabel] };
+        });
+      }
+    };
+
+    const onLabelUpdated = (updatedLabel) => {
+      if (updatedLabel.bookId === bookId) {
+        setBookContent((prev) => ({
+          ...prev,
+          labels: prev.labels.map((l) => (l._id === updatedLabel._id ? updatedLabel : l)),
+        }));
+      }
+    };
+
+    const onLabelDeleted = ({ labelId, mode }) => {
+      setBookContent((prev) => ({
+        ...prev,
+        labels: prev.labels.filter((l) => l._id !== labelId),
+        products:
+          mode === 'detach'
+            ? prev.products.map((p) => ({
+                ...p,
+                labelIds: (p.labelIds || []).filter((id) => id !== labelId),
+              }))
+            : prev.products.filter((p) => !(p.labelIds || []).includes(labelId)),
+      }));
+    };
+
+    // Sous-labels en direct
+    const onSubLabelCreated = (newSub) => {
+      if (newSub.bookId === bookId) {
+        setBookContent((prev) => {
+          if (prev.subLabels.some((s) => s._id === newSub._id)) return prev;
+          return { ...prev, subLabels: [...prev.subLabels, newSub] };
+        });
+      }
+    };
+
+    const onSubLabelUpdated = (updatedSub) => {
+      if (updatedSub.bookId === bookId) {
+        setBookContent((prev) => ({
+          ...prev,
+          subLabels: prev.subLabels.map((s) => (s._id === updatedSub._id ? updatedSub : s)),
+        }));
+      }
+    };
+
+    const onSubLabelDeleted = ({ subLabelId, mode }) => {
+      setBookContent((prev) => ({
+        ...prev,
+        subLabels: prev.subLabels.filter((s) => s._id !== subLabelId),
+        products:
+          mode === 'detach'
+            ? prev.products.map((p) => ({
+                ...p,
+                subLabelIds: (p.subLabelIds || []).filter((id) => id !== subLabelId),
+              }))
+            : prev.products.filter((p) => !(p.subLabelIds || []).includes(subLabelId)),
+      }));
+    };
+
+    socket.on('book:updated', onBookUpdated);
+    socket.on('book:deleted', onBookDeleted);
+    socket.on('collaborators:updated', onCollaboratorsUpdated);
+    socket.on('role:updated', onRoleUpdated);
+
+    socket.on('product:created', onProductCreated);
+    socket.on('product:updated', onProductUpdated);
+    socket.on('product:deleted', onProductDeleted);
+
+    socket.on('label:created', onLabelCreated);
+    socket.on('label:updated', onLabelUpdated);
+    socket.on('label:deleted', onLabelDeleted);
+
+    socket.on('sublabel:created', onSubLabelCreated);
+    socket.on('sublabel:updated', onSubLabelUpdated);
+    socket.on('sublabel:deleted', onSubLabelDeleted);
+
+    return () => {
+      leaveBookRoom(bookId);
+
+      socket.off('book:updated', onBookUpdated);
+      socket.off('book:deleted', onBookDeleted);
+      socket.off('collaborators:updated', onCollaboratorsUpdated);
+      socket.off('role:updated', onRoleUpdated);
+
+      socket.off('product:created', onProductCreated);
+      socket.off('product:updated', onProductUpdated);
+      socket.off('product:deleted', onProductDeleted);
+
+      socket.off('label:created', onLabelCreated);
+      socket.off('label:updated', onLabelUpdated);
+      socket.off('label:deleted', onLabelDeleted);
+
+      socket.off('sublabel:created', onSubLabelCreated);
+      socket.off('sublabel:updated', onSubLabelUpdated);
+      socket.off('sublabel:deleted', onSubLabelDeleted);
+    };
+  }, [selectedBook?._id]);
 
 
 

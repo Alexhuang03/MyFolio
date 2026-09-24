@@ -1,6 +1,7 @@
 import Product from '../models/Product.js';
 import Book from '../models/Book.js';
 import { getBookAccess } from '../utils/permissionHelper.js';
+import { emitToBook } from '../utils/socketEmitter.js';
 
 // Créer un produit
 export const createProduct = async (req, res) => {
@@ -47,6 +48,9 @@ export const createProduct = async (req, res) => {
       labelIds: Array.isArray(labelIds) ? labelIds : [],
       subLabelIds: Array.isArray(subLabelIds) ? subLabelIds : [],
     });
+
+    // Émettre en temps réel à tous les collaborateurs connectés sur ce livre
+    emitToBook(bookId, 'product:created', product);
 
     res.status(201).json(product);
   } catch (error) {
@@ -105,6 +109,9 @@ export const updateProduct = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    // Émettre en temps réel à tous les collaborateurs connectés sur ce livre
+    emitToBook(product.bookId, 'product:updated', updatedProduct);
+
     res.json(updatedProduct);
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la mise à jour du produit', error: error.message });
@@ -128,7 +135,12 @@ export const deleteProduct = async (req, res) => {
       return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
     }
 
+    const bookId = product.bookId;
     await Product.findByIdAndDelete(req.params.id);
+
+    // Émettre en temps réel à tous les collaborateurs connectés sur ce livre
+    emitToBook(bookId, 'product:deleted', { productId: req.params.id });
+
     res.json({ message: 'Produit supprimé avec succès', productId: req.params.id });
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la suppression du produit', error: error.message });

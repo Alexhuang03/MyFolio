@@ -335,6 +335,10 @@ const translations = {
     readonly_banner: 'Vous consultez ce livre en lecture seule.',
     cannot_share_self: 'Vous êtes déjà le propriétaire de ce livre.',
     shared_collaborators_count: '{count} personne{plural}',
+    book_shared_with_you: 'Livre "{title}" partagé avec vous !',
+    book_access_revoked: 'Votre accès à ce livre a été révoqué.',
+    book_deleted_by_owner: 'Ce livre a été supprimé par son propriétaire.',
+    your_role_updated: 'Vos droits ont été mis à jour.',
   },
 
 
@@ -647,6 +651,10 @@ const translations = {
     readonly_banner: 'You are viewing this book in read-only mode.',
     cannot_share_self: 'You are already the owner of this book.',
     shared_collaborators_count: '{count} person{plural}',
+    book_shared_with_you: 'Book "{title}" was shared with you!',
+    book_access_revoked: 'Your access to this book has been revoked.',
+    book_deleted_by_owner: 'This book was deleted by its owner.',
+    your_role_updated: 'Your permissions have been updated.',
   },
 
 
@@ -960,6 +968,10 @@ const translations = {
     readonly_banner: '您正在以只读模式查看此书籍。',
     cannot_share_self: '您是此书籍的所有者。',
     shared_collaborators_count: '{count} 位协作者',
+    book_shared_with_you: '书籍 "{title}" 已与您分享！',
+    book_access_revoked: '您对该书籍的访问权限已被撤销。',
+    book_deleted_by_owner: '此书籍已被其所有者删除。',
+    your_role_updated: '您的权限已更新。',
   },
 };
 
