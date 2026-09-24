@@ -114,6 +114,72 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /api/auth/profile - Mettre à jour les informations du profil
+router.put('/profile', authMiddleware, async (req, res) => {
+  try {
+    const { name, wallpaper, language, theme } = req.body;
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    if (name && typeof name === 'string' && name.trim()) {
+      user.name = name.trim().slice(0, 50);
+    }
+    if (wallpaper !== undefined && typeof wallpaper === 'string') {
+      user.wallpaper = wallpaper;
+    }
+    if (language !== undefined && typeof language === 'string') {
+      user.language = language;
+    }
+    if (theme !== undefined && typeof theme === 'string') {
+      user.theme = theme;
+    }
+
+    await user.save();
+    res.json({ user, message: 'Profil mis à jour avec succès' });
+  } catch (err) {
+    console.error('[Auth] Profile update error:', err);
+    res.status(500).json({ error: 'Erreur serveur lors de la mise à jour du profil' });
+  }
+});
+
+// PUT /api/auth/change-password - Changer le mot de passe
+router.put('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || typeof currentPassword !== 'string') {
+      return res.status(400).json({ error: 'Le mot de passe actuel est requis' });
+    }
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Le nouveau mot de passe doit contenir au moins 6 caractères' });
+    }
+    if (newPassword.length > 128) {
+      return res.status(400).json({ error: 'Le nouveau mot de passe est trop long (128 caractères maximum)' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    const isMatch = await user.verifyPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Le mot de passe actuel est incorrect' });
+    }
+
+    user.passwordHash = newPassword;
+    await user.save();
+
+    res.json({ message: 'Votre mot de passe a été modifié avec succès.' });
+  } catch (err) {
+    console.error('[Auth] Change password error:', err);
+    res.status(500).json({ error: 'Erreur serveur lors du changement de mot de passe' });
+  }
+});
+
 // POST /api/auth/forgot-password
 router.post('/forgot-password', authLimiter, async (req, res) => {
   try {

@@ -65,6 +65,18 @@ export function AuthProvider({ children }) {
     return await authService.resetPassword(resetToken, password);
   }, []);
 
+  const updateProfile = useCallback(async (profileData) => {
+    const data = await authService.updateProfile(profileData);
+    if (data.user) {
+      setUser(data.user);
+    }
+    return data;
+  }, []);
+
+  const changePassword = useCallback(async ({ currentPassword, newPassword }) => {
+    return await authService.changePassword({ currentPassword, newPassword });
+  }, []);
+
   const value = {
     user,
     token,
@@ -75,6 +87,8 @@ export function AuthProvider({ children }) {
     logout,
     forgotPassword,
     resetPassword,
+    updateProfile,
+    changePassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

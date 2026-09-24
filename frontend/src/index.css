@@ -24,6 +24,72 @@ html.theme-transitioning *::after {
   transition-delay: 0s !important;
 }
 
+/* Library Wallpapers */
+body.wallpaper-wood, html.wallpaper-wood {
+  background-color: #f5eedf !important;
+  background-image: radial-gradient(#92400e20 1px, transparent 1px), linear-gradient(135deg, #fdf8ef 0%, #ebe1cf 100%) !important;
+  background-size: 24px 24px, 100% 100% !important;
+  background-attachment: fixed !important;
+}
+.dark body.wallpaper-wood, html.dark.wallpaper-wood, .dark.wallpaper-wood {
+  background-color: #170d06 !important;
+  background-image: radial-gradient(#d9770622 1px, transparent 1px), linear-gradient(135deg, #24140b 0%, #0e0603 100%) !important;
+  background-size: 24px 24px, 100% 100% !important;
+  background-attachment: fixed !important;
+}
+
+body.wallpaper-paper, html.wallpaper-paper {
+  background-color: #faf4e6 !important;
+  background-image: radial-gradient(#78716c30 0.9px, transparent 0.9px) !important;
+  background-size: 20px 20px !important;
+  background-attachment: fixed !important;
+}
+.dark body.wallpaper-paper, html.dark.wallpaper-paper, .dark.wallpaper-paper {
+  background-color: #181410 !important;
+  background-image: radial-gradient(#a8a29e22 0.9px, transparent 0.9px) !important;
+  background-size: 20px 20px !important;
+  background-attachment: fixed !important;
+}
+
+body.wallpaper-cosmos, html.wallpaper-cosmos {
+  background-color: #ede9fe !important;
+  background-image: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 50%, #fae8ff 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+.dark body.wallpaper-cosmos, html.dark.wallpaper-cosmos, .dark.wallpaper-cosmos {
+  background-color: #070a16 !important;
+  background-image: radial-gradient(circle at 50% 10%, #2e106580 0%, transparent 60%), linear-gradient(135deg, #060914 0%, #0c1224 50%, #1c0e32 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+
+body.wallpaper-slate, html.wallpaper-slate {
+  background-color: #e2e8f0 !important;
+  background-image: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+.dark body.wallpaper-slate, html.dark.wallpaper-slate, .dark.wallpaper-slate {
+  background-color: #0b0f19 !important;
+  background-image: linear-gradient(135deg, #0f172a 0%, #020617 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+
+body.wallpaper-emerald, html.wallpaper-emerald {
+  background-color: #f0f7f3 !important;
+  background-image: linear-gradient(135deg, #f7fbf9 0%, #e2f4eb 50%, #d4ede1 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+.dark body.wallpaper-emerald, html.dark.wallpaper-emerald, .dark.wallpaper-emerald {
+  background-color: #031710 !important;
+  background-image: radial-gradient(circle at 50% 15%, #065f4655 0%, transparent 65%), linear-gradient(135deg, #062319 0%, #031710 50%, #010c08 100%) !important;
+  background-size: 100% 100% !important;
+  background-attachment: fixed !important;
+}
+
 /* Custom book scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

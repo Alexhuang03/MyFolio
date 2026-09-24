@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { Plus, Search, BookMarked, Library, LogOut, Bookmark } from 'lucide-react';
+import { Plus, Search, BookMarked, Library, LogOut, Bookmark, Settings } from 'lucide-react';
 import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
+import SettingsModal from '../settings/SettingsModal';
 import BookOpeningAnimation from '../book/BookOpeningAnimation';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
-import LanguageSwitcher from '../settings/LanguageSwitcher';
 import ThemeToggle from '../settings/ThemeToggle';
 
 export default function LibraryView({
@@ -20,6 +20,7 @@ export default function LibraryView({
   const [searchQuery, setSearchQuery] = useState('');
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [openingBook, setOpeningBook] = useState(null);
 
@@ -48,7 +49,7 @@ export default function LibraryView({
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f5f0] dark:bg-stone-950 text-stone-800 dark:text-stone-100 flex flex-col transition-colors duration-200">
+    <div className="min-h-screen text-stone-800 dark:text-stone-100 flex flex-col transition-colors duration-200">
       {/* Top Header */}
       <header className="border-b border-stone-200/80 dark:border-stone-850 bg-white/70 dark:bg-stone-900/80 backdrop-blur-md sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 sm:py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
@@ -71,14 +72,11 @@ export default function LibraryView({
             <div className="flex items-center gap-1.5 sm:hidden">
               <ThemeToggle />
               <button
-                onClick={() => {
-                  setEditingBook(null);
-                  setIsModalOpen(true);
-                }}
-                className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs flex items-center gap-1.5"
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-1.5 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors border border-transparent hover:border-stone-200 dark:hover:border-stone-700"
+                title={t('settings')}
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{t('create')}</span>
+                <Settings className="w-4 h-4" />
               </button>
               {user && (
                 <button
@@ -109,18 +107,14 @@ export default function LibraryView({
               <ThemeToggle />
             </div>
 
-            <LanguageSwitcher />
-
-            {/* Desktop Create Book Button */}
+            {/* Desktop Settings Button */}
             <button
-              onClick={() => {
-                setEditingBook(null);
-                setIsModalOpen(true);
-              }}
-              className="hidden sm:flex px-4 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all items-center gap-2 flex-shrink-0"
+              onClick={() => setIsSettingsOpen(true)}
+              className="hidden sm:flex px-3.5 py-2 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-750 border border-stone-200/80 dark:border-stone-700 rounded-xl text-xs font-semibold transition-all items-center gap-2 flex-shrink-0 cursor-pointer shadow-2xs"
+              title={t('settings')}
             >
-              <Plus className="w-4 h-4" />
-              <span>{t('new_book')}</span>
+              <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+              <span>{t('settings')}</span>
             </button>
 
             {/* Desktop User Profile & Logout */}
@@ -228,9 +222,16 @@ export default function LibraryView({
                 </button>
               </div>
 
-              <span className="text-xs text-stone-400 dark:text-stone-500 italic">
-                {t('click_to_open')}
-              </span>
+              <button
+                onClick={() => {
+                  setEditingBook(null);
+                  setIsModalOpen(true);
+                }}
+                className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>{t('new_book')}</span>
+              </button>
             </div>
 
             {/* Books Grid */}
@@ -278,6 +279,14 @@ export default function LibraryView({
               await onCreateBook(data);
             }
           }}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
         />
       )}
     </div>

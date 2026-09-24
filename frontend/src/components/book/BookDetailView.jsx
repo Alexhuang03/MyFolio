@@ -7,7 +7,7 @@ import ProductModal from '../modals/ProductModal';
 import { PIVOT_MODES, getPivotViewData } from '../../utils/pivotEngine';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
-import LanguageSwitcher from '../settings/LanguageSwitcher';
+import SettingsModal from '../settings/SettingsModal';
 import ThemeToggle from '../settings/ThemeToggle';
 
 export default function BookDetailView({
@@ -31,6 +31,7 @@ export default function BookDetailView({
   const [pivotMode, setPivotMode] = useState(PIVOT_MODES.BY_LABEL);
   const [selectedPrimaryId, setSelectedPrimaryId] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Modals state
   const [tagModalConfig, setTagModalConfig] = useState(null); // { isOpen, tagType, initialTag }
@@ -134,7 +135,13 @@ export default function BookDetailView({
         {/* Right: Quick actions */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           <ThemeToggle />
-          <LanguageSwitcher />
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-1.5 text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all border border-transparent hover:border-stone-200 dark:hover:border-stone-700 cursor-pointer"
+            title={t('settings')}
+          >
+            <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+          </button>
 
           {/* Prominent Pivot Toggle Button */}
           <button
@@ -241,6 +248,14 @@ export default function BookDetailView({
               await onCreateProduct({ ...data, bookId: book._id });
             }
           }}
+        />
+      )}
+
+      {/* Settings Modal */}
+      {isSettingsOpen && (
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
         />
       )}
     </div>

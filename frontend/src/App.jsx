@@ -313,7 +313,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-100 dark:bg-stone-950 font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200">
+    <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200">
 
       {/* Toast Notification Banner */}
       {toast && (

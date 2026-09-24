@@ -100,5 +100,29 @@ export const authService = {
       'Erreur lors de la réinitialisation du mot de passe'
     );
   },
+
+  async updateProfile(profileData) {
+    return request(
+      `${API_BASE}/profile`,
+      {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(profileData),
+      },
+      'Erreur lors de la mise à jour du profil'
+    );
+  },
+
+  async changePassword({ currentPassword, newPassword }) {
+    return request(
+      `${API_BASE}/change-password`,
+      {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ currentPassword, newPassword }),
+      },
+      'Erreur lors du changement de mot de passe'
+    );
+  },
 };
 

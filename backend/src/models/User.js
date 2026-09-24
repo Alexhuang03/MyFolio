@@ -36,6 +36,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: 'fr',
     },
+    wallpaper: {
+      type: String,
+      default: 'default',
+    },
     termsAcceptedAt: {
       type: Date,
       default: Date.now,
