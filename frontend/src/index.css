@@ -9,6 +9,21 @@
   }
 }
 
+/* Smooth 0.7-second theme transition for dark/light mode */
+html.theme-transitioning,
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+  transition: background-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              color 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              fill 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 700ms cubic-bezier(0.4, 0, 0.2, 1),
+              text-decoration-color 700ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0s !important;
+}
+
 /* Custom book scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

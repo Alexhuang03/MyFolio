@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 
 const ThemeContext = createContext();
 
@@ -17,6 +17,8 @@ export function ThemeProvider({ children }) {
     }
   });
 
+  const isInitialMount = useRef(true);
+
   const applyTheme = useCallback((currentTheme) => {
     const root = document.documentElement;
     if (currentTheme === 'dark') {
@@ -30,6 +32,22 @@ export function ThemeProvider({ children }) {
 
   // Update DOM & LocalStorage whenever theme changes
   useEffect(() => {
+    const root = document.documentElement;
+
+    // Only apply the 0.7s transition if this is not the initial mount
+    if (!isInitialMount.current) {
+      root.classList.add('theme-transitioning');
+      void root.offsetHeight; // Forces style recalculation
+      if (window._themeTransitionTimeout) {
+        clearTimeout(window._themeTransitionTimeout);
+      }
+      window._themeTransitionTimeout = setTimeout(() => {
+        root.classList.remove('theme-transitioning');
+      }, 700);
+    } else {
+      isInitialMount.current = false;
+    }
+
     applyTheme(theme);
     try {
       localStorage.setItem(STORAGE_KEY, theme);
