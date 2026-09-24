@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
+  KeyRound,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -132,6 +133,8 @@ export default function AuthScreen() {
       const res = await forgotPassword(forgotEmail.trim());
       setForgotFeedback({
         message: res.message || 'Si cet e-mail existe, un lien vous a été envoyé.',
+        resetLink: res.resetLink,
+        emailSent: Boolean(res.emailSent),
         isSuccess: true,
       });
       setForgotEmail('');
@@ -478,6 +481,38 @@ export default function AuthScreen() {
                     <AlertCircle className="w-4 h-4 flex-shrink-0" />
                   )}
                   <span>{forgotFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Dev Mode direct reset link helper */}
+              {forgotFeedback.isSuccess && forgotFeedback.resetLink && !forgotFeedback.emailSent && (
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs space-y-2.5 text-stone-700 dark:text-stone-300">
+                  <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-400">
+                    <KeyRound className="w-4 h-4 flex-shrink-0" />
+                    <span>{t('forgot_dev_mode_title')}</span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                    {t('forgot_dev_mode_desc')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        const url = new URL(forgotFeedback.resetLink, window.location.origin);
+                        const token = url.searchParams.get('reset_token');
+                        if (token) {
+                          setResetToken(token);
+                          setView('reset');
+                          clearErrors();
+                        }
+                      } catch (_) {
+                        window.location.href = forgotFeedback.resetLink;
+                      }
+                    }}
+                    className="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <span>{t('reset_now_btn')}</span>
+                  </button>
                 </div>
               )}
 

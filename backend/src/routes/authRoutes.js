@@ -1,6 +1,7 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 import rateLimit from 'express-rate-limit';
 import User from '../models/User.js';
 import { authMiddleware, getJwtSecret } from '../middlewares/authMiddleware.js';
@@ -195,7 +196,7 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
 
     const user = await User.findOne({ email: cleanEmail });
     if (!user) {
-      return res.json({ message: 'Si cet e-mail existe, un lien a été envoyé.' });
+      return res.json({ message: 'Si cet e-mail existe, un lien a été envoyé.', emailSent: false });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -206,11 +207,70 @@ router.post('/forgot-password', authLimiter, async (req, res) => {
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
     const resetLink = `${appUrl}/?reset_token=${token}`;
 
+    const hasSmtp = Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+    let emailSent = false;
+
+    if (hasSmtp) {
+      try {
+        const transporter = process.env.SMTP_SERVICE
+          ? nodemailer.createTransport({
+              service: process.env.SMTP_SERVICE,
+              auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+              },
+            })
+          : nodemailer.createTransport({
+              host: process.env.SMTP_HOST || 'smtp.gmail.com',
+              port: Number(process.env.SMTP_PORT) || 587,
+              secure: process.env.SMTP_SECURE === 'true',
+              auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS,
+              },
+            });
+
+        await transporter.sendMail({
+          from: `"MyFolio" <${process.env.SMTP_USER}>`,
+          to: user.email,
+          subject: '🔑 Réinitialisation de votre mot de passe - MyFolio',
+          html: `
+            <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: auto; padding: 2.5rem; background: #fafaf9; border-radius: 16px; border: 1px solid #e7e5e4;">
+              <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="color: #d97706; margin: 0; font-size: 1.75rem; font-family: serif;">MyFolio</h1>
+                <p style="color: #78716c; font-size: 0.875rem; margin-top: 0.25rem;">Organisez vos collections avec élégance</p>
+              </div>
+              <h2 style="color: #1c1917; font-size: 1.15rem; margin-bottom: 1rem;">Réinitialisation de votre mot de passe</h2>
+              <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Bonjour <strong>${user.name}</strong>,</p>
+              <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Vous avez demandé la réinitialisation de votre mot de passe pour votre compte MyFolio. Cliquez sur le bouton ci-dessous pour en choisir un nouveau :</p>
+              <div style="text-align: center; margin: 2rem 0;">
+                <a href="${resetLink}" style="display: inline-block; padding: 0.85rem 2rem; background: #d97706; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);">
+                  Réinitialiser mon mot de passe
+                </a>
+              </div>
+              <p style="color: #78716c; font-size: 0.85rem; line-height: 1.5; border-top: 1px solid #e7e5e4; padding-top: 1.25rem; margin-top: 2rem;">
+                Ce lien est valable pendant <strong>1 heure</strong>.<br>
+                Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.
+              </p>
+            </div>
+          `,
+        });
+
+        console.log(`[Auth] 📧 Email de réinitialisation envoyé avec succès à ${user.email}`);
+        emailSent = true;
+      } catch (mailErr) {
+        console.error('[Auth] Erreur lors de l\'envoi de l\'e-mail SMTP:', mailErr.message);
+      }
+    }
+
     console.log(`[Auth] 🔑 Lien de réinitialisation pour ${user.email} : ${resetLink}`);
 
     res.json({
-      message: 'Un e-mail de réinitialisation a été envoyé.',
-      resetLink: process.env.NODE_ENV !== 'production' ? resetLink : undefined,
+      message: emailSent
+        ? 'Un e-mail de réinitialisation a été envoyé à votre adresse.'
+        : 'Lien de réinitialisation généré.',
+      resetLink,
+      emailSent,
     });
   } catch (err) {
     console.error('[Auth] Forgot password error:', err);

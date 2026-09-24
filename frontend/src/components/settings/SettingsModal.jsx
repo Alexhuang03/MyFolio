@@ -142,9 +142,9 @@ export default function SettingsModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full h-[580px] sm:h-[620px] max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 flex items-center justify-center text-amber-700 dark:text-amber-400">
               <Sparkles className="w-5 h-5" />
@@ -167,7 +167,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-4 sm:px-6 bg-stone-50/30 dark:bg-stone-850/30 overflow-x-auto gap-1.5 sm:gap-2 py-2">
+        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-4 sm:px-6 bg-stone-50/30 dark:bg-stone-900/30 overflow-x-auto gap-1.5 sm:gap-2 py-2 flex-shrink-0">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -253,7 +253,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       type="email"
                       disabled
                       value={user?.email || ''}
-                      className="w-full pl-3.5 pr-10 py-2.5 bg-stone-100 dark:bg-stone-850/60 border border-stone-200/80 dark:border-stone-800 rounded-xl text-stone-500 dark:text-stone-400 text-sm cursor-not-allowed select-none"
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-stone-100 dark:bg-stone-800/60 border border-stone-200/80 dark:border-stone-800 rounded-xl text-stone-500 dark:text-stone-400 text-sm cursor-not-allowed select-none"
                     />
                     <Lock className="w-4 h-4 text-stone-400 absolute right-3.5 top-1/2 -translate-y-1/2" />
                   </div>
@@ -389,29 +389,29 @@ export default function SettingsModal({ isOpen, onClose }) {
               </div>
 
               {/* Segmented switch between Fond d'écran and Ambiance across full width */}
-              <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-stone-850 rounded-2xl border border-stone-200/80 dark:border-stone-750 w-full">
+              <div className="flex items-center gap-1.5 p-1 bg-stone-200/80 dark:bg-stone-950 rounded-2xl border border-stone-300/70 dark:border-stone-800 w-full transition-colors">
                 <button
                   type="button"
                   onClick={() => setWallpaperCategory('image')}
-                  className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     wallpaperCategory === 'image'
-                      ? 'bg-white dark:bg-stone-750 text-stone-900 dark:text-white shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm border border-stone-300/50 dark:border-stone-700'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-900/50 border border-transparent'
                   }`}
                 >
-                  <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <ImageIcon className={`w-4 h-4 transition-colors ${wallpaperCategory === 'image' ? 'text-amber-600 dark:text-amber-400' : 'text-stone-500 dark:text-stone-400'}`} />
                   <span>{t('wallpaper_section_wallpapers')}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setWallpaperCategory('ambiance')}
-                  className={`flex-1 py-2 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     wallpaperCategory === 'ambiance'
-                      ? 'bg-white dark:bg-stone-750 text-stone-900 dark:text-white shadow-xs'
-                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm border border-stone-300/50 dark:border-stone-700'
+                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-900/50 border border-transparent'
                   }`}
                 >
-                  <Palette className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <Palette className={`w-4 h-4 transition-colors ${wallpaperCategory === 'ambiance' ? 'text-amber-600 dark:text-amber-400' : 'text-stone-500 dark:text-stone-400'}`} />
                   <span>{t('wallpaper_section_ambiances')}</span>
                 </button>
               </div>
@@ -445,11 +445,11 @@ export default function SettingsModal({ isOpen, onClose }) {
                           className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative cursor-pointer group ${
                             isSelected
                               ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
-                              : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                              : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                           }`}
                         >
                           {/* Miniature de l'illustration */}
-                          <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-750 flex-shrink-0 relative overflow-hidden bg-white dark:bg-stone-900 flex items-center justify-center p-1">
+                          <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-700 flex-shrink-0 relative overflow-hidden bg-white dark:bg-stone-900 flex items-center justify-center p-1">
                             <img
                               src={p.previewImage}
                               alt=""
@@ -492,7 +492,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         className="hidden"
                       />
 
-                      <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-750 flex-shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-850 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-700 flex-shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
                         {customWallpaperUrl ? (
                           <img
                             src={customWallpaperUrl}
@@ -578,7 +578,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                           className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 relative cursor-pointer ${
                             isSelected
                               ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
-                              : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                              : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                           }`}
                         >
                           {/* Pastille double aperçu clair / sombre */}
@@ -643,7 +643,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       onClick={async () => {
                         switchLanguage(item.code);
                         if (user && updateProfile) {
-                          try {
+                           try {
                             await updateProfile({ language: item.code });
                           } catch (_) {}
                         }
@@ -651,7 +651,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       className={`p-4 rounded-2xl border text-left transition-all flex flex-col items-center justify-center text-center gap-2 relative ${
                         isSelected
                           ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
-                          : 'border-stone-200 dark:border-stone-750 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-650'
+                          : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                       }`}
                     >
                       <span className="text-3xl select-none">{item.flag}</span>
@@ -672,11 +672,11 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end bg-stone-50/50 dark:bg-stone-850/50">
+        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end bg-stone-50/50 dark:bg-stone-900/50 flex-shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-750 dark:hover:bg-stone-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
+            className="px-5 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
           >
             {t('close')}
           </button>

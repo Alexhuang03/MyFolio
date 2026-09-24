@@ -7,6 +7,13 @@ export default {
   ],
   theme: {
     extend: {
+      colors: {
+        stone: {
+          650: '#4d4744',
+          750: '#36322f',
+          850: '#231f1d',
+        },
+      },
       fontFamily: {
         serif: ['Georgia', 'Cambria', 'serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
