@@ -4,7 +4,20 @@ import Book from '../models/Book.js';
 // Créer un produit
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, image, price, bookId, labelIds, subLabelIds } = req.body;
+    const {
+      name,
+      description,
+      image,
+      price,
+      location,
+      date,
+      rating,
+      url,
+      customValues,
+      bookId,
+      labelIds,
+      subLabelIds,
+    } = req.body;
 
     if (!name || !name.trim() || !bookId) {
       return res.status(400).json({ message: 'Le nom du produit et bookId sont requis' });
@@ -20,7 +33,12 @@ export const createProduct = async (req, res) => {
       name: name.trim(),
       description: description ? description.trim() : '',
       image: image || '',
-      price: price !== undefined && price !== '' ? Number(price) : null,
+      price: price !== undefined && price !== '' && price !== null ? Number(price) : null,
+      location: location ? location.trim() : '',
+      date: date ? date.trim() : '',
+      rating: rating !== undefined && rating !== '' && rating !== null ? Number(rating) : null,
+      url: url ? url.trim() : '',
+      customValues: customValues && typeof customValues === 'object' ? customValues : {},
       bookId,
       labelIds: Array.isArray(labelIds) ? labelIds : [],
       subLabelIds: Array.isArray(subLabelIds) ? subLabelIds : [],
@@ -35,7 +53,19 @@ export const createProduct = async (req, res) => {
 // Mettre à jour un produit
 export const updateProduct = async (req, res) => {
   try {
-    const { name, description, image, price, labelIds, subLabelIds } = req.body;
+    const {
+      name,
+      description,
+      image,
+      price,
+      location,
+      date,
+      rating,
+      url,
+      customValues,
+      labelIds,
+      subLabelIds,
+    } = req.body;
 
     const product = await Product.findById(req.params.id);
     if (!product) {
@@ -52,7 +82,12 @@ export const updateProduct = async (req, res) => {
       ...(name && { name: name.trim() }),
       ...(description !== undefined && { description: description.trim() }),
       ...(image !== undefined && { image }),
-      ...(price !== undefined && { price: price !== '' ? Number(price) : null }),
+      ...(price !== undefined && { price: price !== '' && price !== null ? Number(price) : null }),
+      ...(location !== undefined && { location: location.trim() }),
+      ...(date !== undefined && { date: date.trim() }),
+      ...(rating !== undefined && { rating: rating !== '' && rating !== null ? Number(rating) : null }),
+      ...(url !== undefined && { url: url.trim() }),
+      ...(customValues !== undefined && { customValues }),
       ...(labelIds !== undefined && { labelIds: Array.isArray(labelIds) ? labelIds : [] }),
       ...(subLabelIds !== undefined && { subLabelIds: Array.isArray(subLabelIds) ? subLabelIds : [] }),
     };

@@ -20,6 +20,31 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       default: null,
     },
+    location: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    date: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    rating: {
+      type: Number,
+      default: null,
+      min: 0,
+      max: 5,
+    },
+    url: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    customValues: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
+    },
     bookId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Book',

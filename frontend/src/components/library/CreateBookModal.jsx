@@ -1,5 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { X, BookPlus, Check, Bookmark } from 'lucide-react';
+import {
+  X,
+  BookPlus,
+  Check,
+  Bookmark,
+  Plus,
+  Image as ImageIcon,
+  DollarSign,
+  MapPin,
+  Calendar,
+  Star,
+  Link as LinkIcon,
+  FileText,
+} from 'lucide-react';
 import { COVERS } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -13,6 +26,17 @@ const COLOR_PRESETS = [
   '#0e7490', // Cyan
   '#475569', // Slate
 ];
+
+const DEFAULT_FIELDS_CONFIG = {
+  hasImage: true,
+  hasPrice: true,
+  hasLocation: false,
+  hasDate: false,
+  hasRating: false,
+  hasUrl: false,
+  hasDescription: true,
+  customFields: [],
+};
 
 export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook = null }) {
   const isEditing = Boolean(initialBook);
@@ -29,6 +53,12 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
   const [isFavorite, setIsFavorite] = useState(
     initialBook ? Boolean(initialBook.isFavorite) : false
   );
+  const [fieldsConfig, setFieldsConfig] = useState(
+    initialBook?.fieldsConfig
+      ? { ...DEFAULT_FIELDS_CONFIG, ...initialBook.fieldsConfig }
+      : DEFAULT_FIELDS_CONFIG
+  );
+  const [newCustomFieldName, setNewCustomFieldName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -40,18 +70,53 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
         setCoverImage(initialBook.coverImage || COVERS[0].id);
         setColorTheme(initialBook.colorTheme || COVERS[0].defaultColor);
         setIsFavorite(Boolean(initialBook.isFavorite));
+        setFieldsConfig({
+          ...DEFAULT_FIELDS_CONFIG,
+          ...(initialBook.fieldsConfig || {}),
+          customFields: initialBook.fieldsConfig?.customFields || [],
+        });
       } else {
         setTitle('');
         setDescription('');
         setCoverImage(COVERS[0].id);
         setColorTheme(COVERS[0].defaultColor);
         setIsFavorite(false);
+        setFieldsConfig(DEFAULT_FIELDS_CONFIG);
       }
+      setNewCustomFieldName('');
       setError('');
     }
   }, [isOpen, initialBook]);
 
   if (!isOpen) return null;
+
+  const toggleField = (key) => {
+    setFieldsConfig((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  const handleAddCustomField = (e) => {
+    if (e) e.preventDefault();
+    const trimmed = newCustomFieldName.trim();
+    if (!trimmed) return;
+    if (fieldsConfig.customFields?.some((f) => f.name.toLowerCase() === trimmed.toLowerCase())) {
+      return;
+    }
+    setFieldsConfig((prev) => ({
+      ...prev,
+      customFields: [...(prev.customFields || []), { name: trimmed, type: 'text' }],
+    }));
+    setNewCustomFieldName('');
+  };
+
+  const handleRemoveCustomField = (fieldName) => {
+    setFieldsConfig((prev) => ({
+      ...prev,
+      customFields: (prev.customFields || []).filter((f) => f.name !== fieldName),
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +134,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
         coverImage,
         colorTheme,
         isFavorite,
+        fieldsConfig,
       });
       onClose();
     } catch (err) {
@@ -290,6 +356,115 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
               </div>
             </div>
           )}
+
+          {/* Configuration des champs des éléments */}
+          <div className="pt-2 border-t border-stone-100 dark:border-stone-800/80">
+            <div className="mb-2.5">
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                {t('book_fields_section_title')}
+              </label>
+              <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
+                {t('book_fields_section_desc')}
+              </p>
+            </div>
+
+            {/* Grille des champs prédéfinis */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {[
+                { key: 'hasImage', label: t('field_image'), icon: ImageIcon },
+                { key: 'hasPrice', label: t('field_price'), icon: DollarSign },
+                { key: 'hasLocation', label: t('field_location'), icon: MapPin },
+                { key: 'hasDate', label: t('field_date'), icon: Calendar },
+                { key: 'hasRating', label: t('field_rating'), icon: Star },
+                { key: 'hasUrl', label: t('field_url'), icon: LinkIcon },
+                { key: 'hasDescription', label: t('field_description'), icon: FileText },
+              ].map((f) => {
+                const isChecked = Boolean(fieldsConfig[f.key]);
+                const IconComponent = f.icon;
+                return (
+                  <button
+                    key={f.key}
+                    type="button"
+                    onClick={() => toggleField(f.key)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-medium transition-all text-left ${
+                      isChecked
+                        ? 'border-amber-500 bg-amber-50/70 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 ring-1 ring-amber-500/20 shadow-2xs'
+                        : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 bg-stone-50 dark:bg-stone-800/40 text-stone-500 dark:text-stone-400'
+                    }`}
+                  >
+                    <IconComponent
+                      className={`w-3.5 h-3.5 flex-shrink-0 ${
+                        isChecked ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'
+                      }`}
+                    />
+                    <span className="truncate flex-1">{f.label}</span>
+                    <div
+                      className={`w-3.5 h-3.5 rounded-sm flex items-center justify-center border flex-shrink-0 transition-colors ${
+                        isChecked
+                          ? 'bg-amber-500 border-amber-500 text-white'
+                          : 'border-stone-300 dark:border-stone-600'
+                      }`}
+                    >
+                      {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Champs personnalisés */}
+            <div className="mt-3.5 pt-3 border-t border-dashed border-stone-200 dark:border-stone-800">
+              <label className="block text-[11px] font-semibold text-stone-600 dark:text-stone-400 uppercase tracking-wider mb-2">
+                {t('custom_fields_title')}
+              </label>
+
+              {fieldsConfig.customFields?.length > 0 && (
+                <div className="flex flex-wrap gap-1.5 mb-2.5">
+                  {fieldsConfig.customFields.map((cf) => (
+                    <span
+                      key={cf.name}
+                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-100/70 dark:bg-amber-950/50 text-amber-900 dark:text-amber-200 border border-amber-300 dark:border-amber-800"
+                    >
+                      <span>{cf.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCustomField(cf.name)}
+                        className="p-0.5 hover:text-rose-600 dark:hover:text-rose-400 transition-colors"
+                        title="Supprimer"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={newCustomFieldName}
+                  onChange={(e) => setNewCustomFieldName(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustomField();
+                    }
+                  }}
+                  placeholder={t('custom_field_placeholder')}
+                  className="flex-1 px-3 py-1.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCustomField}
+                  disabled={!newCustomFieldName.trim()}
+                  className="px-3 py-1.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-700 dark:hover:bg-stone-600 text-white rounded-xl text-xs font-semibold disabled:opacity-40 transition-all flex items-center gap-1"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{t('add_custom_field_btn')}</span>
+                </button>
+              </div>
+            </div>
+          </div>
 
           {/* Modal Footer */}
           <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end gap-3">

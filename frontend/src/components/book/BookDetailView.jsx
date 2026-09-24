@@ -189,6 +189,7 @@ export default function BookDetailView({
           sections={sections}
           labels={labels}
           subLabels={subLabels}
+          fieldsConfig={book?.fieldsConfig}
           onAddProduct={handleOpenAddProduct}
           onEditProduct={handleOpenEditProduct}
           onDeleteProduct={onDeleteProduct}
@@ -231,6 +232,7 @@ export default function BookDetailView({
           defaultSubLabelId={productModalConfig.defaultSubLabelId}
           labels={labels}
           subLabels={subLabels}
+          fieldsConfig={book?.fieldsConfig}
           onClose={() => setProductModalConfig(null)}
           onSubmit={async (data) => {
             if (productModalConfig.initialProduct) {

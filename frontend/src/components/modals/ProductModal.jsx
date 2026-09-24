@@ -1,5 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Upload, Image as ImageIcon, Check, DollarSign } from 'lucide-react';
+import {
+  X,
+  Plus,
+  Upload,
+  Image as ImageIcon,
+  Check,
+  DollarSign,
+  MapPin,
+  Calendar,
+  Star,
+  Link as LinkIcon,
+} from 'lucide-react';
 import { api } from '../../services/api';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -12,14 +23,32 @@ export default function ProductModal({
   initialProduct = null,
   defaultLabelId = null,
   defaultSubLabelId = null,
+  fieldsConfig,
 }) {
   const isEditing = Boolean(initialProduct);
   const { t } = useLanguage();
+
+  const config = {
+    hasImage: true,
+    hasPrice: true,
+    hasLocation: false,
+    hasDate: false,
+    hasRating: false,
+    hasUrl: false,
+    hasDescription: true,
+    customFields: [],
+    ...(fieldsConfig || {}),
+  };
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [image, setImage] = useState('');
+  const [location, setLocation] = useState('');
+  const [date, setDate] = useState('');
+  const [rating, setRating] = useState(null);
+  const [url, setUrl] = useState('');
+  const [customValues, setCustomValues] = useState({});
   const [selectedLabelIds, setSelectedLabelIds] = useState([]);
   const [selectedSubLabelIds, setSelectedSubLabelIds] = useState([]);
 
@@ -34,6 +63,11 @@ export default function ProductModal({
       setDescription(initialProduct.description || '');
       setPrice(initialProduct.price !== null && initialProduct.price !== undefined ? initialProduct.price : '');
       setImage(initialProduct.image || '');
+      setLocation(initialProduct.location || '');
+      setDate(initialProduct.date || '');
+      setRating(initialProduct.rating !== null && initialProduct.rating !== undefined ? initialProduct.rating : null);
+      setUrl(initialProduct.url || '');
+      setCustomValues(initialProduct.customValues || {});
       setSelectedLabelIds(initialProduct.labelIds || []);
       setSelectedSubLabelIds(initialProduct.subLabelIds || []);
     } else {
@@ -41,6 +75,11 @@ export default function ProductModal({
       setDescription('');
       setPrice('');
       setImage('');
+      setLocation('');
+      setDate('');
+      setRating(null);
+      setUrl('');
+      setCustomValues({});
       setSelectedLabelIds(defaultLabelId ? [defaultLabelId] : []);
       setSelectedSubLabelIds(defaultSubLabelId ? [defaultSubLabelId] : []);
     }
@@ -89,12 +128,17 @@ export default function ProductModal({
       setError('');
       await onSubmit({
         name: name.trim(),
-        description: description.trim(),
-        price: price !== '' ? parseFloat(price) : null,
-        image: image.trim(),
+        description: config.hasDescription ? description.trim() : '',
+        price: config.hasPrice && price !== '' ? parseFloat(price) : null,
+        image: config.hasImage ? image.trim() : '',
+        location: config.hasLocation ? location.trim() : '',
+        date: config.hasDate ? date.trim() : '',
+        rating: config.hasRating && rating !== null ? rating : null,
+        url: config.hasUrl ? url.trim() : '',
+        customValues: config.customFields?.length > 0 ? customValues : {},
         labelIds: selectedLabelIds,
         subLabelIds: selectedSubLabelIds,
-        });
+      });
       onClose();
     } catch (err) {
       setError(err.message || t('generic_error'));
@@ -133,8 +177,38 @@ export default function ProductModal({
           )}
 
           {/* Name & Price */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="sm:col-span-2">
+          {config.hasPrice ? (
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+                  {t('name_label')}
+                </label>
+                <input
+                  type="text"
+                  required
+                  autoFocus
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder={t('name_placeholder')}
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+                  {t('price_label')}
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder={t('price_placeholder')}
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                />
+              </div>
+            </div>
+          ) : (
+            <div>
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
                 {t('name_label')}
               </label>
@@ -148,104 +222,217 @@ export default function ProductModal({
                 className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
-                {t('price_label')}
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                placeholder={t('price_placeholder')}
-                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
-              />
-            </div>
-          </div>
+          )}
 
           {/* Description */}
-          <div>
-            <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
-              {t('description')}
-            </label>
-            <textarea
-              rows={2}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder={t('description_placeholder_product')}
-              className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
-            />
-          </div>
+          {config.hasDescription && (
+            <div>
+              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
+                {t('description')}
+              </label>
+              <textarea
+                rows={2}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t('description_placeholder_product')}
+                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              />
+            </div>
+          )}
+
+          {/* Location & Date */}
+          {(config.hasLocation || config.hasDate) && (
+            <div className={`grid grid-cols-1 ${config.hasLocation && config.hasDate ? 'sm:grid-cols-2' : ''} gap-3`}>
+              {config.hasLocation && (
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-stone-400" />
+                    <span>{t('location_label')}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder={t('location_placeholder')}
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  />
+                </div>
+              )}
+              {config.hasDate && (
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-stone-400" />
+                    <span>{t('date_label')}</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    placeholder={t('date_placeholder')}
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Rating & Web URL */}
+          {(config.hasRating || config.hasUrl) && (
+            <div className={`grid grid-cols-1 ${config.hasRating && config.hasUrl ? 'sm:grid-cols-2' : ''} gap-3`}>
+              {config.hasRating && (
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <Star className="w-3.5 h-3.5 text-amber-500" />
+                    <span>{t('rating_label')}</span>
+                  </label>
+                  <div className="flex items-center gap-1.5 py-1.5">
+                    {[1, 2, 3, 4, 5].map((starVal) => {
+                      const isFilled = rating !== null && starVal <= rating;
+                      return (
+                        <button
+                          key={starVal}
+                          type="button"
+                          onClick={() => setRating(rating === starVal ? null : starVal)}
+                          className="p-1 hover:scale-110 transition-transform focus:outline-none"
+                          title={`${starVal}/5`}
+                        >
+                          <Star
+                            className={`w-6 h-6 transition-colors ${
+                              isFilled
+                                ? 'text-amber-500 fill-amber-500'
+                                : 'text-stone-300 dark:text-stone-600 hover:text-amber-400'
+                            }`}
+                          />
+                        </button>
+                      );
+                    })}
+                    {rating !== null && (
+                      <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 ml-2">
+                        {rating}/5
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+              {config.hasUrl && (
+                <div>
+                  <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                    <LinkIcon className="w-3.5 h-3.5 text-stone-400" />
+                    <span>{t('url_label')}</span>
+                  </label>
+                  <input
+                    type="url"
+                    value={url}
+                    onChange={(e) => setUrl(e.target.value)}
+                    placeholder={t('url_placeholder')}
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Image (URL ou Upload) */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
+          {config.hasImage && (
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  {t('illustration')}
+                </label>
+                <div className="flex items-center gap-2 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setImageType('url')}
+                    className={`px-2 py-0.5 rounded ${imageType === 'url' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
+                  >
+                    {t('url_link')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageType('file')}
+                    className={`px-2 py-0.5 rounded ${imageType === 'file' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
+                  >
+                    {t('local_file')}
+                  </button>
+                </div>
+              </div>
+
+              {imageType === 'url' ? (
+                <input
+                  type="url"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  placeholder="https://images.unsplash.com/..."
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                />
+              ) : (
+                <div className="flex items-center gap-3">
+                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300">
+                    <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                    <span>{uploading ? t('uploading') : t('select_photo')}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
+
+              {image && (
+                <div className="mt-2 flex items-center gap-3 p-2 bg-stone-50 dark:bg-stone-800/80 rounded-xl border border-stone-200 dark:border-stone-700">
+                  <img
+                    src={image}
+                    alt={t('preview')}
+                    className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                  <span className="text-xs text-stone-500 dark:text-stone-400 truncate flex-1">{image}</span>
+                  <button
+                    type="button"
+                    onClick={() => setImage('')}
+                    className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Custom Fields */}
+          {config.customFields?.length > 0 && (
+            <div className="space-y-3 pt-1 border-t border-stone-100 dark:border-stone-800">
               <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
-                {t('illustration')}
+                {t('custom_fields_modal_title')}
               </label>
-              <div className="flex items-center gap-2 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setImageType('url')}
-                  className={`px-2 py-0.5 rounded ${imageType === 'url' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
-                >
-                  {t('url_link')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImageType('file')}
-                  className={`px-2 py-0.5 rounded ${imageType === 'file' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
-                >
-                  {t('local_file')}
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {config.customFields.map((cf) => (
+                  <div key={cf.name}>
+                    <label className="block text-[11px] font-medium text-stone-600 dark:text-stone-400 mb-1">
+                      {cf.name}
+                    </label>
+                    <input
+                      type="text"
+                      value={customValues[cf.name] || ''}
+                      onChange={(e) =>
+                        setCustomValues((prev) => ({
+                          ...prev,
+                          [cf.name]: e.target.value,
+                        }))
+                      }
+                      placeholder={cf.name}
+                      className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
-
-            {imageType === 'url' ? (
-              <input
-                type="url"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
-              />
-            ) : (
-              <div className="flex items-center gap-3">
-                <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300">
-                  <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                  <span>{uploading ? t('uploading') : t('select_photo')}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    disabled={uploading}
-                  />
-                </label>
-              </div>
-            )}
-
-            {image && (
-              <div className="mt-2 flex items-center gap-3 p-2 bg-stone-50 dark:bg-stone-800/80 rounded-xl border border-stone-200 dark:border-stone-700">
-                <img
-                  src={image}
-                  alt={t('preview')}
-                  className="w-12 h-12 object-cover rounded-lg shadow-sm"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <span className="text-xs text-stone-500 dark:text-stone-400 truncate flex-1">{image}</span>
-                <button
-                  type="button"
-                  onClick={() => setImage('')}
-                  className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Multi-Tagging : Labels (ex: Pays) */}
           <div>

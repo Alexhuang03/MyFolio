@@ -29,7 +29,7 @@ export const getBookById = async (req, res) => {
 // Créer un nouveau livre rattaché à l'utilisateur connecté
 export const createBook = async (req, res) => {
   try {
-    const { title, description, coverImage, colorTheme, isFavorite } = req.body;
+    const { title, description, coverImage, colorTheme, isFavorite, fieldsConfig } = req.body;
     if (!title || !title.trim()) {
       return res.status(400).json({ message: 'Le titre est obligatoire' });
     }
@@ -40,6 +40,7 @@ export const createBook = async (req, res) => {
       coverImage: coverImage || 'cover-classic.svg',
       colorTheme: colorTheme || '#3b82f6',
       isFavorite: Boolean(isFavorite),
+      fieldsConfig: fieldsConfig || undefined,
       userId: req.userId,
     });
 
@@ -52,7 +53,7 @@ export const createBook = async (req, res) => {
 // Modifier un livre de l'utilisateur connecté
 export const updateBook = async (req, res) => {
   try {
-    const { title, description, coverImage, colorTheme, isFavorite } = req.body;
+    const { title, description, coverImage, colorTheme, isFavorite, fieldsConfig } = req.body;
     const book = await Book.findOneAndUpdate(
       { _id: req.params.id, userId: req.userId },
       {
@@ -61,6 +62,7 @@ export const updateBook = async (req, res) => {
         ...(coverImage && { coverImage }),
         ...(colorTheme && { colorTheme }),
         ...(isFavorite !== undefined && { isFavorite: Boolean(isFavorite) }),
+        ...(fieldsConfig !== undefined && { fieldsConfig }),
       },
       { new: true, runValidators: true }
     );

@@ -10,6 +10,7 @@ export default function ProductWorkspace({
   sections = [],
   labels = [],
   subLabels = [],
+  fieldsConfig,
   onAddProduct,
   onEditProduct,
   onDeleteProduct,
@@ -186,6 +187,7 @@ export default function ProductWorkspace({
                       product={product}
                       labels={labels}
                       subLabels={subLabels}
+                      fieldsConfig={fieldsConfig}
                       onEdit={onEditProduct}
                       onDelete={onDeleteProduct}
                     />
