@@ -182,14 +182,12 @@ export default function AuthScreen() {
     setIsSubmitting(true);
     try {
       const res = await register(regName.trim(), regEmail.trim(), regPassword, true, hpWebsite);
-      if (res?.requiresVerification) {
-        setVerificationPending({
-          email: regEmail.trim(),
-          verificationLink: res.verificationLink,
-          emailSent: Boolean(res.emailSent),
-        });
-        setView('verify-pending');
-      }
+      setVerificationPending({
+        email: regEmail.trim(),
+        verificationLink: res?.verificationLink,
+        emailSent: Boolean(res?.emailSent),
+      });
+      setView('verify-pending');
     } catch (err) {
       setErrorMsg(formatAuthError(err, "Erreur lors de l'inscription"));
     } finally {
