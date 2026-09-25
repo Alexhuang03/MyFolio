@@ -23,10 +23,103 @@ function isValidEmail(email) {
     /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
 }
 
+function hasSmtpConfigured() {
+  return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
+async function sendMailHelper({ to, subject, html, text }) {
+  if (!hasSmtpConfigured()) {
+    return false;
+  }
+  try {
+    const transporter = process.env.SMTP_SERVICE
+      ? nodemailer.createTransport({
+          service: process.env.SMTP_SERVICE,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        })
+      : nodemailer.createTransport({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: Number(process.env.SMTP_PORT) || 587,
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        });
+
+    await transporter.sendMail({
+      from: `"MyFolio" <${process.env.SMTP_USER}>`,
+      to,
+      subject,
+      html,
+      text,
+    });
+    return true;
+  } catch (err) {
+    console.error('[Auth] SMTP Error:', err.message);
+    return false;
+  }
+}
+
+function getVerificationEmailHtml(userName, verifyLink) {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: auto; padding: 2.5rem; background: #fafaf9; border-radius: 16px; border: 1px solid #e7e5e4;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: #d97706; margin: 0; font-size: 1.75rem; font-family: serif;">MyFolio</h1>
+        <p style="color: #78716c; font-size: 0.875rem; margin-top: 0.25rem;">Organisez vos collections avec élégance</p>
+      </div>
+      <h2 style="color: #1c1917; font-size: 1.15rem; margin-bottom: 1rem;">Confirmez votre adresse e-mail</h2>
+      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Bonjour <strong>${userName}</strong>,</p>
+      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Merci de vous être inscrit sur MyFolio ! Pour activer votre compte et sécuriser vos collections, veuillez cliquer sur le bouton ci-dessous :</p>
+      <div style="text-align: center; margin: 2rem 0;">
+        <a href="${verifyLink}" style="display: inline-block; padding: 0.85rem 2rem; background: #d97706; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);">
+          Confirmer mon compte
+        </a>
+      </div>
+      <p style="color: #78716c; font-size: 0.85rem; line-height: 1.5; border-top: 1px solid #e7e5e4; padding-top: 1.25rem; margin-top: 2rem;">
+        Ce lien est valable pendant <strong>24 heures</strong>.<br>
+        Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.
+      </p>
+    </div>
+  `;
+}
+
+function getPasswordResetEmailHtml(userName, resetLink) {
+  return `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: auto; padding: 2.5rem; background: #fafaf9; border-radius: 16px; border: 1px solid #e7e5e4;">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="color: #d97706; margin: 0; font-size: 1.75rem; font-family: serif;">MyFolio</h1>
+        <p style="color: #78716c; font-size: 0.875rem; margin-top: 0.25rem;">Organisez vos collections avec élégance</p>
+      </div>
+      <h2 style="color: #1c1917; font-size: 1.15rem; margin-bottom: 1rem;">Réinitialisation de votre mot de passe</h2>
+      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Bonjour <strong>${userName}</strong>,</p>
+      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Vous avez demandé la réinitialisation de votre mot de passe pour votre compte MyFolio. Cliquez sur le bouton ci-dessous pour en choisir un nouveau :</p>
+      <div style="text-align: center; margin: 2rem 0;">
+        <a href="${resetLink}" style="display: inline-block; padding: 0.85rem 2rem; background: #d97706; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);">
+          Réinitialiser mon mot de passe
+        </a>
+      </div>
+      <p style="color: #78716c; font-size: 0.85rem; line-height: 1.5; border-top: 1px solid #e7e5e4; padding-top: 1.25rem; margin-top: 2rem;">
+        Ce lien est valable pendant <strong>1 heure</strong>.<br>
+        Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.
+      </p>
+    </div>
+  `;
+}
+
 // POST /api/auth/register
 router.post('/register', authLimiter, async (req, res) => {
   try {
-    const { name, email, password, termsAccepted } = req.body;
+    const { name, email, password, termsAccepted, hp_website } = req.body;
+
+    // Protection anti-bot : champ piège Honeypot invisible
+    if (hp_website) {
+      console.warn('[Auth] Tentative d\'inscription automatique détectée via honeypot');
+      return res.status(400).json({ error: 'Inscription rejetée (détection anti-bot).' });
+    }
 
     if (!termsAccepted || (termsAccepted !== true && termsAccepted !== 'true')) {
       return res.status(400).json({ error: "Vous devez accepter les Conditions d'Utilisation et la Politique de Confidentialité." });
@@ -48,23 +141,68 @@ router.post('/register', authLimiter, async (req, res) => {
     }
 
     const cleanEmail = email.trim().toLowerCase();
-    const exists = await User.findOne({ email: cleanEmail });
-    if (exists) {
-      return res.status(409).json({ error: 'Cet e-mail est déjà utilisé' });
+    const existingUser = await User.findOne({ email: cleanEmail });
+
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+    const verifyLink = `${appUrl}/?verify_token=${verificationToken}`;
+
+    if (existingUser) {
+      if (existingUser.isVerified) {
+        return res.status(409).json({ error: 'Cet e-mail est déjà utilisé' });
+      }
+
+      // Utilisateur existant mais non vérifié : renouveler le token et renvoyer
+      existingUser.name = name.trim();
+      existingUser.passwordHash = password; // haché par le pre-save hook
+      existingUser.verificationToken = verificationToken;
+      existingUser.verificationTokenExpiry = verificationTokenExpiry;
+      await existingUser.save();
+
+      const emailSent = await sendMailHelper({
+        to: existingUser.email,
+        subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
+        html: getVerificationEmailHtml(existingUser.name, verifyLink),
+      });
+
+      console.log(`[Auth] ✉️ Lien d'activation pour ${existingUser.email} : ${verifyLink}`);
+
+      return res.status(200).json({
+        message: 'Un e-mail de confirmation a été envoyé pour activer votre compte.',
+        requiresVerification: true,
+        email: cleanEmail,
+        verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
+        emailSent,
+      });
     }
 
     const user = new User({
       name: name.trim(),
       email: cleanEmail,
       passwordHash: password,
+      isVerified: false,
+      verificationToken,
+      verificationTokenExpiry,
       termsAcceptedAt: new Date(),
     });
     await user.save();
 
-    const secret = getJwtSecret();
-    const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
+    const emailSent = await sendMailHelper({
+      to: user.email,
+      subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
+      html: getVerificationEmailHtml(user.name, verifyLink),
+    });
 
-    res.status(201).json({ token, user });
+    console.log(`[Auth] ✉️ Lien d'activation pour ${user.email} : ${verifyLink}`);
+
+    res.status(201).json({
+      message: 'Votre compte a été créé ! Veuillez confirmer votre adresse e-mail pour l\'activer.',
+      requiresVerification: true,
+      email: cleanEmail,
+      verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
+      emailSent,
+    });
   } catch (err) {
     console.error('[Auth] Register error:', err);
     res.status(500).json({ error: 'Erreur serveur lors de la création du compte' });
@@ -86,6 +224,15 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(401).json({ error: 'Identifiants incorrects' });
     }
 
+    // Vérification de l'activation du compte
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "Veuillez confirmer votre adresse e-mail avant de vous connecter.",
+        code: 'EMAIL_NOT_VERIFIED',
+        email: cleanEmail,
+      });
+    }
+
     const secret = getJwtSecret();
     const token = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
 
@@ -93,6 +240,90 @@ router.post('/login', authLimiter, async (req, res) => {
   } catch (err) {
     console.error('[Auth] Login error:', err);
     res.status(500).json({ error: 'Erreur serveur lors de la connexion' });
+  }
+});
+
+// POST /api/auth/verify-email/:token
+router.post('/verify-email/:token', authLimiter, async (req, res) => {
+  try {
+    const { token } = req.params;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ error: "Jeton d'activation invalide" });
+    }
+
+    const user = await User.findOne({
+      verificationToken: token,
+      verificationTokenExpiry: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ error: "Ce lien d'activation est invalide ou a expiré." });
+    }
+
+    user.isVerified = true;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
+    await user.save();
+
+    console.log(`[Auth] ✅ Compte activé avec succès pour ${user.email}`);
+
+    // Connexion automatique après confirmation
+    const secret = getJwtSecret();
+    const jwtToken = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
+
+    res.json({
+      message: 'Votre compte a été activé avec succès !',
+      token: jwtToken,
+      user,
+    });
+  } catch (err) {
+    console.error('[Auth] Verify email error:', err);
+    res.status(500).json({ error: 'Erreur serveur lors de la vérification de l\'e-mail' });
+  }
+});
+
+// POST /api/auth/resend-verification
+router.post('/resend-verification', authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || typeof email !== 'string') {
+      return res.status(400).json({ error: 'E-mail requis' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: cleanEmail });
+
+    // Si utilisateur inexistant ou déjà vérifié, protection contre l'énumération
+    if (!user || user.isVerified) {
+      return res.json({
+        message: 'Si ce compte existe et nécessite une confirmation, un e-mail a été envoyé.',
+        emailSent: false,
+      });
+    }
+
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+    user.verificationToken = verificationToken;
+    user.verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+
+    const appUrl = process.env.APP_URL || 'http://localhost:3000';
+    const verifyLink = `${appUrl}/?verify_token=${verificationToken}`;
+    const emailSent = await sendMailHelper({
+      to: user.email,
+      subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
+      html: getVerificationEmailHtml(user.name, verifyLink),
+    });
+
+    console.log(`[Auth] ✉️ Nouveau lien d'activation pour ${user.email} : ${verifyLink}`);
+
+    res.json({
+      message: 'Un nouvel e-mail de confirmation a été envoyé.',
+      verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
+      emailSent,
+    });
+  } catch (err) {
+    console.error('[Auth] Resend verification error:', err);
+    res.status(500).json({ error: 'Erreur serveur lors du renvoi de l\'e-mail' });
   }
 });
 

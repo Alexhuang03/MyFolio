@@ -25,7 +25,11 @@ async function request(url, options = {}, defaultErrMsg = 'Une erreur est surven
   } catch (_) {}
 
   if (!res.ok) {
-    throw new Error(data?.error || data?.message || defaultErrMsg);
+    const error = new Error(data?.error || data?.message || defaultErrMsg);
+    error.status = res.status;
+    error.code = data?.code;
+    error.data = data;
+    throw error;
   }
 
   return data;
@@ -122,6 +126,29 @@ export const authService = {
         body: JSON.stringify({ currentPassword, newPassword }),
       },
       'Erreur lors du changement de mot de passe'
+    );
+  },
+
+  async verifyEmail(token) {
+    return request(
+      `${API_BASE}/verify-email/${token}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      },
+      'Erreur lors de la confirmation de votre adresse e-mail'
+    );
+  },
+
+  async resendVerification(email) {
+    return request(
+      `${API_BASE}/resend-verification`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      },
+      'Erreur lors du renvoi de l\'e-mail de confirmation'
     );
   },
 };

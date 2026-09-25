@@ -309,6 +309,19 @@ const translations = {
     user_greeting: 'Bonjour, {name}',
     network_error: 'Impossible de joindre le serveur. Assurez-vous que le serveur backend est bien démarré.',
 
+    // Email Verification & Honeypot
+    verify_email_sent_title: 'Confirmez votre e-mail',
+    verify_email_sent_desc: 'Un e-mail de confirmation a été envoyé à {email}. Veuillez cliquer sur le lien qu\'il contient pour activer votre compte.',
+    verify_dev_btn: 'Activer mon compte maintenant (Mode local) →',
+    verify_dev_mode_desc: "Aucun serveur d'envoi d'e-mail (SMTP) n'est configuré en local. Cliquez ci-dessous pour activer directement votre compte :",
+    resend_verification_btn: 'Renvoyer l\'e-mail de confirmation',
+    verification_resending: 'Renvoi en cours...',
+    verification_resent: 'Un nouvel e-mail de confirmation a été envoyé avec succès.',
+    email_not_verified_banner: 'Votre compte n\'a pas encore été activé. Veuillez vérifier votre boîte de réception ou renvoyer le lien ci-dessous.',
+    account_activated_success: 'Votre compte a été activé avec succès ! Bienvenue sur MyFolio.',
+    verifying_email: 'Activation de votre compte en cours...',
+    verify_email_error: 'Lien de confirmation invalide ou expiré.',
+
     // Sharing & Collaborators
     share: 'Partager',
     share_book: 'Partager le livre',
@@ -624,6 +637,19 @@ const translations = {
     logout_btn: 'Logout',
     user_greeting: 'Hello, {name}',
     network_error: 'Unable to reach the server. Please make sure the backend server is running.',
+
+    // Email Verification & Honeypot
+    verify_email_sent_title: 'Confirm your email',
+    verify_email_sent_desc: 'A confirmation email has been sent to {email}. Please click the link inside to activate your account.',
+    verify_dev_btn: 'Activate my account now (Local Mode) →',
+    verify_dev_mode_desc: 'No email sending server (SMTP) is configured locally. Click below to activate your account directly:',
+    resend_verification_btn: 'Resend confirmation email',
+    verification_resending: 'Resending...',
+    verification_resent: 'A new confirmation email has been sent successfully.',
+    email_not_verified_banner: 'Your account has not been activated yet. Please check your inbox or resend the link below.',
+    account_activated_success: 'Your account has been successfully activated! Welcome to MyFolio.',
+    verifying_email: 'Activating your account...',
+    verify_email_error: 'Invalid or expired confirmation link.',
 
     // Sharing & Collaborators
     share: 'Share',
@@ -941,6 +967,19 @@ const translations = {
     logout_btn: '退出登录',
     user_greeting: '你好，{name}',
     network_error: '无法连接到服务器，请确保后端服务正在运行。',
+
+    // Email Verification & Honeypot
+    verify_email_sent_title: '验证您的电子邮箱',
+    verify_email_sent_desc: '确认邮件已发送至 {email}。请点击邮件中的链接以激活您的账户。',
+    verify_dev_btn: '立即激活我的账户（本地开发模式）→',
+    verify_dev_mode_desc: '本地未配置邮件发送服务器 (SMTP)。点击下方按钮即可直接激活您的账户：',
+    resend_verification_btn: '重新发送确认邮件',
+    verification_resending: '正在重新发送...',
+    verification_resent: '已成功发送新的确认邮件。',
+    email_not_verified_banner: '您的账户尚未激活。请检查您的收件箱，或点击下方重新发送激活邮件。',
+    account_activated_success: '您的账户已成功激活！欢迎使用 MyFolio。',
+    verifying_email: '正在激活您的账户...',
+    verify_email_error: '验证链接无效或已过期。',
 
     // Sharing & Collaborators
     share: '分享',

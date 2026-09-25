@@ -42,12 +42,28 @@ export function AuthProvider({ children }) {
     return data.user;
   }, []);
 
-  const register = useCallback(async (name, email, password, termsAccepted) => {
-    const data = await authService.register({ name, email, password, termsAccepted });
-    localStorage.setItem('myfolio_token', data.token);
-    setToken(data.token);
-    setUser(data.user);
-    return data.user;
+  const register = useCallback(async (name, email, password, termsAccepted, hp_website = '') => {
+    const data = await authService.register({ name, email, password, termsAccepted, hp_website });
+    if (data.token) {
+      localStorage.setItem('myfolio_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+    }
+    return data;
+  }, []);
+
+  const verifyEmail = useCallback(async (verifyToken) => {
+    const data = await authService.verifyEmail(verifyToken);
+    if (data.token) {
+      localStorage.setItem('myfolio_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+    }
+    return data;
+  }, []);
+
+  const resendVerification = useCallback(async (email) => {
+    return await authService.resendVerification(email);
   }, []);
 
   const logout = useCallback(async () => {
@@ -84,6 +100,8 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     login,
     register,
+    verifyEmail,
+    resendVerification,
     logout,
     forgotPassword,
     resetPassword,

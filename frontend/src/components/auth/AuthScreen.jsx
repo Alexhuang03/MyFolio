@@ -12,6 +12,8 @@ import {
   Loader2,
   ExternalLink,
   KeyRound,
+  MailCheck,
+  Send,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -20,10 +22,10 @@ import LanguageSwitcher from '../settings/LanguageSwitcher';
 import LegalModal from './LegalModal';
 
 export default function AuthScreen() {
-  const { login, register, forgotPassword, resetPassword } = useAuth();
+  const { login, register, forgotPassword, resetPassword, verifyEmail, resendVerification } = useAuth();
   const { t } = useLanguage();
 
-  const [view, setView] = useState('login'); // 'login' | 'register' | 'forgot' | 'reset'
+  const [view, setView] = useState('login'); // 'login' | 'register' | 'forgot' | 'reset' | 'verify-pending' | 'verifying'
   const [resetToken, setResetToken] = useState('');
 
   // Form states
@@ -34,6 +36,18 @@ export default function AuthScreen() {
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
   const [regTerms, setRegTerms] = useState(false);
+  const [hpWebsite, setHpWebsite] = useState(''); // Honeypot trap for bots
+
+  // Verification states
+  const [verificationPending, setVerificationPending] = useState({
+    email: '',
+    verificationLink: '',
+    emailSent: false,
+  });
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendFeedback, setResendFeedback] = useState({ message: '', isSuccess: false });
+  const [isResending, setIsResending] = useState(false);
+  const [accountActivatedMsg, setAccountActivatedMsg] = useState('');
 
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotFeedback, setForgotFeedback] = useState({ message: '', isSuccess: false });
@@ -49,18 +63,36 @@ export default function AuthScreen() {
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('terms');
 
-  // Check URL query for reset_token on mount
+  // Check URL query for verify_token or reset_token on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get('reset_token');
-    if (token) {
-      setResetToken(token);
+    const vToken = params.get('verify_token');
+    const rToken = params.get('reset_token');
+
+    if (vToken) {
+      setView('verifying');
+      verifyEmail(vToken)
+        .then(() => {
+          // Success: Clean URL parameter and redirect or let AuthContext handle state
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setAccountActivatedMsg(t('account_activated_success') || 'Votre compte a été activé avec succès !');
+          setView('login');
+        })
+        .catch((err) => {
+          window.history.replaceState({}, document.title, window.location.pathname);
+          setView('login');
+          setErrorMsg(formatAuthError(err, t('verify_email_error') || 'Lien de confirmation invalide ou expiré.'));
+        });
+    } else if (rToken) {
+      setResetToken(rToken);
       setView('reset');
     }
   }, []);
 
   const clearErrors = () => {
     setErrorMsg('');
+    setUnverifiedEmail('');
+    setResendFeedback({ message: '', isSuccess: false });
     setForgotFeedback({ message: '', isSuccess: false });
     setResetFeedback({ message: '', isSuccess: false });
   };
@@ -85,6 +117,36 @@ export default function AuthScreen() {
     return err.message || defaultMsg;
   };
 
+  // Resend verification email
+  const handleResendVerification = async (targetEmail) => {
+    const emailToUse = targetEmail || verificationPending.email || unverifiedEmail;
+    if (!emailToUse) return;
+
+    setIsResending(true);
+    setResendFeedback({ message: '', isSuccess: false });
+    try {
+      const res = await resendVerification(emailToUse);
+      setResendFeedback({
+        message: res.message || t('verification_resent'),
+        isSuccess: true,
+      });
+      if (res.verificationLink) {
+        setVerificationPending((prev) => ({
+          ...prev,
+          verificationLink: res.verificationLink,
+          emailSent: Boolean(res.emailSent),
+        }));
+      }
+    } catch (err) {
+      setResendFeedback({
+        message: formatAuthError(err, "Erreur lors du renvoi de l'e-mail de confirmation"),
+        isSuccess: false,
+      });
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   // --- SUBMIT HANDLERS ---
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -94,6 +156,9 @@ export default function AuthScreen() {
     try {
       await login(loginEmail.trim(), loginPassword);
     } catch (err) {
+      if (err.code === 'EMAIL_NOT_VERIFIED') {
+        setUnverifiedEmail(loginEmail.trim());
+      }
       setErrorMsg(formatAuthError(err, 'Identifiants incorrects'));
     } finally {
       setIsSubmitting(false);
@@ -116,7 +181,15 @@ export default function AuthScreen() {
 
     setIsSubmitting(true);
     try {
-      await register(regName.trim(), regEmail.trim(), regPassword, true);
+      const res = await register(regName.trim(), regEmail.trim(), regPassword, true, hpWebsite);
+      if (res?.requiresVerification) {
+        setVerificationPending({
+          email: regEmail.trim(),
+          verificationLink: res.verificationLink,
+          emailSent: Boolean(res.emailSent),
+        });
+        setView('verify-pending');
+      }
     } catch (err) {
       setErrorMsg(formatAuthError(err, "Erreur lors de l'inscription"));
     } finally {
@@ -230,11 +303,43 @@ export default function AuthScreen() {
 
         {/* Card Content */}
         <div className="bg-white/80 dark:bg-stone-900/85 backdrop-blur-xl border border-white/60 dark:border-stone-750/70 rounded-3xl shadow-2xl p-6 sm:p-8 transition-all duration-300">
+          {/* Account Activated Success Notice */}
+          {accountActivatedMsg && (
+            <div className="mb-5 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400 text-xs">
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <span>{accountActivatedMsg}</span>
+            </div>
+          )}
+
           {/* Global Error Notice */}
           {errorMsg && (
             <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2.5 text-rose-600 dark:text-rose-400 text-xs animate-shake">
               <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <span>{errorMsg}</span>
+            </div>
+          )}
+
+          {/* Unverified Email Warning & Resend Button in Login View */}
+          {unverifiedEmail && (
+            <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-2.5 text-xs text-stone-700 dark:text-stone-300">
+              <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400 font-medium leading-tight">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <span>{t('email_not_verified_banner')}</span>
+              </div>
+              {resendFeedback.message && (
+                <p className={`text-[11px] ${resendFeedback.isSuccess ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                  {resendFeedback.message}
+                </p>
+              )}
+              <button
+                type="button"
+                disabled={isResending}
+                onClick={() => handleResendVerification(unverifiedEmail)}
+                className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-60"
+              >
+                {isResending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                <span>{isResending ? t('verification_resending') : t('resend_verification_btn')}</span>
+              </button>
             </div>
           )}
 
@@ -396,6 +501,18 @@ export default function AuthScreen() {
                 </div>
               </div>
 
+              {/* Honeypot field (hidden from real users, traps bots) */}
+              <div style={{ position: 'absolute', left: '-9999px', opacity: 0, height: 0, overflow: 'hidden' }} aria-hidden="true">
+                <input
+                  type="text"
+                  name="hp_website"
+                  tabIndex="-1"
+                  autoComplete="off"
+                  value={hpWebsite}
+                  onChange={(e) => setHpWebsite(e.target.value)}
+                />
+              </div>
+
               {/* Terms Checkbox */}
               <div className="flex items-start gap-2.5 pt-1">
                 <input
@@ -457,7 +574,128 @@ export default function AuthScreen() {
             </form>
           )}
 
-          {/* ================= VIEW 3: FORGOT PASSWORD ================= */}
+          {/* ================= VIEW 3: VERIFY PENDING ================= */}
+          {view === 'verify-pending' && (
+            <div className="space-y-4">
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400 mb-1">
+                  <MailCheck className="w-6 h-6" />
+                </div>
+                <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100">
+                  {t('verify_email_sent_title')}
+                </h2>
+                <p className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed">
+                  {(t('verify_email_sent_desc') || 'Un e-mail de confirmation a été envoyé à {email}.').replace(
+                    '{email}',
+                    verificationPending.email
+                  )}
+                </p>
+              </div>
+
+              {/* Dev Mode direct activation button helper */}
+              {verificationPending.verificationLink && !verificationPending.emailSent && (
+                <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs space-y-2.5 text-stone-700 dark:text-stone-300">
+                  <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-400">
+                    <KeyRound className="w-4 h-4 flex-shrink-0" />
+                    <span>{t('forgot_dev_mode_title')}</span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                    {t('verify_dev_mode_desc')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      try {
+                        const url = new URL(verificationPending.verificationLink, window.location.origin);
+                        const token = url.searchParams.get('verify_token');
+                        if (token) {
+                          setView('verifying');
+                          verifyEmail(token)
+                            .then(() => {
+                              window.history.replaceState({}, document.title, window.location.pathname);
+                              setAccountActivatedMsg(t('account_activated_success') || 'Votre compte a été activé avec succès !');
+                              setView('login');
+                            })
+                            .catch((err) => {
+                              setView('login');
+                              setErrorMsg(formatAuthError(err, t('verify_email_error') || 'Lien invalide ou expiré.'));
+                            });
+                        } else {
+                          window.location.href = verificationPending.verificationLink;
+                        }
+                      } catch (_) {
+                        window.location.href = verificationPending.verificationLink;
+                      }
+                    }}
+                    className="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                  >
+                    <span>{t('verify_dev_btn')}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Resend confirmation feedback */}
+              {resendFeedback.message && (
+                <div
+                  className={`p-3 rounded-xl flex items-center gap-2 text-xs ${
+                    resendFeedback.isSuccess
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400'
+                  }`}
+                >
+                  {resendFeedback.isSuccess ? (
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  )}
+                  <span>{resendFeedback.message}</span>
+                </div>
+              )}
+
+              {/* Resend email button */}
+              <button
+                type="button"
+                disabled={isResending}
+                onClick={() => handleResendVerification(verificationPending.email)}
+                className="w-full py-2.5 px-4 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 font-semibold text-xs sm:text-sm rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+              >
+                {isResending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t('verification_resending')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4" />
+                    <span>{t('resend_verification_btn')}</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleSwitchView('login')}
+                className="w-full text-center text-xs text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 flex items-center justify-center gap-1.5 pt-1 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>{t('back_to_login')}</span>
+              </button>
+            </div>
+          )}
+
+          {/* ================= VIEW: VERIFYING IN PROGRESS ================= */}
+          {view === 'verifying' && (
+            <div className="py-8 text-center space-y-4">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                <Loader2 className="w-6 h-6 animate-spin" />
+              </div>
+              <h2 className="text-base font-bold text-stone-900 dark:text-stone-100">
+                {t('verifying_email') || 'Activation de votre compte en cours...'}
+              </h2>
+            </div>
+          )}
+
+          {/* ================= VIEW 4: FORGOT PASSWORD ================= */}
           {view === 'forgot' && (
             <form onSubmit={handleForgotSubmit} className="space-y-4">
               <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 mb-1">
