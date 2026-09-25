@@ -40,6 +40,14 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    verificationCode: {
+      type: String,
+      default: null,
+    },
+    verificationCodeExpiry: {
+      type: Date,
+      default: null,
+    },
     theme: {
       type: String,
       default: 'dark',
@@ -81,6 +89,8 @@ userSchema.methods.toJSON = function () {
   delete obj.resetTokenExpiry;
   delete obj.verificationToken;
   delete obj.verificationTokenExpiry;
+  delete obj.verificationCode;
+  delete obj.verificationCodeExpiry;
   return obj;
 };
 

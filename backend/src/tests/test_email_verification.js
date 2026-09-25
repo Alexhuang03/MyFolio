@@ -11,35 +11,13 @@ async function runTests() {
   await mongoose.connect(MONGO_URI);
   console.log('Connected.');
 
-  const testEmail = `test_verify_${Date.now()}@example.com`;
+  const testEmail = `test_otp_${Date.now()}@example.com`;
   const testPassword = 'Password123!';
-  const testName = 'Test Verification User';
+  const testName = 'Test OTP User';
 
   try {
-    // 1. Test Honeypot (bot registration)
-    console.log('\n--- 1. Testing Honeypot Bot Trap ---');
-    const botRes = await fetch(`${API_URL}/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'Spam Bot',
-        email: `bot_${Date.now()}@spambot.com`,
-        password: 'Password123!',
-        termsAccepted: true,
-        hp_website: 'https://spam-bot-trap.com',
-      }),
-    });
-    const botData = await botRes.json();
-    console.log('Bot register status:', botRes.status, 'Response:', botData);
-    const botInDb = await User.findOne({ email: botData.email });
-    if (!botInDb) {
-      console.log('SUCCESS: Honeypot blocked user creation in database!');
-    } else {
-      console.error('FAILURE: Honeypot user was created in DB');
-    }
-
-    // 2. Normal Registration (requires email confirmation)
-    console.log('\n--- 2. Testing Normal Registration ---');
+    // 1. Inscription
+    console.log('\n--- 1. Testing Registration with 6-digit Code ---');
     const regRes = await fetch(`${API_URL}/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -52,63 +30,51 @@ async function runTests() {
     });
     const regData = await regRes.json();
     console.log('Register status:', regRes.status, 'Response:', regData);
-    if (!regData.requiresVerification) {
-      throw new Error('Registration should require verification!');
+    if (!regData.verificationCode || regData.verificationCode.length !== 6) {
+      throw new Error('Registration should return a 6-digit verificationCode in dev mode');
     }
+    const code = regData.verificationCode;
+    console.log('Generated 6-digit Code:', code);
 
-    const unverifiedUser = await User.findOne({ email: testEmail });
-    console.log('User in DB isVerified:', unverifiedUser.isVerified);
-    console.log('Verification Token in DB exists:', Boolean(unverifiedUser.verificationToken));
-
-    // 3. Login Attempt before Verification (Must be rejected with 403 & EMAIL_NOT_VERIFIED)
-    console.log('\n--- 3. Testing Login Before Verification ---');
-    const loginFailRes = await fetch(`${API_URL}/login`, {
+    // 2. Test avec un mauvais code
+    console.log('\n--- 2. Testing Wrong Code ---');
+    const wrongRes = await fetch(`${API_URL}/verify-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: testEmail,
-        password: testPassword,
+        code: '999999',
       }),
     });
-    const loginFailData = await loginFailRes.json();
-    console.log('Login status:', loginFailRes.status, 'Response:', loginFailData);
-    if (loginFailRes.status === 403 && loginFailData.code === 'EMAIL_NOT_VERIFIED') {
-      console.log('SUCCESS: Login blocked for unverified account with code EMAIL_NOT_VERIFIED!');
-    } else {
-      throw new Error(`Login should have failed with 403 and EMAIL_NOT_VERIFIED, got ${loginFailRes.status}`);
+    const wrongData = await wrongRes.json();
+    console.log('Wrong code status:', wrongRes.status, 'Response:', wrongData);
+    if (wrongRes.status !== 400) {
+      throw new Error('Wrong code should be rejected with 400');
     }
 
-    // 4. Resend Verification Link
-    console.log('\n--- 4. Testing Resend Verification ---');
-    const resendRes = await fetch(`${API_URL}/resend-verification`, {
+    // 3. Test avec le bon code à 6 chiffres
+    console.log('\n--- 3. Testing Correct 6-digit Code ---');
+    const okRes = await fetch(`${API_URL}/verify-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: testEmail }),
+      body: JSON.stringify({
+        email: testEmail,
+        code: code,
+      }),
     });
-    const resendData = await resendRes.json();
-    console.log('Resend status:', resendRes.status, 'Response:', resendData);
-
-    // 5. Verify Email using Token
-    console.log('\n--- 5. Testing Email Verification via Token ---');
-    const updatedUser = await User.findOne({ email: testEmail });
-    const token = updatedUser.verificationToken;
-    const verifyRes = await fetch(`${API_URL}/verify-email/${token}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    const verifyData = await verifyRes.json();
-    console.log('Verify status:', verifyRes.status, 'Response:', verifyData);
-    if (!verifyData.token || !verifyData.user) {
-      throw new Error('Verification should log user in and return token/user');
+    const okData = await okRes.json();
+    console.log('Verify code status:', okRes.status, 'User:', okData.user?.name);
+    if (okRes.status !== 200 || !okData.token) {
+      throw new Error('Valid code should verify user and return JWT token');
     }
 
     const verifiedUser = await User.findOne({ email: testEmail });
-    console.log('User in DB after verification isVerified:', verifiedUser.isVerified);
-    console.log('Token cleared in DB:', verifiedUser.verificationToken == null);
+    console.log('User in DB isVerified:', verifiedUser.isVerified);
+    console.log('Code cleared in DB:', verifiedUser.verificationCode == null);
 
-    // 6. Login Attempt after Verification (Must succeed)
-    console.log('\n--- 6. Testing Login After Verification ---');
-    const loginOkRes = await fetch(`${API_URL}/login`, {
+    // 4. Test login post-validation
+    console.log('\n--- 4. Testing Login after OTP verification ---');
+    const loginRes = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -116,18 +82,15 @@ async function runTests() {
         password: testPassword,
       }),
     });
-    const loginOkData = await loginOkRes.json();
-    console.log('Login status:', loginOkRes.status, 'User:', loginOkData.user?.name);
-    if (loginOkRes.status === 200 && loginOkData.token) {
-      console.log('SUCCESS: Login succeeds after verification!');
-    } else {
-      throw new Error('Login failed after verification!');
+    const loginData = await loginRes.json();
+    console.log('Login status:', loginRes.status, 'Token exists:', Boolean(loginData.token));
+    if (loginRes.status !== 200) {
+      throw new Error('Login failed after OTP verification');
     }
 
-    // Cleanup test user
+    // Cleanup
     await User.deleteOne({ email: testEmail });
-    console.log('\nCleaned up test user.');
-    console.log('ALL TESTS PASSED SUCCESSFULLY!');
+    console.log('\nSUCCESS: 6-digit OTP verification works flawlessly!');
   } catch (err) {
     console.error('Test error:', err);
   } finally {

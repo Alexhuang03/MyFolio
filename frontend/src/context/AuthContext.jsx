@@ -62,6 +62,16 @@ export function AuthProvider({ children }) {
     return data;
   }, []);
 
+  const verifyCode = useCallback(async (email, code) => {
+    const data = await authService.verifyCode(email, code);
+    if (data.token) {
+      localStorage.setItem('myfolio_token', data.token);
+      setToken(data.token);
+      setUser(data.user);
+    }
+    return data;
+  }, []);
+
   const resendVerification = useCallback(async (email) => {
     return await authService.resendVerification(email);
   }, []);
@@ -101,6 +111,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     verifyEmail,
+    verifyCode,
     resendVerification,
     logout,
     forgotPassword,

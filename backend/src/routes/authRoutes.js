@@ -64,7 +64,7 @@ async function sendMailHelper({ to, subject, html, text }) {
   }
 }
 
-function getVerificationEmailHtml(userName, verifyLink) {
+function getVerificationEmailHtml(userName, verificationCode, verifyLink) {
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 520px; margin: auto; padding: 2.5rem; background: #fafaf9; border-radius: 16px; border: 1px solid #e7e5e4;">
       <div style="text-align: center; margin-bottom: 2rem;">
@@ -73,15 +73,25 @@ function getVerificationEmailHtml(userName, verifyLink) {
       </div>
       <h2 style="color: #1c1917; font-size: 1.15rem; margin-bottom: 1rem;">Confirmez votre adresse e-mail</h2>
       <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Bonjour <strong>${userName}</strong>,</p>
-      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Merci de vous être inscrit sur MyFolio ! Pour activer votre compte et sécuriser vos collections, veuillez cliquer sur le bouton ci-dessous :</p>
-      <div style="text-align: center; margin: 2rem 0;">
-        <a href="${verifyLink}" style="display: inline-block; padding: 0.85rem 2rem; background: #d97706; color: #ffffff; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.2);">
-          Confirmer mon compte
+      <p style="color: #44403c; font-size: 0.95rem; line-height: 1.6;">Merci de vous être inscrit sur MyFolio ! Voici votre code de confirmation pour activer votre compte :</p>
+      
+      <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #ffffff; border-radius: 14px; border: 2px dashed #f59e0b; box-shadow: 0 2px 4px rgba(0,0,0,0.03);">
+        <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: #a8a29e; display: block; margin-bottom: 0.5rem; font-weight: 600;">Code de validation</span>
+        <span style="font-family: 'SF Mono', Consolas, Monaco, monospace; font-size: 2.5rem; font-weight: 800; letter-spacing: 0.35em; color: #d97706; display: inline-block; padding-left: 0.35em;">${verificationCode}</span>
+      </div>
+
+      <p style="color: #78716c; font-size: 0.85rem; text-align: center; margin-bottom: 1.5rem;">
+        Ce code est valable pendant <strong>15 minutes</strong>.
+      </p>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <a href="${verifyLink}" style="display: inline-block; padding: 0.75rem 1.75rem; background: #fef3c7; color: #b45309; text-decoration: none; border-radius: 10px; font-weight: 600; font-size: 0.85rem; border: 1px solid #fde68a;">
+          Ou cliquez ici pour activer automatiquement
         </a>
       </div>
-      <p style="color: #78716c; font-size: 0.85rem; line-height: 1.5; border-top: 1px solid #e7e5e4; padding-top: 1.25rem; margin-top: 2rem;">
-        Ce lien est valable pendant <strong>24 heures</strong>.<br>
-        Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail.
+
+      <p style="color: #a8a29e; font-size: 0.8rem; line-height: 1.5; border-top: 1px solid #e7e5e4; padding-top: 1.25rem; margin-top: 2rem;">
+        Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet e-mail en toute sécurité.
       </p>
     </div>
   `;
@@ -148,30 +158,37 @@ router.post('/register', authLimiter, async (req, res) => {
     const verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     const verifyLink = `${appUrl}/?verify_token=${verificationToken}`;
 
+    // Code de validation à 6 chiffres aléatoires (ex: 482915)
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+
     if (existingUser) {
       if (existingUser.isVerified) {
         return res.status(409).json({ error: 'Cet e-mail est déjà utilisé' });
       }
 
-      // Utilisateur existant mais non vérifié : renouveler le token et renvoyer
+      // Utilisateur existant mais non vérifié : renouveler le token + code et renvoyer
       existingUser.name = name.trim();
       existingUser.passwordHash = password; // haché par le pre-save hook
       existingUser.verificationToken = verificationToken;
       existingUser.verificationTokenExpiry = verificationTokenExpiry;
+      existingUser.verificationCode = verificationCode;
+      existingUser.verificationCodeExpiry = verificationCodeExpiry;
       await existingUser.save();
 
       const emailSent = await sendMailHelper({
         to: existingUser.email,
-        subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
-        html: getVerificationEmailHtml(existingUser.name, verifyLink),
+        subject: `✉️ Votre code de confirmation : ${verificationCode} - MyFolio`,
+        html: getVerificationEmailHtml(existingUser.name, verificationCode, verifyLink),
       });
 
-      console.log(`[Auth] ✉️ Lien d'activation pour ${existingUser.email} : ${verifyLink}`);
+      console.log(`[Auth] 🔑 Code d'activation pour ${existingUser.email} : ${verificationCode} | Lien : ${verifyLink}`);
 
       return res.status(200).json({
-        message: 'Un e-mail de confirmation a été envoyé pour activer votre compte.',
+        message: 'Un code de confirmation a été envoyé pour activer votre compte.',
         requiresVerification: true,
         email: cleanEmail,
+        verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
         verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
         emailSent,
       });
@@ -184,22 +201,25 @@ router.post('/register', authLimiter, async (req, res) => {
       isVerified: false,
       verificationToken,
       verificationTokenExpiry,
+      verificationCode,
+      verificationCodeExpiry,
       termsAcceptedAt: new Date(),
     });
     await user.save();
 
     const emailSent = await sendMailHelper({
       to: user.email,
-      subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
-      html: getVerificationEmailHtml(user.name, verifyLink),
+      subject: `✉️ Votre code de confirmation : ${verificationCode} - MyFolio`,
+      html: getVerificationEmailHtml(user.name, verificationCode, verifyLink),
     });
 
-    console.log(`[Auth] ✉️ Lien d'activation pour ${user.email} : ${verifyLink}`);
+    console.log(`[Auth] 🔑 Code d'activation pour ${user.email} : ${verificationCode} | Lien : ${verifyLink}`);
 
     res.status(201).json({
-      message: 'Votre compte a été créé ! Veuillez confirmer votre adresse e-mail pour l\'activer.',
+      message: 'Votre compte a été créé ! Entrez le code à 6 chiffres reçu par e-mail pour l\'activer.',
       requiresVerification: true,
       email: cleanEmail,
+      verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
       verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
       emailSent,
     });
@@ -263,9 +283,11 @@ router.post('/verify-email/:token', authLimiter, async (req, res) => {
     user.isVerified = true;
     user.verificationToken = null;
     user.verificationTokenExpiry = null;
+    user.verificationCode = null;
+    user.verificationCodeExpiry = null;
     await user.save();
 
-    console.log(`[Auth] ✅ Compte activé avec succès pour ${user.email}`);
+    console.log(`[Auth] ✅ Compte activé avec succès par lien pour ${user.email}`);
 
     // Connexion automatique après confirmation
     const secret = getJwtSecret();
@@ -279,6 +301,64 @@ router.post('/verify-email/:token', authLimiter, async (req, res) => {
   } catch (err) {
     console.error('[Auth] Verify email error:', err);
     res.status(500).json({ error: 'Erreur serveur lors de la vérification de l\'e-mail' });
+  }
+});
+
+// POST /api/auth/verify-code (Activation via code à 6 chiffres)
+router.post('/verify-code', authLimiter, async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'E-mail et code de validation requis' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanCode = code.toString().trim();
+
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    if (user.isVerified) {
+      const secret = getJwtSecret();
+      const jwtToken = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
+      return res.json({
+        message: 'Votre compte est déjà activé !',
+        token: jwtToken,
+        user,
+      });
+    }
+
+    if (!user.verificationCode || user.verificationCode !== cleanCode) {
+      return res.status(400).json({ error: 'Code incorrect. Veuillez vérifier le code à 6 chiffres et réessayer.' });
+    }
+
+    if (user.verificationCodeExpiry && user.verificationCodeExpiry < new Date()) {
+      return res.status(400).json({ error: 'Ce code a expiré. Veuillez cliquer sur "Renvoyer un code".' });
+    }
+
+    // Activer l'utilisateur
+    user.isVerified = true;
+    user.verificationCode = null;
+    user.verificationCodeExpiry = null;
+    user.verificationToken = null;
+    user.verificationTokenExpiry = null;
+    await user.save();
+
+    console.log(`[Auth] ✅ Compte activé avec succès par code à 6 chiffres pour ${user.email}`);
+
+    const secret = getJwtSecret();
+    const jwtToken = jwt.sign({ userId: user._id }, secret, { expiresIn: '30d' });
+
+    res.json({
+      message: 'Votre compte a été activé avec succès !',
+      token: jwtToken,
+      user,
+    });
+  } catch (err) {
+    console.error('[Auth] Verify code error:', err);
+    res.status(500).json({ error: 'Erreur lors de la validation du code' });
   }
 });
 
@@ -296,34 +376,38 @@ router.post('/resend-verification', authLimiter, async (req, res) => {
     // Si utilisateur inexistant ou déjà vérifié, protection contre l'énumération
     if (!user || user.isVerified) {
       return res.json({
-        message: 'Si ce compte existe et nécessite une confirmation, un e-mail a été envoyé.',
+        message: 'Si ce compte existe et nécessite une confirmation, un nouveau code a été envoyé.',
         emailSent: false,
       });
     }
 
     const verificationToken = crypto.randomBytes(32).toString('hex');
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
     user.verificationToken = verificationToken;
     user.verificationTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    user.verificationCode = verificationCode;
+    user.verificationCodeExpiry = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
     const appUrl = process.env.APP_URL || 'http://localhost:3000';
     const verifyLink = `${appUrl}/?verify_token=${verificationToken}`;
     const emailSent = await sendMailHelper({
       to: user.email,
-      subject: '✉️ Confirmez votre adresse e-mail - MyFolio',
-      html: getVerificationEmailHtml(user.name, verifyLink),
+      subject: `✉️ Votre nouveau code de confirmation : ${verificationCode} - MyFolio`,
+      html: getVerificationEmailHtml(user.name, verificationCode, verifyLink),
     });
 
-    console.log(`[Auth] ✉️ Nouveau lien d'activation pour ${user.email} : ${verifyLink}`);
+    console.log(`[Auth] 🔑 Nouveau code d'activation pour ${user.email} : ${verificationCode} | Lien : ${verifyLink}`);
 
     res.json({
-      message: 'Un nouvel e-mail de confirmation a été envoyé.',
+      message: 'Un nouveau code de confirmation a été envoyé.',
+      verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
       verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
       emailSent,
     });
   } catch (err) {
     console.error('[Auth] Resend verification error:', err);
-    res.status(500).json({ error: 'Erreur serveur lors du renvoi de l\'e-mail' });
+    res.status(500).json({ error: 'Erreur serveur lors du renvoi du code' });
   }
 });
 

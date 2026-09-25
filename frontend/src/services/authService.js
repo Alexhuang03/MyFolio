@@ -140,6 +140,18 @@ export const authService = {
     );
   },
 
+  async verifyCode(email, code) {
+    return request(
+      `${API_BASE}/verify-code`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      },
+      'Code de confirmation incorrect ou expiré'
+    );
+  },
+
   async resendVerification(email) {
     return request(
       `${API_BASE}/resend-verification`,
@@ -148,7 +160,7 @@ export const authService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       },
-      'Erreur lors du renvoi de l\'e-mail de confirmation'
+      'Erreur lors du renvoi du code de confirmation'
     );
   },
 };
