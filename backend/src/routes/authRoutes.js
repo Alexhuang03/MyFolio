@@ -188,8 +188,6 @@ router.post('/register', authLimiter, async (req, res) => {
         message: 'Un code de confirmation a été envoyé pour activer votre compte.',
         requiresVerification: true,
         email: cleanEmail,
-        verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
-        verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
         emailSent,
       });
     }
@@ -219,8 +217,6 @@ router.post('/register', authLimiter, async (req, res) => {
       message: 'Votre compte a été créé ! Entrez le code à 6 chiffres reçu par e-mail pour l\'activer.',
       requiresVerification: true,
       email: cleanEmail,
-      verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
-      verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
       emailSent,
     });
   } catch (err) {
@@ -401,8 +397,6 @@ router.post('/resend-verification', authLimiter, async (req, res) => {
 
     res.json({
       message: 'Un nouveau code de confirmation a été envoyé.',
-      verificationCode: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verificationCode : undefined,
-      verificationLink: (!hasSmtpConfigured() || process.env.NODE_ENV !== 'production') ? verifyLink : undefined,
       emailSent,
     });
   } catch (err) {

@@ -643,31 +643,6 @@ export default function AuthScreen() {
                   />
                 </div>
 
-                {/* Mode Développement Local : Badge pratique pour tester en local */}
-                {verificationPending.verificationCode && !verificationPending.emailSent && (
-                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs space-y-2 text-stone-700 dark:text-stone-300">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 font-semibold text-amber-700 dark:text-amber-400 text-[11px]">
-                        <KeyRound className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>{t('verify_dev_code_title')}</span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setVerificationCodeInput(verificationPending.verificationCode)}
-                        className="text-[11px] font-semibold text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
-                      >
-                        {t('fill_code_btn')} →
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-[11px] text-stone-500 dark:text-stone-400">{t('verify_dev_code_desc')}</span>
-                      <span className="font-mono font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-stone-800 px-2 py-0.5 rounded-lg border border-amber-500/20 tracking-widest text-sm">
-                        {verificationPending.verificationCode}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
                 {/* Feedback renvoi de code */}
                 {resendFeedback.message && (
                   <div
