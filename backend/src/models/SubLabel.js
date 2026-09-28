@@ -23,4 +23,6 @@ const SubLabelSchema = new mongoose.Schema(
   }
 );
 
+SubLabelSchema.index({ bookId: 1, name: 1 }, { unique: true });
+
 export default mongoose.model('SubLabel', SubLabelSchema);

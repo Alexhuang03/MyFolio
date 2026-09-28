@@ -50,6 +50,7 @@ export default function TagModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
     const trimmed = name.trim();
     if (!trimmed) {
       setError(t('name_required'));

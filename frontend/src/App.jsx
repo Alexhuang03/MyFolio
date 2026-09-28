@@ -150,7 +150,7 @@ export default function App() {
     const onProductCreated = (newProd) => {
       if (newProd.bookId === bookId) {
         setBookContent((prev) => {
-          if (prev.products.some((p) => p._id === newProd._id)) return prev;
+          if (prev.products.some((p) => String(p._id) === String(newProd._id))) return prev;
           return { ...prev, products: [newProd, ...prev.products] };
         });
       }
@@ -160,7 +160,7 @@ export default function App() {
       if (updatedProd.bookId === bookId) {
         setBookContent((prev) => ({
           ...prev,
-          products: prev.products.map((p) => (p._id === updatedProd._id ? updatedProd : p)),
+          products: prev.products.map((p) => (String(p._id) === String(updatedProd._id) ? updatedProd : p)),
         }));
       }
     };
@@ -168,7 +168,7 @@ export default function App() {
     const onProductDeleted = ({ productId }) => {
       setBookContent((prev) => ({
         ...prev,
-        products: prev.products.filter((p) => p._id !== productId),
+        products: prev.products.filter((p) => String(p._id) !== String(productId)),
       }));
     };
 
@@ -176,7 +176,15 @@ export default function App() {
     const onLabelCreated = (newLabel) => {
       if (newLabel.bookId === bookId) {
         setBookContent((prev) => {
-          if (prev.labels.some((l) => l._id === newLabel._id)) return prev;
+          if (
+            prev.labels.some(
+              (l) =>
+                String(l._id) === String(newLabel._id) ||
+                l.name?.trim().toLowerCase() === newLabel.name?.trim().toLowerCase()
+            )
+          ) {
+            return prev;
+          }
           return { ...prev, labels: [...prev.labels, newLabel] };
         });
       }
@@ -186,7 +194,7 @@ export default function App() {
       if (updatedLabel.bookId === bookId) {
         setBookContent((prev) => ({
           ...prev,
-          labels: prev.labels.map((l) => (l._id === updatedLabel._id ? updatedLabel : l)),
+          labels: prev.labels.map((l) => (String(l._id) === String(updatedLabel._id) ? updatedLabel : l)),
         }));
       }
     };
@@ -194,14 +202,14 @@ export default function App() {
     const onLabelDeleted = ({ labelId, mode }) => {
       setBookContent((prev) => ({
         ...prev,
-        labels: prev.labels.filter((l) => l._id !== labelId),
+        labels: prev.labels.filter((l) => String(l._id) !== String(labelId)),
         products:
           mode === 'detach'
             ? prev.products.map((p) => ({
                 ...p,
-                labelIds: (p.labelIds || []).filter((id) => id !== labelId),
+                labelIds: (p.labelIds || []).filter((id) => String(id) !== String(labelId)),
               }))
-            : prev.products.filter((p) => !(p.labelIds || []).includes(labelId)),
+            : prev.products.filter((p) => !(p.labelIds || []).map(String).includes(String(labelId))),
       }));
     };
 
@@ -209,7 +217,15 @@ export default function App() {
     const onSubLabelCreated = (newSub) => {
       if (newSub.bookId === bookId) {
         setBookContent((prev) => {
-          if (prev.subLabels.some((s) => s._id === newSub._id)) return prev;
+          if (
+            prev.subLabels.some(
+              (s) =>
+                String(s._id) === String(newSub._id) ||
+                s.name?.trim().toLowerCase() === newSub.name?.trim().toLowerCase()
+            )
+          ) {
+            return prev;
+          }
           return { ...prev, subLabels: [...prev.subLabels, newSub] };
         });
       }
@@ -219,7 +235,7 @@ export default function App() {
       if (updatedSub.bookId === bookId) {
         setBookContent((prev) => ({
           ...prev,
-          subLabels: prev.subLabels.map((s) => (s._id === updatedSub._id ? updatedSub : s)),
+          subLabels: prev.subLabels.map((s) => (String(s._id) === String(updatedSub._id) ? updatedSub : s)),
         }));
       }
     };
@@ -227,14 +243,14 @@ export default function App() {
     const onSubLabelDeleted = ({ subLabelId, mode }) => {
       setBookContent((prev) => ({
         ...prev,
-        subLabels: prev.subLabels.filter((s) => s._id !== subLabelId),
+        subLabels: prev.subLabels.filter((s) => String(s._id) !== String(subLabelId)),
         products:
           mode === 'detach'
             ? prev.products.map((p) => ({
                 ...p,
-                subLabelIds: (p.subLabelIds || []).filter((id) => id !== subLabelId),
+                subLabelIds: (p.subLabelIds || []).filter((id) => String(id) !== String(subLabelId)),
               }))
-            : prev.products.filter((p) => !(p.subLabelIds || []).includes(subLabelId)),
+            : prev.products.filter((p) => !(p.subLabelIds || []).map(String).includes(String(subLabelId))),
       }));
     };
 
@@ -285,10 +301,28 @@ export default function App() {
       setLoading(true);
       const data = await api.getBookContent(book._id);
       setSelectedBook(data.book);
+
+      // Déduplication par sécurité
+      const seenLabels = new Set();
+      const uniqueLabels = (data.labels || []).filter((l) => {
+        const key = l.name?.trim().toLowerCase();
+        if (!key || seenLabels.has(key)) return false;
+        seenLabels.add(key);
+        return true;
+      });
+
+      const seenSubLabels = new Set();
+      const uniqueSubLabels = (data.subLabels || []).filter((s) => {
+        const key = s.name?.trim().toLowerCase();
+        if (!key || seenSubLabels.has(key)) return false;
+        seenSubLabels.add(key);
+        return true;
+      });
+
       setBookContent({
-        labels: data.labels,
-        subLabels: data.subLabels,
-        products: data.products,
+        labels: uniqueLabels,
+        subLabels: uniqueSubLabels,
+        products: data.products || [],
       });
     } catch (err) {
       showToast(err.message, 'error');
@@ -385,10 +419,21 @@ export default function App() {
   const handleCreateLabel = async (labelData) => {
     try {
       const newLabel = await api.createLabel(labelData);
-      setBookContent((prev) => ({
-        ...prev,
-        labels: [...prev.labels, newLabel],
-      }));
+      setBookContent((prev) => {
+        if (
+          prev.labels.some(
+            (l) =>
+              String(l._id) === String(newLabel._id) ||
+              l.name?.trim().toLowerCase() === newLabel.name?.trim().toLowerCase()
+          )
+        ) {
+          return prev;
+        }
+        return {
+          ...prev,
+          labels: [...prev.labels, newLabel],
+        };
+      });
       showToast(t('label_created', { name: newLabel.name }));
     } catch (err) {
       showToast(err.message, 'error');
@@ -449,10 +494,21 @@ export default function App() {
   const handleCreateSubLabel = async (subLabelData) => {
     try {
       const newSub = await api.createSubLabel(subLabelData);
-      setBookContent((prev) => ({
-        ...prev,
-        subLabels: [...prev.subLabels, newSub],
-      }));
+      setBookContent((prev) => {
+        if (
+          prev.subLabels.some(
+            (s) =>
+              String(s._id) === String(newSub._id) ||
+              s.name?.trim().toLowerCase() === newSub.name?.trim().toLowerCase()
+          )
+        ) {
+          return prev;
+        }
+        return {
+          ...prev,
+          subLabels: [...prev.subLabels, newSub],
+        };
+      });
       showToast(t('sublabel_created', { name: newSub.name }));
     } catch (err) {
       showToast(err.message, 'error');
@@ -464,7 +520,7 @@ export default function App() {
       const updated = await api.updateSubLabel(id, subLabelData);
       setBookContent((prev) => ({
         ...prev,
-        subLabels: prev.subLabels.map((s) => (s._id === id ? updated : s)),
+        subLabels: prev.subLabels.map((s) => (String(s._id) === String(id) ? updated : s)),
       }));
       showToast(t('sublabel_updated', { name: updated.name }));
     } catch (err) {
@@ -476,17 +532,17 @@ export default function App() {
     try {
       const res = await api.deleteSubLabel(id, mode);
       setBookContent((prev) => {
-        const remainingSubLabels = prev.subLabels.filter((s) => s._id !== id);
+        const remainingSubLabels = prev.subLabels.filter((s) => String(s._id) !== String(id));
         let updatedProducts = prev.products;
 
         if (mode === 'cascade') {
           updatedProducts = prev.products.filter(
-            (p) => !p.subLabelIds || !p.subLabelIds.includes(id)
+            (p) => !p.subLabelIds || !p.subLabelIds.map(String).includes(String(id))
           );
         } else {
           updatedProducts = prev.products.map((p) => ({
             ...p,
-            subLabelIds: (p.subLabelIds || []).filter((sId) => sId !== id),
+            subLabelIds: (p.subLabelIds || []).filter((sId) => String(sId) !== String(id)),
           }));
         }
 
@@ -511,10 +567,15 @@ export default function App() {
   const handleCreateProduct = async (productData) => {
     try {
       const newProduct = await api.createProduct(productData);
-      setBookContent((prev) => ({
-        ...prev,
-        products: [newProduct, ...prev.products],
-      }));
+      setBookContent((prev) => {
+        if (prev.products.some((p) => String(p._id) === String(newProduct._id))) {
+          return prev;
+        }
+        return {
+          ...prev,
+          products: [newProduct, ...prev.products],
+        };
+      });
       showToast(t('product_added', { name: newProduct.name }));
     } catch (err) {
       showToast(err.message, 'error');

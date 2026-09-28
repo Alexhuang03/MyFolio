@@ -23,4 +23,6 @@ const LabelSchema = new mongoose.Schema(
   }
 );
 
+LabelSchema.index({ bookId: 1, name: 1 }, { unique: true });
+
 export default mongoose.model('Label', LabelSchema);

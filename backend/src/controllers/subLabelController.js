@@ -46,6 +46,11 @@ export const createSubLabel = async (req, res) => {
 
     res.status(201).json(subLabel);
   } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: `Un sous-label nommé "${req.body.name?.trim() || ''}" existe déjà dans ce livre.`,
+      });
+    }
     res.status(500).json({ message: 'Erreur lors de la création du sous-label', error: error.message });
   }
 };
