@@ -724,6 +724,7 @@ export default function App() {
             subLabels={bookContent.subLabels}
             products={bookContent.products}
             onBackToLibrary={handleBackToLibrary}
+            onUpdateBook={handleUpdateBook}
             onCreateLabel={handleCreateLabel}
             onUpdateLabel={handleUpdateLabel}
             onDeleteLabel={handleDeleteLabel}

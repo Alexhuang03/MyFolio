@@ -35,6 +35,7 @@ const translations = {
     no_favorites_desc: "Cliquez sur l'icône de marque-page d'un livre pour l'ajouter à vos favoris.",
 
     // Create/Edit Book Modal
+    book_settings: 'Paramètres du livre',
     edit_book_title: 'Modifier le livre',
     create_new_book: 'Créer un nouveau livre',
     edit_book_desc: 'Ajustez le design et les informations',
@@ -407,6 +408,7 @@ const translations = {
     filter_favorites: 'Show favorites only',
     no_favorites: 'No favorite books',
     no_favorites_desc: 'Click on the bookmark icon of a book to add it to your favorites.',
+    book_settings: 'Book settings',
     edit_book_title: 'Edit book',
     create_new_book: 'Create a new book',
     edit_book_desc: 'Adjust design and information',
@@ -759,6 +761,7 @@ const translations = {
     filter_favorites: '仅显示收藏书籍',
     no_favorites: '暂无收藏书籍',
     no_favorites_desc: '点击书籍上的书签图标将其加入收藏。',
+    book_settings: '书籍设置',
     edit_book_title: '编辑书籍',
     create_new_book: '创建新书籍',
     edit_book_desc: '调整设计和信息',
