@@ -13,6 +13,7 @@ import {
   Check,
   CheckCircle,
   AlertCircle,
+  AlertTriangle,
   Sparkles,
   Image as ImageIcon,
   Upload,
@@ -23,7 +24,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { useWallpaper, compressImage } from '../../theme/WallpaperContext';
 
 export default function SettingsModal({ isOpen, onClose }) {
-  const { user, updateProfile, changePassword } = useAuth();
+  const { user, updateProfile, changePassword, deleteAccount } = useAuth();
   const { t, lang, switchLanguage } = useLanguage();
   const {
     wallpaper,
@@ -56,6 +57,13 @@ export default function SettingsModal({ isOpen, onClose }) {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
   const [passwordSuccess, setPasswordSuccess] = useState('');
+
+  // Delete Account State
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
 
   if (!isOpen) return null;
 
@@ -116,6 +124,23 @@ export default function SettingsModal({ isOpen, onClose }) {
       setPasswordError(err.message || t('generic_error'));
     } finally {
       setPasswordLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    if (!deletePassword) return;
+
+    try {
+      setDeleteLoading(true);
+      setDeleteError('');
+      await deleteAccount(deletePassword);
+      setShowDeleteModal(false);
+      onClose();
+    } catch (err) {
+      setDeleteError(err.message || t('generic_error'));
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -278,6 +303,41 @@ export default function SettingsModal({ isOpen, onClose }) {
                   </button>
                 </div>
               </form>
+
+              {/* Danger Zone: Account Deletion */}
+              <div className="pt-6 border-t border-stone-200 dark:border-stone-800">
+                <div className="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/50 space-y-3">
+                  <div className="flex items-start justify-between gap-3 flex-wrap sm:flex-nowrap">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-rose-100 dark:bg-rose-900/60 text-rose-700 dark:text-rose-300 rounded-md">
+                          {t('danger_zone')}
+                        </span>
+                        <h5 className="text-xs font-bold text-stone-800 dark:text-stone-100">
+                          {t('delete_account_title')}
+                        </h5>
+                      </div>
+                      <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
+                        {t('delete_account_desc')}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeletePassword('');
+                        setDeleteError('');
+                        setShowDeletePassword(false);
+                        setShowDeleteModal(true);
+                      }}
+                      className="px-3.5 py-2 bg-white dark:bg-stone-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer hover:border-rose-300 dark:hover:border-rose-700"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{t('delete_account_btn')}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -691,6 +751,87 @@ export default function SettingsModal({ isOpen, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Account Deletion Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-stone-200 dark:border-stone-800 animate-scale-up space-y-4">
+            {/* Modal Header */}
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-serif font-bold text-stone-900 dark:text-stone-100">
+                  {t('confirm_delete_account_title')}
+                </h4>
+                <p className="text-xs text-stone-500 dark:text-stone-400 mt-1 leading-relaxed">
+                  {t('confirm_delete_account_desc')}
+                </p>
+              </div>
+            </div>
+
+            {/* Error Message */}
+            {deleteError && (
+              <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                <span>{deleteError}</span>
+              </div>
+            )}
+
+            {/* Password confirmation form */}
+            <form onSubmit={handleDeleteAccount} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
+                  {t('confirm_delete_account_password_prompt')}
+                </label>
+                <div className="relative">
+                  <input
+                    type={showDeletePassword ? 'text' : 'password'}
+                    required
+                    autoFocus
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    placeholder={t('confirm_delete_account_password_placeholder')}
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDeletePassword(!showDeletePassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 cursor-pointer"
+                  >
+                    {showDeletePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  disabled={deleteLoading}
+                  onClick={() => {
+                    setShowDeleteModal(false);
+                    setDeletePassword('');
+                    setDeleteError('');
+                  }}
+                  className="px-4 py-2 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-xl text-xs font-semibold transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {t('cancel')}
+                </button>
+                <button
+                  type="submit"
+                  disabled={deleteLoading || !deletePassword}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{deleteLoading ? t('deleting_account') : t('confirm_delete_account_submit_btn')}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

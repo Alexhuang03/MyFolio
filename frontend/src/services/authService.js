@@ -163,5 +163,17 @@ export const authService = {
       'Erreur lors du renvoi du code de confirmation'
     );
   },
+
+  async deleteAccount(password) {
+    return request(
+      `${API_BASE}/account`,
+      {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ password }),
+      },
+      'Erreur lors de la suppression du compte'
+    );
+  },
 };
 

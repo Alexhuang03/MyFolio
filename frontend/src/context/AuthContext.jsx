@@ -103,6 +103,14 @@ export function AuthProvider({ children }) {
     return await authService.changePassword({ currentPassword, newPassword });
   }, []);
 
+  const deleteAccount = useCallback(async (password) => {
+    const data = await authService.deleteAccount(password);
+    localStorage.removeItem('myfolio_token');
+    setToken(null);
+    setUser(null);
+    return data;
+  }, []);
+
   const value = {
     user,
     token,
@@ -118,6 +126,7 @@ export function AuthProvider({ children }) {
     resetPassword,
     updateProfile,
     changePassword,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

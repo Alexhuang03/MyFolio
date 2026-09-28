@@ -4,6 +4,11 @@ import crypto from 'crypto';
 import nodemailer from 'nodemailer';
 import rateLimit from 'express-rate-limit';
 import User from '../models/User.js';
+import Book from '../models/Book.js';
+import Label from '../models/Label.js';
+import SubLabel from '../models/SubLabel.js';
+import Product from '../models/Product.js';
+import { emitToUser, emitToBook } from '../utils/socketEmitter.js';
 import { authMiddleware, getJwtSecret } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -487,6 +492,72 @@ router.put('/change-password', authMiddleware, async (req, res) => {
   } catch (err) {
     console.error('[Auth] Change password error:', err);
     res.status(500).json({ error: 'Erreur serveur lors du changement de mot de passe' });
+  }
+});
+
+// DELETE /api/auth/account - Supprimer définitivement le compte utilisateur et toutes ses données
+router.delete('/account', authMiddleware, async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    if (!password || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Le mot de passe actuel est requis pour confirmer la suppression.' });
+    }
+
+    const user = await User.findById(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur introuvable' });
+    }
+
+    const isMatch = await user.verifyPassword(password);
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Mot de passe incorrect' });
+    }
+
+    // 1. Récupérer tous les livres possédés par l'utilisateur
+    const ownedBooks = await Book.find({ userId: user._id });
+    const ownedBookIds = ownedBooks.map((b) => b._id);
+
+    // 2. Prévenir les collaborateurs en temps réel que ces livres sont supprimés
+    for (const book of ownedBooks) {
+      emitToBook(book._id, 'book:deleted', { bookId: book._id });
+      if (book.collaborators && book.collaborators.length > 0) {
+        for (const collab of book.collaborators) {
+          emitToUser(collab.userId, 'book:removed', { bookId: book._id });
+        }
+      }
+    }
+
+    // 3. Supprimer en cascade tout le contenu des livres possédés
+    if (ownedBookIds.length > 0) {
+      await Product.deleteMany({ bookId: { $in: ownedBookIds } });
+      await Label.deleteMany({ bookId: { $in: ownedBookIds } });
+      await SubLabel.deleteMany({ bookId: { $in: ownedBookIds } });
+      await Book.deleteMany({ _id: { $in: ownedBookIds } });
+    }
+
+    // 4. Retirer l'utilisateur des livres partagés appartenant à d'autres utilisateurs
+    const sharedBooksWithUser = await Book.find({ 'collaborators.userId': user._id });
+    for (const sharedBook of sharedBooksWithUser) {
+      sharedBook.collaborators = sharedBook.collaborators.filter(
+        (c) => c.userId.toString() !== user._id.toString()
+      );
+      await sharedBook.save();
+      emitToBook(sharedBook._id, 'collaborators:updated', {
+        bookId: sharedBook._id,
+        collaboratorsCount: sharedBook.collaborators.length,
+      });
+    }
+
+    // 5. Supprimer le compte utilisateur
+    await User.findByIdAndDelete(user._id);
+
+    console.log(`[Auth] 🗑️ Compte de ${user.email} (${user.name}) supprimé définitivement.`);
+
+    res.json({ message: 'Votre compte ainsi que toutes vos données ont été définitivement supprimés.' });
+  } catch (err) {
+    console.error('[Auth] Delete account error:', err);
+    res.status(500).json({ error: 'Erreur serveur lors de la suppression du compte' });
   }
 });
 
