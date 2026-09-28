@@ -65,6 +65,10 @@ export default function LibraryView({
             <div>
               <h1 className="font-serif font-bold text-lg sm:text-2xl tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
                 MyFolio <span className="text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 dark:bg-amber-950/70 rounded-full border border-amber-200 dark:border-amber-800/80">{t('library_badge')}</span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/80" title={t('live_sync')}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  {t('live_sync')}
+                </span>
               </h1>
               <p className="hidden lg:block text-[11px] sm:text-xs text-stone-500 dark:text-stone-400 line-clamp-1">
                 {t('library_subtitle')}

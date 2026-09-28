@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 
 let socket = null;
+let currentBookId = null;
 
 /**
  * Initialise la connexion Socket.IO avec le token JWT
@@ -19,8 +20,17 @@ export const initSocket = (token) => {
     auth: { token },
     transports: ['websocket', 'polling'],
     reconnection: true,
-    reconnectionAttempts: 10,
+    reconnectionAttempts: Infinity,
     reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
+  });
+
+  // Dès qu'on est connecté ou reconnecté, on ré-adhère automatiquement au livre actif s'il y en a un
+  socket.on('connect', () => {
+    if (currentBookId) {
+      socket.emit('join_book', currentBookId);
+    }
   });
 
   socket.on('connect_error', (err) => {
@@ -43,6 +53,7 @@ export const disconnectSocket = () => {
   if (socket) {
     socket.disconnect();
     socket = null;
+    currentBookId = null;
   }
 };
 
@@ -51,8 +62,10 @@ export const disconnectSocket = () => {
  * @param {string} bookId
  */
 export const joinBookRoom = (bookId) => {
-  if (socket && bookId) {
-    socket.emit('join_book', bookId);
+  if (!bookId) return;
+  currentBookId = String(bookId);
+  if (socket) {
+    socket.emit('join_book', currentBookId);
   }
 };
 
@@ -61,7 +74,11 @@ export const joinBookRoom = (bookId) => {
  * @param {string} bookId
  */
 export const leaveBookRoom = (bookId) => {
-  if (socket && bookId) {
-    socket.emit('leave_book', bookId);
+  const bId = bookId ? String(bookId) : null;
+  if (currentBookId === bId) {
+    currentBookId = null;
+  }
+  if (socket && bId) {
+    socket.emit('leave_book', bId);
   }
 };

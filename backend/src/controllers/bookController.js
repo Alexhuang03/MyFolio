@@ -130,8 +130,15 @@ export const updateBook = async (req, res) => {
       collaboratorsCount: book.collaborators?.length || 0,
     };
 
-    // Émettre l'événement temps réel
+    // Émettre l'événement temps réel à la salle du livre
     emitToBook(book._id, 'book:updated', result);
+    // Émettre aussi aux salons des collaborateurs et du propriétaire (pour leur vue bibliothèque)
+    emitToUser(book.userId, 'book:updated', result);
+    book.collaborators?.forEach((c) => {
+      if (c.userId) {
+        emitToUser(c.userId, 'book:updated', result);
+      }
+    });
 
     res.json(result);
   } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { api } from './services/api';
 import LibraryView from './components/library/LibraryView';
 import BookDetailView from './components/book/BookDetailView';
@@ -77,12 +77,21 @@ export default function App() {
           });
         };
 
+        // Livre mis à jour (titre, couverture, etc.)
+        const onGlobalBookUpdated = (updatedBook) => {
+          setBooks((prev) =>
+            prev.map((b) => (String(b._id) === String(updatedBook._id) ? { ...b, ...updatedBook } : b))
+          );
+        };
+
         socket.on('book:shared', onBookShared);
         socket.on('book:removed', onBookRemoved);
+        socket.on('book:updated', onGlobalBookUpdated);
 
         return () => {
           socket.off('book:shared', onBookShared);
           socket.off('book:removed', onBookRemoved);
+          socket.off('book:updated', onGlobalBookUpdated);
         };
       }
     } else {
@@ -94,11 +103,59 @@ export default function App() {
     }
   }, [user]);
 
+  // Synchronisation silencieuse en arrière-plan sans bloquer l'UI ni recharger la page
+  const silentSync = useCallback(async () => {
+    if (!user) return;
+    try {
+      if (selectedBook?._id) {
+        const data = await api.getBookContent(selectedBook._id);
+        setSelectedBook((prev) => (prev ? { ...prev, ...data.book } : data.book));
+        setBookContent({
+          labels: data.labels || [],
+          subLabels: data.subLabels || [],
+          products: data.products || [],
+        });
+      } else {
+        const booksData = await api.getBooks();
+        setBooks(booksData);
+      }
+    } catch {
+      // Ignorer silencieusement si hors ligne ou erreur temporaire
+    }
+  }, [user, selectedBook?._id]);
+
+  // Détection du retour sur l'onglet (déverrouillage téléphone, changement d'onglet) + auto-rafraîchissement périodique
+  useEffect(() => {
+    if (!user) return;
+
+    const handleFocus = () => {
+      if (document.visibilityState === 'visible') {
+        silentSync();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleFocus);
+
+    // Auto-rafraîchissement automatique de sécurité toutes les 5 secondes
+    const pollInterval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        silentSync();
+      }
+    }, 5000);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleFocus);
+      clearInterval(pollInterval);
+    };
+  }, [user, silentSync]);
+
   // Synchronisation collaborative en temps réel à l'intérieur du livre actif
   useEffect(() => {
     if (!selectedBook?._id) return;
 
-    const bookId = selectedBook._id;
+    const bookId = String(selectedBook._id);
     joinBookRoom(bookId);
     const socket = getSocket();
 
@@ -106,41 +163,41 @@ export default function App() {
 
     // Mise à jour des informations du livre en direct
     const onBookUpdated = (updatedBook) => {
-      if (updatedBook._id === bookId) {
+      if (String(updatedBook._id) === bookId) {
         setSelectedBook((prev) => (prev ? { ...prev, ...updatedBook } : null));
         setBooks((prev) =>
-          prev.map((b) => (b._id === bookId ? { ...b, ...updatedBook } : b))
+          prev.map((b) => (String(b._id) === bookId ? { ...b, ...updatedBook } : b))
         );
       }
     };
 
     // Livre supprimé par le propriétaire pendant qu'un collaborateur le consulte
     const onBookDeleted = ({ bookId: deletedId }) => {
-      if (deletedId === bookId) {
+      if (String(deletedId) === bookId) {
         setSelectedBook(null);
-        setBooks((prev) => prev.filter((b) => b._id !== deletedId));
+        setBooks((prev) => prev.filter((b) => String(b._id) !== String(deletedId)));
         showToast(t('book_deleted_by_owner'), 'error');
       }
     };
 
     // Mise à jour de la liste des collaborateurs
     const onCollaboratorsUpdated = ({ bookId: bId, collaborators, collaboratorsCount }) => {
-      if (bId === bookId) {
+      if (String(bId) === bookId) {
         setSelectedBook((prev) =>
           prev ? { ...prev, collaborators, collaboratorsCount } : null
         );
         setBooks((prev) =>
-          prev.map((b) => (b._id === bId ? { ...b, collaborators, collaboratorsCount } : b))
+          prev.map((b) => (String(b._id) === String(bId) ? { ...b, collaborators, collaboratorsCount } : b))
         );
       }
     };
 
     // Modification des droits de l'utilisateur actuel en direct
     const onRoleUpdated = ({ bookId: bId, role }) => {
-      if (bId === bookId) {
+      if (String(bId) === bookId) {
         setSelectedBook((prev) => (prev ? { ...prev, myRole: role } : null));
         setBooks((prev) =>
-          prev.map((b) => (b._id === bId ? { ...b, myRole: role } : b))
+          prev.map((b) => (String(b._id) === String(bId) ? { ...b, myRole: role } : b))
         );
         showToast(t('your_role_updated'));
       }
@@ -148,16 +205,19 @@ export default function App() {
 
     // Produits en direct (Création, Modification, Suppression)
     const onProductCreated = (newProd) => {
-      if (newProd.bookId === bookId) {
+      if (String(newProd.bookId) === bookId) {
         setBookContent((prev) => {
           if (prev.products.some((p) => String(p._id) === String(newProd._id))) return prev;
           return { ...prev, products: [newProd, ...prev.products] };
         });
+        setBooks((prev) =>
+          prev.map((b) => (String(b._id) === bookId ? { ...b, updatedAt: new Date().toISOString() } : b))
+        );
       }
     };
 
     const onProductUpdated = (updatedProd) => {
-      if (updatedProd.bookId === bookId) {
+      if (String(updatedProd.bookId) === bookId) {
         setBookContent((prev) => ({
           ...prev,
           products: prev.products.map((p) => (String(p._id) === String(updatedProd._id) ? updatedProd : p)),
@@ -174,7 +234,7 @@ export default function App() {
 
     // Labels en direct
     const onLabelCreated = (newLabel) => {
-      if (newLabel.bookId === bookId) {
+      if (String(newLabel.bookId) === bookId) {
         setBookContent((prev) => {
           if (
             prev.labels.some(
@@ -191,7 +251,7 @@ export default function App() {
     };
 
     const onLabelUpdated = (updatedLabel) => {
-      if (updatedLabel.bookId === bookId) {
+      if (String(updatedLabel.bookId) === bookId) {
         setBookContent((prev) => ({
           ...prev,
           labels: prev.labels.map((l) => (String(l._id) === String(updatedLabel._id) ? updatedLabel : l)),
@@ -215,7 +275,7 @@ export default function App() {
 
     // Sous-labels en direct
     const onSubLabelCreated = (newSub) => {
-      if (newSub.bookId === bookId) {
+      if (String(newSub.bookId) === bookId) {
         setBookContent((prev) => {
           if (
             prev.subLabels.some(
@@ -232,7 +292,7 @@ export default function App() {
     };
 
     const onSubLabelUpdated = (updatedSub) => {
-      if (updatedSub.bookId === bookId) {
+      if (String(updatedSub.bookId) === bookId) {
         setBookContent((prev) => ({
           ...prev,
           subLabels: prev.subLabels.map((s) => (String(s._id) === String(updatedSub._id) ? updatedSub : s)),

@@ -3,6 +3,7 @@ const translations = {
     // Library Header
     library_badge: 'Bibliothèque',
     library_subtitle: 'Vos collections organisées en livres interactifs',
+    live_sync: 'En direct',
     search_book: 'Rechercher un livre...',
     new_book: 'Nouveau Livre',
     create: 'Créer',
@@ -380,6 +381,7 @@ const translations = {
   en: {
     library_badge: 'Library',
     library_subtitle: 'Your collections organized in interactive books',
+    live_sync: 'Live sync',
     search_book: 'Search a book...',
     new_book: 'New Book',
     create: 'Create',
@@ -731,6 +733,7 @@ const translations = {
   zh: {
     library_badge: '书库',
     library_subtitle: '您的收藏以互动书籍形式整理',
+    live_sync: '实时同步',
     search_book: '搜索书籍...',
     new_book: '新建书籍',
     create: '创建',

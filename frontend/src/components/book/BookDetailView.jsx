@@ -127,9 +127,15 @@ export default function BookDetailView({
               <h1 className="font-serif font-bold text-stone-900 dark:text-stone-100 text-xs sm:text-base leading-tight truncate">
                 {book.title}
               </h1>
-              <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 leading-none mt-0.5 truncate">
-                {products.length} {products.length > 1 ? t('elements') : t('element')}
-              </p>
+              <div className="flex items-center gap-2 mt-0.5">
+                <p className="text-[10px] sm:text-[11px] text-stone-400 dark:text-stone-500 leading-none truncate">
+                  {products.length} {products.length > 1 ? t('elements') : t('element')}
+                </p>
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-emerald-600 dark:text-emerald-400" title={t('live_sync')}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span className="hidden sm:inline">{t('live_sync')}</span>
+                </span>
+              </div>
             </div>
           </div>
         </div>
