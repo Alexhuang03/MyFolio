@@ -41,7 +41,7 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage,
   limits: {
-    fileSize: 2 * 1024 * 1024, // 2MB max
+    fileSize: 15 * 1024 * 1024, // 15MB max (adapté aux photos prises depuis un smartphone)
     files: 1,
   },
   fileFilter: (req, file, cb) => {
@@ -68,7 +68,7 @@ router.post('/upload', (req, res, next) => {
   upload.single('image')(req, res, (err) => {
     if (err) {
       if (err.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ message: 'Image trop volumineuse. La taille maximale autorisée est de 2 Mo.' });
+        return res.status(400).json({ message: 'Image trop volumineuse. La taille maximale autorisée est de 15 Mo.' });
       }
       return res.status(400).json({ message: err.message || "Erreur lors de l'envoi de l'image." });
     }

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { optimizeImageForUpload } from '../../utils/imageOptimizer';
 
 export default function ProductModal({
   isOpen,
@@ -121,12 +122,14 @@ export default function ProductModal({
     try {
       setUploading(true);
       setError('');
-      const res = await api.uploadImage(file);
+      const optimizedFile = await optimizeImageForUpload(file);
+      const res = await api.uploadImage(optimizedFile);
       setImage(res.url);
     } catch (err) {
-      setError(t('upload_error'));
+      setError(err.message || t('upload_error'));
     } finally {
       setUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -383,14 +386,18 @@ export default function ProductModal({
                 />
               ) : (
                 <div className="flex items-center gap-3">
-                  <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300">
+                  <label
+                    htmlFor="product-image-file-input"
+                    className="relative overflow-hidden flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300 active:scale-[0.99]"
+                  >
                     <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400" />
                     <span>{uploading ? t('uploading') : (image ? t('replace_photo') : t('select_photo'))}</span>
                     <input
+                      id="product-image-file-input"
                       type="file"
                       accept="image/*"
                       onChange={handleFileUpload}
-                      className="hidden"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       disabled={uploading}
                     />
                   </label>

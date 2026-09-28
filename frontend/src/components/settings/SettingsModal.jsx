@@ -164,6 +164,8 @@ export default function SettingsModal({ isOpen, onClose }) {
         }
       };
       reader.readAsDataURL(file);
+    } finally {
+      e.target.value = '';
     }
   };
 
@@ -546,8 +548,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 
                     {/* Carte Importer une image (style Google Chrome "Importer depuis l'appareil") */}
                     <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative cursor-pointer group ${
+                      className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative overflow-hidden cursor-pointer group ${
                         wallpaper === 'custom'
                           ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
                           : 'border-dashed border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/30 hover:border-amber-500/60 dark:hover:border-amber-500/60'
@@ -558,7 +559,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         type="file"
                         accept="image/*"
                         onChange={handleCustomImageUpload}
-                        className="hidden"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
 
                       <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-700 flex-shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
