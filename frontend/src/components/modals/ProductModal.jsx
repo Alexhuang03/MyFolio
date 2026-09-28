@@ -52,7 +52,7 @@ export default function ProductModal({
   const [selectedLabelIds, setSelectedLabelIds] = useState([]);
   const [selectedSubLabelIds, setSelectedSubLabelIds] = useState([]);
 
-  const [imageType, setImageType] = useState('url'); // 'url' ou 'file'
+  const [imageType, setImageType] = useState('file'); // 'url' ou 'file'
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,7 +62,20 @@ export default function ProductModal({
       setName(initialProduct.name || '');
       setDescription(initialProduct.description || '');
       setPrice(initialProduct.price !== null && initialProduct.price !== undefined ? initialProduct.price : '');
-      setImage(initialProduct.image || '');
+      const prodImage = initialProduct.image || '';
+      setImage(prodImage);
+      const isLocal =
+        prodImage.startsWith('/uploads/') ||
+        prodImage.startsWith('data:') ||
+        prodImage.startsWith('blob:') ||
+        (prodImage && !prodImage.startsWith('http://') && !prodImage.startsWith('https://'));
+      if (isLocal) {
+        setImageType('file');
+      } else if (prodImage) {
+        setImageType('url');
+      } else {
+        setImageType('file');
+      }
       setLocation(initialProduct.location || '');
       setDate(initialProduct.date || '');
       setRating(initialProduct.rating !== null && initialProduct.rating !== undefined ? initialProduct.rating : null);
@@ -75,6 +88,7 @@ export default function ProductModal({
       setDescription('');
       setPrice('');
       setImage('');
+      setImageType('file');
       setLocation('');
       setDate('');
       setRating(null);
@@ -169,7 +183,7 @@ export default function ProductModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
           {error && (
             <div className="p-3 text-xs bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 rounded-lg">
               {error}
@@ -321,7 +335,8 @@ export default function ProductModal({
                     <span>{t('url_label')}</span>
                   </label>
                   <input
-                    type="url"
+                    type="text"
+                    inputMode="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder={t('url_placeholder')}
@@ -359,7 +374,8 @@ export default function ProductModal({
 
               {imageType === 'url' ? (
                 <input
-                  type="url"
+                  type="text"
+                  inputMode="url"
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
@@ -369,7 +385,7 @@ export default function ProductModal({
                 <div className="flex items-center gap-3">
                   <label className="flex-1 flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-stone-300 dark:border-stone-700 hover:border-stone-400 dark:hover:border-stone-600 rounded-xl cursor-pointer bg-stone-50 dark:bg-stone-800/60 hover:bg-stone-100/60 dark:hover:bg-stone-800 transition-all text-xs font-medium text-stone-600 dark:text-stone-300">
                     <Upload className="w-4 h-4 text-stone-500 dark:text-stone-400" />
-                    <span>{uploading ? t('uploading') : t('select_photo')}</span>
+                    <span>{uploading ? t('uploading') : (image ? t('replace_photo') : t('select_photo'))}</span>
                     <input
                       type="file"
                       accept="image/*"
