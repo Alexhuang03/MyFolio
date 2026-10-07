@@ -4,6 +4,7 @@ import CategorySidebar from '../navigation/CategorySidebar';
 import ProductWorkspace from '../content/ProductWorkspace';
 import TagModal from '../modals/TagModal';
 import ProductModal from '../modals/ProductModal';
+import ProductDetailModal from '../modals/ProductDetailModal';
 import { PIVOT_MODES, getPivotViewData } from '../../utils/pivotEngine';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -39,6 +40,7 @@ export default function BookDetailView({
   // Modals state
   const [tagModalConfig, setTagModalConfig] = useState(null); // { isOpen, tagType, initialTag }
   const [productModalConfig, setProductModalConfig] = useState(null); // { isOpen, initialProduct, defaultLabelId, defaultSubLabelId }
+  const [selectedProductDetail, setSelectedProductDetail] = useState(null);
 
   // Pivot computation
   const {
@@ -223,6 +225,7 @@ export default function BookDetailView({
           onAddProduct={handleOpenAddProduct}
           onEditProduct={handleOpenEditProduct}
           onDeleteProduct={onDeleteProduct}
+          onViewProduct={(product) => setSelectedProductDetail(product)}
           onOpenMobileCategories={() => setIsMobileSidebarOpen(true)}
           isReadOnly={isReadOnly}
         />
@@ -285,6 +288,25 @@ export default function BookDetailView({
             if (onUpdateBook) {
               await onUpdateBook(book._id, data);
             }
+          }}
+        />
+      )}
+
+      {/* Product Detail / Presentation Modal */}
+      {selectedProductDetail && (
+        <ProductDetailModal
+          isOpen={Boolean(selectedProductDetail)}
+          product={
+            products.find((p) => p._id === selectedProductDetail._id) || selectedProductDetail
+          }
+          labels={labels}
+          subLabels={subLabels}
+          fieldsConfig={book?.fieldsConfig}
+          isReadOnly={isReadOnly}
+          onClose={() => setSelectedProductDetail(null)}
+          onEdit={(prod) => {
+            setSelectedProductDetail(null);
+            handleOpenEditProduct(prod);
           }}
         />
       )}

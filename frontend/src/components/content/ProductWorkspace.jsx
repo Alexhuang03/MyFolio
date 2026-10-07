@@ -14,6 +14,7 @@ export default function ProductWorkspace({
   onAddProduct,
   onEditProduct,
   onDeleteProduct,
+  onViewProduct,
   onOpenMobileCategories,
   isReadOnly = false,
 }) {
@@ -195,6 +196,7 @@ export default function ProductWorkspace({
                       fieldsConfig={fieldsConfig}
                       onEdit={onEditProduct}
                       onDelete={onDeleteProduct}
+                      onView={onViewProduct}
                       isReadOnly={isReadOnly}
                     />
                   ))}

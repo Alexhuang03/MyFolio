@@ -17,6 +17,7 @@ export default function ProductCard({
   fieldsConfig,
   onEdit,
   onDelete,
+  onView,
   isReadOnly = false,
 }) {
   const { t } = useLanguage();
@@ -52,7 +53,10 @@ export default function ProductCard({
     config.customFields?.some((cf) => product.customValues?.[cf.name]);
 
   return (
-    <div className="group relative bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs hover:shadow-md dark:hover:border-stone-700 transition-all flex flex-col overflow-hidden">
+    <div
+      onClick={() => onView && onView(product)}
+      className="group relative bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/50 transition-all flex flex-col overflow-hidden cursor-pointer"
+    >
       {/* Product Image (Rendered only when hasImage is enabled) */}
       {config.hasImage && (
         <div className="relative w-full h-40 bg-stone-100 dark:bg-stone-800 overflow-hidden select-none">
@@ -89,14 +93,20 @@ export default function ProductCard({
           {!isReadOnly && (
             <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
-                onClick={() => onEdit(product)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(product);
+                }}
                 className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-white dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
                 title={t('edit_element')}
               >
                 <Edit3 className="w-3.5 h-3.5" />
               </button>
               <button
-                onClick={() => onDelete(product)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(product);
+                }}
                 className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
                 title={t('delete_element')}
               >
@@ -125,14 +135,20 @@ export default function ProductCard({
                 {!isReadOnly && (
                   <>
                     <button
-                      onClick={() => onEdit(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(product);
+                      }}
                       className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-md transition-colors"
                       title={t('edit_element')}
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
                     <button
-                      onClick={() => onDelete(product)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(product);
+                      }}
                       className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/50 rounded-md transition-colors"
                       title={t('delete_element')}
                     >

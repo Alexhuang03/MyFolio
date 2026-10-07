@@ -173,6 +173,14 @@ const translations = {
     add_to_book: 'Ajouter au livre',
     preview: 'Aperçu',
 
+    // Product Detail View
+    product_details: "Détails de l'élément",
+    full_description: 'Description',
+    no_description_provided: 'Aucune description fournie.',
+    open_link: 'Ouvrir le lien',
+    edit_from_detail: 'Modifier',
+    close: 'Fermer',
+
     // Toast Messages
     book_created: 'Le livre "{title}" a été créé avec succès.',
     book_updated: 'Livre mis à jour.',
@@ -533,6 +541,14 @@ const translations = {
     general_section_note: 'If no sub-label is checked, the element will appear in the "General" section.',
     add_to_book: 'Add to book',
     preview: 'Preview',
+
+    // Product Detail View
+    product_details: 'Item Details',
+    full_description: 'Description',
+    no_description_provided: 'No description provided.',
+    open_link: 'Open link',
+    edit_from_detail: 'Edit',
+    close: 'Close',
     book_created: 'The book "{title}" has been created successfully.',
     book_updated: 'Book updated.',
     book_favorited: '"{title}" added to favorites.',
@@ -886,6 +902,14 @@ const translations = {
     general_section_note: '如果未勾选子标签，元素将出现在"通用"区。',
     add_to_book: '添加到书籍',
     preview: '预览',
+
+    // Product Detail View
+    product_details: '元素详情',
+    full_description: '描述',
+    no_description_provided: '暂无描述。',
+    open_link: '打开链接',
+    edit_from_detail: '编辑',
+    close: '关闭',
     book_created: '书籍"{title}"已成功创建。',
     book_updated: '书籍已更新。',
     book_favorited: '"{title}"已加入收藏。',
