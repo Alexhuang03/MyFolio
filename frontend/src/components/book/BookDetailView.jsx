@@ -43,6 +43,7 @@ export default function BookDetailView({
   onUpdateProduct,
   onDeleteProduct,
   onDeleteMultipleProducts,
+  onUpdateCart,
   showToast,
 }) {
   const { t } = useLanguage();
@@ -54,30 +55,38 @@ export default function BookDetailView({
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isBookSettingsOpen, setIsBookSettingsOpen] = useState(false);
 
-  // Selection mode & Cart state
+  // Selection mode & Cart state (Partagé en temps réel)
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState(new Set());
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [openedFromCart, setOpenedFromCart] = useState(false);
+
+  // Cart item IDs et Completed IDs synchronisés avec le livre partagé
   const [cartItemIds, setCartItemIds] = useState(() => {
-    try {
-      const saved = localStorage.getItem(`myfolio_cart_${book?._id}`);
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    } catch (e) {
-      return new Set();
+    const fromBook = book?.cart?.itemIds;
+    if (Array.isArray(fromBook)) {
+      return new Set(fromBook.map(String));
     }
+    return new Set();
   });
 
-  // Sync cart to localStorage
-  useEffect(() => {
-    if (book?._id) {
-      try {
-        localStorage.setItem(`myfolio_cart_${book._id}`, JSON.stringify([...cartItemIds]));
-      } catch (e) {
-        // ignore storage errors
-      }
+  const [completedItemIds, setCompletedItemIds] = useState(() => {
+    const fromBook = book?.cart?.completedIds;
+    if (Array.isArray(fromBook)) {
+      return new Set(fromBook.map(String));
     }
-  }, [cartItemIds, book?._id]);
+    return new Set();
+  });
+
+  // Synchronisation dynamique quand book.cart est mis à jour (WebSocket ou API)
+  useEffect(() => {
+    if (book?.cart) {
+      const serverItemIds = (book.cart.itemIds || []).map(String);
+      const serverCompletedIds = (book.cart.completedIds || []).map(String);
+      setCartItemIds(new Set(serverItemIds));
+      setCompletedItemIds(new Set(serverCompletedIds));
+    }
+  }, [book?.cart]);
 
   // Modals state
   const [tagModalConfig, setTagModalConfig] = useState(null); // { isOpen, tagType, initialTag }
@@ -176,15 +185,25 @@ export default function BookDetailView({
 
   const handleAddToCart = () => {
     if (selectedProductIds.size === 0) return;
-    const count = selectedProductIds.size;
+    const idsToAdd = [...selectedProductIds].map(String);
+    const count = idsToAdd.length;
+
+    // Mise à jour optimiste immédiate
     setCartItemIds((prev) => {
       const next = new Set(prev);
-      selectedProductIds.forEach((id) => next.add(id));
+      idsToAdd.forEach((id) => next.add(id));
       return next;
     });
-    showToast?.(t('items_added_to_cart', { count }));
+
     setIsSelectionMode(false);
     setSelectedProductIds(new Set());
+    showToast?.(t('items_added_to_cart', { count }));
+
+    // Synchronisation collaborative en temps réel
+    onUpdateCart?.({
+      action: 'add',
+      productIds: idsToAdd,
+    });
   };
 
   const handleDeleteSelected = async () => {
@@ -192,6 +211,23 @@ export default function BookDetailView({
     const selectedProducts = products.filter((p) => selectedProductIds.has(p._id));
     const count = selectedProducts.length;
     if (window.confirm(t('delete_multiple_products_confirm', { count }))) {
+      const removedIds = [...selectedProductIds].map(String);
+
+      // Supprimer aussi du panier si présents
+      setCartItemIds((prev) => {
+        const next = new Set(prev);
+        removedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setCompletedItemIds((prev) => {
+        const next = new Set(prev);
+        removedIds.forEach((id) => next.delete(id));
+        return next;
+      });
+
+      setIsSelectionMode(false);
+      setSelectedProductIds(new Set());
+
       if (onDeleteMultipleProducts) {
         await onDeleteMultipleProducts(selectedProducts);
       } else {
@@ -199,14 +235,6 @@ export default function BookDetailView({
           await onDeleteProduct(prod);
         }
       }
-      // Supprimer aussi du panier si présents
-      setCartItemIds((prev) => {
-        const next = new Set(prev);
-        selectedProductIds.forEach((id) => next.delete(id));
-        return next;
-      });
-      setIsSelectionMode(false);
-      setSelectedProductIds(new Set());
     }
   };
 
@@ -215,17 +243,54 @@ export default function BookDetailView({
   }, [products, cartItemIds]);
 
   const handleRemoveFromCart = (id) => {
+    const idStr = String(id);
     setCartItemIds((prev) => {
       const next = new Set(prev);
-      next.delete(id);
+      next.delete(idStr);
+      return next;
+    });
+    setCompletedItemIds((prev) => {
+      const next = new Set(prev);
+      next.delete(idStr);
       return next;
     });
     showToast?.(t('item_removed_from_cart'));
+
+    // Synchronisation collaborative en temps réel
+    onUpdateCart?.({
+      action: 'remove',
+      productId: idStr,
+    });
   };
 
   const handleClearCart = () => {
     setCartItemIds(new Set());
+    setCompletedItemIds(new Set());
     showToast?.(t('cart_cleared'));
+
+    // Synchronisation collaborative en temps réel
+    onUpdateCart?.({
+      action: 'clear',
+    });
+  };
+
+  const handleToggleCompleted = (id) => {
+    const idStr = String(id);
+    setCompletedItemIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(idStr)) {
+        next.delete(idStr);
+      } else {
+        next.add(idStr);
+      }
+      return next;
+    });
+
+    // Synchronisation collaborative en temps réel
+    onUpdateCart?.({
+      action: 'toggle_completed',
+      productId: idStr,
+    });
   };
 
   const coverSrc = getCoverSrc(book.coverImage);
@@ -546,6 +611,8 @@ export default function BookDetailView({
       <CartModal
         isOpen={isCartModalOpen}
         cartItems={cartProducts}
+        completedIds={completedItemIds}
+        onToggleCompleted={handleToggleCompleted}
         onClose={() => setIsCartModalOpen(false)}
         onRemoveFromCart={handleRemoveFromCart}
         onClearCart={handleClearCart}

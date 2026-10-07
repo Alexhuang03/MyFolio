@@ -56,6 +56,17 @@ export const api = {
     return res.json();
   },
 
+  // Shared Cart (Temps réel)
+  async updateBookCart(bookId, cartData) {
+    const res = await fetch(`${API_BASE}/books/${bookId}/cart`, {
+      method: 'PUT',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(cartData),
+    });
+    if (!res.ok) throw new Error('Erreur lors de la mise à jour du panier');
+    return res.json();
+  },
+
   // Sharing & Collaborators
   async shareBook(bookId, { email, role }) {
     const res = await fetch(`${API_BASE}/books/${bookId}/share`, {

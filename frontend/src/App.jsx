@@ -314,6 +314,19 @@ export default function App() {
       }));
     };
 
+    // Panier partagé en direct
+    const onCartUpdated = ({ bookId: eventBookId, cart }) => {
+      if (String(eventBookId) === bookId) {
+        setSelectedBook((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            cart: cart || { itemIds: [], completedIds: [] },
+          };
+        });
+      }
+    };
+
     socket.on('book:updated', onBookUpdated);
     socket.on('book:deleted', onBookDeleted);
     socket.on('collaborators:updated', onCollaboratorsUpdated);
@@ -330,6 +343,8 @@ export default function App() {
     socket.on('sublabel:created', onSubLabelCreated);
     socket.on('sublabel:updated', onSubLabelUpdated);
     socket.on('sublabel:deleted', onSubLabelDeleted);
+
+    socket.on('cart:updated', onCartUpdated);
 
     return () => {
       leaveBookRoom(bookId);
@@ -350,6 +365,8 @@ export default function App() {
       socket.off('sublabel:created', onSubLabelCreated);
       socket.off('sublabel:updated', onSubLabelUpdated);
       socket.off('sublabel:deleted', onSubLabelDeleted);
+
+      socket.off('cart:updated', onCartUpdated);
     };
   }, [selectedBook?._id]);
 
@@ -685,6 +702,20 @@ export default function App() {
     }
   };
 
+  // Synchronisation du panier partagé
+  const handleUpdateCart = async (cartAction) => {
+    if (!selectedBook?._id) return;
+    try {
+      const res = await api.updateBookCart(selectedBook._id, cartAction);
+      if (res?.cart) {
+        setSelectedBook((prev) => (prev ? { ...prev, cart: res.cart } : prev));
+      }
+    } catch (err) {
+      console.error('Erreur synchronisation panier:', err);
+      showToast(err.message, 'error');
+    }
+  };
+
   return (
     <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200 relative">
       {/* Illustrated Wallpaper: Chat Bibliophile (fond.png cropped and transparent) */}
@@ -750,6 +781,7 @@ export default function App() {
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
             onDeleteMultipleProducts={handleDeleteMultipleProducts}
+            onUpdateCart={handleUpdateCart}
             showToast={showToast}
           />
         ) : (

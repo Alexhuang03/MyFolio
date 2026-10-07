@@ -14,30 +14,14 @@ import { useLanguage } from '../../i18n/LanguageContext';
 export default function CartModal({
   isOpen,
   cartItems = [],
+  completedIds = new Set(),
+  onToggleCompleted,
   onClose,
   onRemoveFromCart,
   onClearCart,
   onViewProduct,
 }) {
   const { t } = useLanguage();
-  const [completedIds, setCompletedIds] = useState(new Set());
-
-  // Purge toute case cochée dont l'élément n'est plus dans le panier
-  useEffect(() => {
-    const currentItemIds = new Set(cartItems.map((item) => item._id));
-    setCompletedIds((prev) => {
-      let changed = false;
-      const next = new Set();
-      for (const id of prev) {
-        if (currentItemIds.has(id)) {
-          next.add(id);
-        } else {
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-  }, [cartItems]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -53,29 +37,22 @@ export default function CartModal({
 
   if (!isOpen) return null;
 
-  const toggleCompleted = (id) => {
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  const isItemChecked = (id) => {
+    const idStr = String(id);
+    if (completedIds instanceof Set) {
+      return completedIds.has(idStr);
+    }
+    if (Array.isArray(completedIds)) {
+      return completedIds.map(String).includes(idStr);
+    }
+    return false;
   };
 
   const handleClearCartClick = () => {
-    setCompletedIds(new Set());
     onClearCart?.();
   };
 
   const handleRemoveItem = (id) => {
-    setCompletedIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
     onRemoveFromCart?.(id);
   };
 
@@ -134,7 +111,7 @@ export default function CartModal({
             </div>
           ) : (
             cartItems.map((item) => {
-              const isChecked = completedIds.has(item._id);
+              const isChecked = isItemChecked(item._id);
               return (
                 <div
                   key={item._id}
@@ -146,7 +123,7 @@ export default function CartModal({
                 >
                   {/* Checklist checkbox */}
                   <button
-                    onClick={() => toggleCompleted(item._id)}
+                    onClick={() => onToggleCompleted?.(item._id)}
                     className={`w-6 h-6 rounded-lg border flex items-center justify-center transition-all flex-shrink-0 cursor-pointer ${
                       isChecked
                         ? 'bg-emerald-500 border-emerald-500 text-white'

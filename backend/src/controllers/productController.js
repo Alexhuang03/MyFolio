@@ -138,6 +138,28 @@ export const deleteProduct = async (req, res) => {
     const bookId = product.bookId;
     await Product.findByIdAndDelete(req.params.id);
 
+    // Retirer aussi le produit du panier du livre s'il y était
+    const updatedBook = await Book.findByIdAndUpdate(
+      bookId,
+      {
+        $pull: {
+          'cart.itemIds': req.params.id,
+          'cart.completedIds': req.params.id,
+        },
+      },
+      { new: true }
+    );
+
+    if (updatedBook && updatedBook.cart) {
+      emitToBook(bookId, 'cart:updated', {
+        bookId,
+        cart: {
+          itemIds: (updatedBook.cart.itemIds || []).map(String),
+          completedIds: (updatedBook.cart.completedIds || []).map(String),
+        },
+      });
+    }
+
     // Émettre en temps réel à tous les collaborateurs connectés sur ce livre
     emitToBook(bookId, 'product:deleted', { productId: req.params.id });
 

@@ -420,3 +420,88 @@ export const removeCollaborator = async (req, res) => {
     res.status(500).json({ message: 'Erreur lors du retrait du collaborateur', error: error.message });
   }
 };
+
+// Mettre à jour le panier partagé d'un livre (actions: add, remove, toggle_completed, clear, sync)
+export const updateBookCart = async (req, res) => {
+  try {
+    const bookId = req.params.id;
+    const { hasAccess, book } = await getBookAccess(bookId, req.userId);
+
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+
+    const { action, productIds, productId, itemIds, completedIds } = req.body;
+
+    if (!book.cart) {
+      book.cart = { itemIds: [], completedIds: [] };
+    }
+    if (!book.cart.itemIds) book.cart.itemIds = [];
+    if (!book.cart.completedIds) book.cart.completedIds = [];
+
+    let currentItemIds = (book.cart.itemIds || []).map((id) => id.toString());
+    let currentCompletedIds = (book.cart.completedIds || []).map((id) => id.toString());
+
+    if (action === 'add') {
+      const toAdd = Array.isArray(productIds)
+        ? productIds.map(String)
+        : productId
+        ? [String(productId)]
+        : [];
+      toAdd.forEach((id) => {
+        if (!currentItemIds.includes(id)) {
+          currentItemIds.push(id);
+        }
+      });
+    } else if (action === 'remove') {
+      const toRemove = String(productId);
+      currentItemIds = currentItemIds.filter((id) => id !== toRemove);
+      currentCompletedIds = currentCompletedIds.filter((id) => id !== toRemove);
+    } else if (action === 'toggle_completed') {
+      const targetId = String(productId);
+      if (currentCompletedIds.includes(targetId)) {
+        currentCompletedIds = currentCompletedIds.filter((id) => id !== targetId);
+      } else {
+        currentCompletedIds.push(targetId);
+      }
+    } else if (action === 'clear') {
+      currentItemIds = [];
+      currentCompletedIds = [];
+    } else if (action === 'sync') {
+      if (Array.isArray(itemIds)) {
+        currentItemIds = itemIds.map(String);
+      }
+      if (Array.isArray(completedIds)) {
+        currentCompletedIds = completedIds.map(String);
+      }
+    }
+
+    // Filtrer les completedIds qui ne sont plus dans itemIds
+    currentCompletedIds = currentCompletedIds.filter((id) => currentItemIds.includes(id));
+
+    book.cart = {
+      itemIds: currentItemIds,
+      completedIds: currentCompletedIds,
+    };
+
+    await book.save();
+
+    const cartPayload = {
+      itemIds: currentItemIds,
+      completedIds: currentCompletedIds,
+    };
+
+    // Émettre en temps réel à tous les collaborateurs connectés sur ce livre
+    emitToBook(bookId, 'cart:updated', {
+      bookId,
+      cart: cartPayload,
+    });
+
+    res.json({
+      message: 'Panier mis à jour avec succès',
+      cart: cartPayload,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la mise à jour du panier', error: error.message });
+  }
+};

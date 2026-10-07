@@ -6,6 +6,7 @@ import {
   updateBook,
   deleteBook,
   getBookContent,
+  updateBookCart,
   shareBook,
   updateCollaboratorRole,
   removeCollaborator,
@@ -23,6 +24,9 @@ router.get('/:id', getBookById);
 router.put('/:id', updateBook);
 router.delete('/:id', deleteBook);
 router.get('/:id/content', getBookContent);
+
+// Panier partagé en temps réel
+router.put('/:id/cart', updateBookCart);
 
 // Routes de partage et gestion des permissions (Google Docs style)
 router.post('/:id/share', shareBook);

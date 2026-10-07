@@ -45,6 +45,26 @@ const BookSchema = new mongoose.Schema(
         },
       ],
     },
+    cart: {
+      itemIds: {
+        type: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+          },
+        ],
+        default: [],
+      },
+      completedIds: {
+        type: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+          },
+        ],
+        default: [],
+      },
+    },
     collaborators: [
       {
         userId: {
