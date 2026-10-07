@@ -17,6 +17,9 @@ export default function ProductWorkspace({
   onViewProduct,
   onOpenMobileCategories,
   isReadOnly = false,
+  isSelectionMode = false,
+  selectedProductIds = new Set(),
+  onToggleSelect,
 }) {
   const { t } = useLanguage();
   const [filterQuery, setFilterQuery] = useState('');
@@ -198,6 +201,9 @@ export default function ProductWorkspace({
                       onDelete={onDeleteProduct}
                       onView={onViewProduct}
                       isReadOnly={isReadOnly}
+                      isSelectionMode={isSelectionMode}
+                      isSelected={selectedProductIds.has(product._id)}
+                      onToggleSelect={onToggleSelect}
                     />
                   ))}
                 </div>

@@ -1,10 +1,25 @@
-import React, { useState, useMemo } from 'react';
-import { ArrowLeft, BookOpen, Shuffle, Plus, Layers, Settings, BookMarked, Eye } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import {
+  ArrowLeft,
+  BookOpen,
+  Shuffle,
+  Plus,
+  Layers,
+  Settings,
+  BookMarked,
+  Eye,
+  CheckSquare,
+  CheckCheck,
+  X,
+  ShoppingBag,
+  Trash2,
+} from 'lucide-react';
 import CategorySidebar from '../navigation/CategorySidebar';
 import ProductWorkspace from '../content/ProductWorkspace';
 import TagModal from '../modals/TagModal';
 import ProductModal from '../modals/ProductModal';
 import ProductDetailModal from '../modals/ProductDetailModal';
+import CartModal from '../modals/CartModal';
 import { PIVOT_MODES, getPivotViewData } from '../../utils/pivotEngine';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -27,6 +42,8 @@ export default function BookDetailView({
   onCreateProduct,
   onUpdateProduct,
   onDeleteProduct,
+  onDeleteMultipleProducts,
+  showToast,
 }) {
   const { t } = useLanguage();
   const isReadOnly = book?.myRole === 'viewer';
@@ -36,6 +53,31 @@ export default function BookDetailView({
   const [selectedPrimaryId, setSelectedPrimaryId] = useState(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isBookSettingsOpen, setIsBookSettingsOpen] = useState(false);
+
+  // Selection mode & Cart state
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedProductIds, setSelectedProductIds] = useState(new Set());
+  const [isCartModalOpen, setIsCartModalOpen] = useState(false);
+  const [openedFromCart, setOpenedFromCart] = useState(false);
+  const [cartItemIds, setCartItemIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem(`myfolio_cart_${book?._id}`);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch (e) {
+      return new Set();
+    }
+  });
+
+  // Sync cart to localStorage
+  useEffect(() => {
+    if (book?._id) {
+      try {
+        localStorage.setItem(`myfolio_cart_${book._id}`, JSON.stringify([...cartItemIds]));
+      } catch (e) {
+        // ignore storage errors
+      }
+    }
+  }, [cartItemIds, book?._id]);
 
   // Modals state
   const [tagModalConfig, setTagModalConfig] = useState(null); // { isOpen, tagType, initialTag }
@@ -97,6 +139,93 @@ export default function BookDetailView({
       isOpen: true,
       initialProduct: prod,
     });
+  };
+
+  // Selection and Cart handlers
+  const allVisibleIds = useMemo(() => {
+    return sections.flatMap((sec) => sec.products).map((p) => p._id);
+  }, [sections]);
+
+  const handleToggleSelectProduct = (product) => {
+    setSelectedProductIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(product._id)) {
+        next.delete(product._id);
+      } else {
+        next.add(product._id);
+      }
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    const isAllSelected =
+      allVisibleIds.length > 0 && allVisibleIds.every((id) => selectedProductIds.has(id));
+
+    if (isAllSelected) {
+      setSelectedProductIds(new Set());
+    } else {
+      setSelectedProductIds(new Set(allVisibleIds));
+    }
+  };
+
+  const handleCancelSelection = () => {
+    setIsSelectionMode(false);
+    setSelectedProductIds(new Set());
+  };
+
+  const handleAddToCart = () => {
+    if (selectedProductIds.size === 0) return;
+    const count = selectedProductIds.size;
+    setCartItemIds((prev) => {
+      const next = new Set(prev);
+      selectedProductIds.forEach((id) => next.add(id));
+      return next;
+    });
+    showToast?.(t('items_added_to_cart', { count }));
+    setIsSelectionMode(false);
+    setSelectedProductIds(new Set());
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedProductIds.size === 0) return;
+    const selectedProducts = products.filter((p) => selectedProductIds.has(p._id));
+    const count = selectedProducts.length;
+    if (window.confirm(t('delete_multiple_products_confirm', { count }))) {
+      if (onDeleteMultipleProducts) {
+        await onDeleteMultipleProducts(selectedProducts);
+      } else {
+        for (const prod of selectedProducts) {
+          await onDeleteProduct(prod);
+        }
+      }
+      // Supprimer aussi du panier si présents
+      setCartItemIds((prev) => {
+        const next = new Set(prev);
+        selectedProductIds.forEach((id) => next.delete(id));
+        return next;
+      });
+      setIsSelectionMode(false);
+      setSelectedProductIds(new Set());
+    }
+  };
+
+  const cartProducts = useMemo(() => {
+    return products.filter((p) => cartItemIds.has(p._id));
+  }, [products, cartItemIds]);
+
+  const handleRemoveFromCart = (id) => {
+    setCartItemIds((prev) => {
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
+    showToast?.(t('item_removed_from_cart'));
+  };
+
+  const handleClearCart = () => {
+    setCartItemIds(new Set());
+    showToast?.(t('cart_cleared'));
   };
 
   const coverSrc = getCoverSrc(book.coverImage);
@@ -178,15 +307,61 @@ export default function BookDetailView({
             </span>
           </button>
 
-          {/* Add Product Button (hidden in read-only) */}
-          {!isReadOnly && (
+          {/* Bouton Panier */}
+          <button
+            onClick={() => setIsCartModalOpen(true)}
+            className="relative px-2.5 sm:px-3 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer border border-stone-200/80 dark:border-stone-700"
+            title={t('cart_title')}
+          >
+            <ShoppingBag className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+            <span className="hidden md:inline">{t('cart_btn')}</span>
+            {cartProducts.length > 0 && (
+              <span className="px-1.5 py-0.2 bg-amber-600 text-white text-[10px] font-bold rounded-full ml-0.5 animate-scale-up">
+                {cartProducts.length}
+              </span>
+            )}
+          </button>
+
+          {/* Bouton Sélectionner OU (Tout sélectionner + Annuler croix) */}
+          {!isSelectionMode ? (
             <button
-              onClick={() => handleOpenAddProduct(activePrimaryId)}
-              className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5"
+              onClick={() => setIsSelectionMode(true)}
+              className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+              title={t('select_mode')}
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{t('element_btn')}</span>
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('select_mode')}</span>
             </button>
+          ) : (
+            <div className="flex items-center gap-1.5 animate-fade-in">
+              {/* Bouton Tout sélectionner */}
+              <button
+                onClick={handleSelectAll}
+                className="px-2.5 sm:px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+                title={
+                  allVisibleIds.length > 0 && allVisibleIds.every((id) => selectedProductIds.has(id))
+                    ? t('deselect_all')
+                    : t('select_all')
+                }
+              >
+                <CheckCheck className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">
+                  {allVisibleIds.length > 0 && allVisibleIds.every((id) => selectedProductIds.has(id))
+                    ? t('deselect_all')
+                    : t('select_all')}
+                </span>
+              </button>
+
+              {/* Bouton Annuler (la croix) */}
+              <button
+                onClick={handleCancelSelection}
+                className="p-1.5 sm:px-2.5 py-1.5 bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 rounded-xl text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer border border-stone-200 dark:border-stone-700"
+                title={t('cancel_selection')}
+              >
+                <X className="w-4 h-4" />
+                <span className="hidden sm:inline">{t('cancel_selection')}</span>
+              </button>
+            </div>
           )}
         </div>
       </header>
@@ -228,6 +403,9 @@ export default function BookDetailView({
           onViewProduct={(product) => setSelectedProductDetail(product)}
           onOpenMobileCategories={() => setIsMobileSidebarOpen(true)}
           isReadOnly={isReadOnly}
+          isSelectionMode={isSelectionMode}
+          selectedProductIds={selectedProductIds}
+          onToggleSelect={handleToggleSelectProduct}
         />
       </div>
 
@@ -303,13 +481,80 @@ export default function BookDetailView({
           subLabels={subLabels}
           fieldsConfig={book?.fieldsConfig}
           isReadOnly={isReadOnly}
-          onClose={() => setSelectedProductDetail(null)}
+          onClose={() => {
+            setSelectedProductDetail(null);
+            setOpenedFromCart(false);
+          }}
           onEdit={(prod) => {
             setSelectedProductDetail(null);
+            setOpenedFromCart(false);
             handleOpenEditProduct(prod);
           }}
+          onBackToCart={
+            openedFromCart
+              ? () => {
+                  setSelectedProductDetail(null);
+                  setOpenedFromCart(false);
+                  setIsCartModalOpen(true);
+                }
+              : null
+          }
         />
       )}
+
+      {/* Floating Action Bar during Selection Mode */}
+      {isSelectionMode && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-stone-900/95 dark:bg-stone-900/95 text-white backdrop-blur-md px-4 sm:px-6 py-3 rounded-2xl shadow-2xl border border-stone-750 flex items-center gap-3 sm:gap-5 animate-slide-up max-w-[95vw]">
+          <div className="flex items-center gap-2 pr-2 border-r border-stone-700">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-xs font-semibold text-stone-200 whitespace-nowrap">
+              {t('items_selected', { count: selectedProductIds.size })}
+            </span>
+          </div>
+
+          {!isReadOnly && (
+            <button
+              onClick={handleDeleteSelected}
+              disabled={selectedProductIds.size === 0}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                selectedProductIds.size === 0
+                  ? 'text-stone-500 cursor-not-allowed opacity-50'
+                  : 'text-rose-400 hover:text-rose-300 hover:bg-rose-500/20 active:scale-95'
+              }`}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{t('delete_selected')}</span>
+            </button>
+          )}
+
+          <button
+            onClick={handleAddToCart}
+            disabled={selectedProductIds.size === 0}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer whitespace-nowrap ${
+              selectedProductIds.size === 0
+                ? 'bg-stone-800 text-stone-500 cursor-not-allowed opacity-50'
+                : 'bg-amber-600 hover:bg-amber-500 text-white active:scale-95 shadow-amber-600/30'
+            }`}
+          >
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span>{t('add_to_cart')}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Cart / Focus Modal */}
+      <CartModal
+        isOpen={isCartModalOpen}
+        cartItems={cartProducts}
+        onClose={() => setIsCartModalOpen(false)}
+        onRemoveFromCart={handleRemoveFromCart}
+        onClearCart={handleClearCart}
+        onViewProduct={(prod) => {
+          setIsCartModalOpen(false);
+          setOpenedFromCart(true);
+          setSelectedProductDetail(prod);
+        }}
+      />
     </div>
   );
 }

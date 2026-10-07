@@ -670,6 +670,21 @@ export default function App() {
     }
   };
 
+  const handleDeleteMultipleProducts = async (productsToDelete) => {
+    if (!productsToDelete || productsToDelete.length === 0) return;
+    try {
+      const ids = productsToDelete.map((p) => p._id);
+      await Promise.all(ids.map((id) => api.deleteProduct(id)));
+      setBookContent((prev) => ({
+        ...prev,
+        products: prev.products.filter((p) => !ids.includes(p._id)),
+      }));
+      showToast(t('multiple_products_deleted', { count: ids.length }));
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   return (
     <div className="min-h-screen font-sans text-stone-900 dark:text-stone-100 transition-colors duration-200 relative">
       {/* Illustrated Wallpaper: Chat Bibliophile (fond.png cropped and transparent) */}
@@ -734,6 +749,8 @@ export default function App() {
             onCreateProduct={handleCreateProduct}
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
+            onDeleteMultipleProducts={handleDeleteMultipleProducts}
+            showToast={showToast}
           />
         ) : (
           <LibraryView

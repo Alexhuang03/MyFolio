@@ -6,6 +6,7 @@ import {
   MapPin,
   Calendar,
   Star,
+  Check,
   Link as LinkIcon,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -19,6 +20,9 @@ export default function ProductCard({
   onDelete,
   onView,
   isReadOnly = false,
+  isSelectionMode = false,
+  isSelected = false,
+  onToggleSelect,
 }) {
   const { t } = useLanguage();
 
@@ -54,9 +58,31 @@ export default function ProductCard({
 
   return (
     <div
-      onClick={() => onView && onView(product)}
-      className="group relative bg-white dark:bg-stone-900 rounded-2xl border border-stone-200/80 dark:border-stone-800 shadow-xs hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/50 transition-all flex flex-col overflow-hidden cursor-pointer"
+      onClick={() => {
+        if (isSelectionMode) {
+          onToggleSelect?.(product);
+        } else {
+          onView?.(product);
+        }
+      }}
+      className={`group relative rounded-2xl border shadow-xs transition-all flex flex-col overflow-hidden cursor-pointer select-none ${
+        isSelected
+          ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 dark:border-amber-500 ring-2 ring-amber-500/40 shadow-md'
+          : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/50'
+      }`}
     >
+      {/* Selection Checkbox */}
+      {isSelectionMode && (
+        <div
+          className={`absolute top-2.5 right-2.5 z-20 w-6 h-6 rounded-full flex items-center justify-center transition-all ${
+            isSelected
+              ? 'bg-amber-600 text-white shadow-md ring-2 ring-white dark:ring-stone-900 scale-105'
+              : 'bg-white/90 dark:bg-stone-800/90 text-transparent border-2 border-stone-300 dark:border-stone-600 backdrop-blur-xs hover:border-amber-500'
+          }`}
+        >
+          <Check className="w-3.5 h-3.5 stroke-[3]" />
+        </div>
+      )}
       {/* Product Image (Rendered only when hasImage is enabled) */}
       {config.hasImage && (
         <div className="relative w-full h-40 bg-stone-100 dark:bg-stone-800 overflow-hidden select-none">
@@ -84,13 +110,17 @@ export default function ProductCard({
 
           {/* Price tag badge */}
           {config.hasPrice && product.price !== null && product.price !== undefined && (
-            <div className="absolute top-2.5 right-2.5 px-2.5 py-1 bg-stone-900/85 dark:bg-stone-950/90 backdrop-blur-xs text-white dark:text-amber-300 rounded-lg text-xs font-mono font-semibold shadow-xs border border-transparent dark:border-amber-500/20">
+            <div
+              className={`absolute top-2.5 px-2.5 py-1 bg-stone-900/85 dark:bg-stone-950/90 backdrop-blur-xs text-white dark:text-amber-300 rounded-lg text-xs font-mono font-semibold shadow-xs border border-transparent dark:border-amber-500/20 transition-all ${
+                isSelectionMode ? 'right-10' : 'right-2.5'
+              }`}
+            >
               {Number(product.price).toFixed(2)} €
             </div>
           )}
 
-          {/* Floating action buttons on hover (hidden in read-only) */}
-          {!isReadOnly && (
+          {/* Floating action buttons on hover (hidden in read-only and in selection mode) */}
+          {!isReadOnly && !isSelectionMode && (
             <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
               <button
                 onClick={(e) => {
@@ -132,7 +162,7 @@ export default function ProductCard({
                     {Number(product.price).toFixed(2)} €
                   </span>
                 )}
-                {!isReadOnly && (
+                {!isReadOnly && !isSelectionMode && (
                   <>
                     <button
                       onClick={(e) => {

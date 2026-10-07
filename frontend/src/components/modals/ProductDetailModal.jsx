@@ -10,6 +10,7 @@ import {
   FileText,
   Tag,
   Layers,
+  ArrowLeft,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -22,6 +23,7 @@ export default function ProductDetailModal({
   isReadOnly = false,
   onClose,
   onEdit,
+  onBackToCart,
 }) {
   const { t } = useLanguage();
 
@@ -101,13 +103,26 @@ export default function ProductDetailModal({
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors flex-shrink-0"
-            title={t('close')}
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {!isReadOnly && onEdit && (
+              <button
+                onClick={() => onEdit(product)}
+                className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title={t('edit_from_detail')}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>{t('edit_from_detail')}</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="p-1.5 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 rounded-lg transition-colors cursor-pointer flex-shrink-0"
+              title={t('close')}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Scrollable Body: Contenu avec défilement fluide pour les descriptions longues */}
@@ -276,26 +291,17 @@ export default function ProductDetailModal({
         </div>
 
         {/* Footer (Hauteur fixe flex-shrink-0) */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50 flex-shrink-0">
-          {!isReadOnly && onEdit ? (
+        {onBackToCart && (
+          <div className="flex items-center justify-center px-4 sm:px-6 py-3.5 sm:py-4 border-t border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50 flex-shrink-0 min-h-[56px]">
             <button
-              onClick={() => onEdit(product)}
-              className="px-3.5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              onClick={onBackToCart}
+              className="px-4 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 text-amber-900 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
             >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>{t('edit_from_detail')}</span>
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>{t('back_to_cart')}</span>
             </button>
-          ) : (
-            <div />
-          )}
-
-          <button
-            onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
-          >
-            {t('close')}
-          </button>
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
