@@ -3,7 +3,7 @@ import { Volume2, Pause, Play, Square, Loader2, SlidersHorizontal, X } from 'luc
 import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../services/api';
 import { stripMarkdown } from '../../utils/markdown';
-import { buildSpeechChunks, resolveVoice, setVoicePref, DEFAULT_VOICES } from '../../utils/speech';
+import { resolveVoice, setVoicePref, DEFAULT_VOICES } from '../../utils/speech';
 
 // Lecteur actif (une seule voix à la fois dans toute l'application)
 let activeReader = null;
@@ -32,7 +32,7 @@ const speakWithBrowser = (chunks, reader, onDone) => {
     if (reader.cancelled) return;
     if (index >= chunks.length) return onDone();
     const utterance = new SpeechSynthesisUtterance(chunks[index].text);
-    utterance.lang = browserLang(chunks[index].lang);
+    if (chunks[index].lang) utterance.lang = browserLang(chunks[index].lang);
     utterance.onend = () => speakAt(index + 1);
     utterance.onerror = (e) => {
       if (e.error !== 'interrupted' && e.error !== 'canceled') speakAt(index + 1);
@@ -48,6 +48,7 @@ export default function ReadAloudButton({ text = '' }) {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(null); // { langs, voices }
   const readerRef = useRef(null);
+  const planRef = useRef(null); // { text, promise } : découpage déjà demandé au serveur
 
   // Arrêter la lecture si la fiche est fermée
   useEffect(() => () => readerRef.current?.stop(), []);
@@ -140,10 +141,32 @@ export default function ReadAloudButton({ text = '' }) {
     playAt(0);
   };
 
+  // Découpage en passages avec leur langue (fait par le serveur), mémorisé tant que le texte ne change pas
+  const getPlan = () => {
+    if (planRef.current?.text !== text) {
+      const promise = api.planSpeech(text);
+      planRef.current = { text, promise };
+      promise.catch(() => {
+        if (planRef.current?.promise === promise) planRef.current = null; // Réessayer la prochaine fois
+      });
+    }
+    return planRef.current.promise;
+  };
+
   const play = async () => {
     const reader = startReader();
     setStatus('loading');
-    const chunks = await buildSpeechChunks(text);
+    let chunks;
+    try {
+      chunks = await getPlan();
+    } catch (err) {
+      // Serveur injoignable : lecture du texte entier avec la voix de l'appareil
+      console.warn('[TTS] Préparation impossible, voix de l’appareil utilisée :', err.message);
+      if (reader.cancelled) return;
+      setStatus('playing');
+      speakWithBrowser([{ text: stripMarkdown(text), lang: null }], reader, () => reader.stop());
+      return;
+    }
     if (!reader.cancelled) playChunks(chunks, reader);
   };
 
@@ -168,7 +191,7 @@ export default function ReadAloudButton({ text = '' }) {
     setIsSettingsOpen(true);
     if (settings) return;
     try {
-      const [chunks, voices] = await Promise.all([buildSpeechChunks(text), loadVoices()]);
+      const [chunks, voices] = await Promise.all([getPlan(), loadVoices()]);
       const langs = [...new Set(chunks.map((c) => c.lang))];
       setSettings({ langs, voices, chunks });
     } catch {
@@ -282,7 +305,7 @@ export default function ReadAloudButton({ text = '' }) {
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(false)}
-                className="p-0.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded cursor-pointer"
+                className="p-0.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-sm cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -311,7 +334,7 @@ export default function ReadAloudButton({ text = '' }) {
                         <select
                           value={current || ''}
                           onChange={(e) => changeVoice(lang, e.target.value)}
-                          className="flex-1 min-w-0 px-2 py-1.5 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                          className="flex-1 min-w-0 px-2 py-1.5 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30"
                         >
                           {options.map((v) => (
                             <option key={v.shortName} value={v.shortName}>

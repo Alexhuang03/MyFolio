@@ -66,7 +66,7 @@ export default function ProductCard({
           onView?.(product);
         }
       }}
-      className={`group relative rounded-2xl border shadow-xs transition-all flex flex-col overflow-hidden cursor-pointer select-none ${
+      className={`group relative rounded-2xl border shadow-2xs transition-all flex flex-col overflow-hidden cursor-pointer select-none ${
         isSelected
           ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-500 dark:border-amber-500 ring-2 ring-amber-500/40 shadow-md'
           : 'bg-white dark:bg-stone-900 border-stone-200/80 dark:border-stone-800 hover:shadow-md hover:border-amber-500/50 dark:hover:border-amber-500/50'
@@ -81,7 +81,7 @@ export default function ProductCard({
               : 'bg-white/90 dark:bg-stone-800/90 text-transparent border-2 border-stone-300 dark:border-stone-600 backdrop-blur-xs hover:border-amber-500'
           }`}
         >
-          <Check className="w-3.5 h-3.5 stroke-[3]" />
+          <Check className="w-3.5 h-3.5 stroke-3" />
         </div>
       )}
       {/* Product Image (Rendered only when hasImage is enabled) */}
@@ -112,7 +112,7 @@ export default function ProductCard({
           {/* Price tag badge */}
           {config.hasPrice && product.price !== null && product.price !== undefined && (
             <div
-              className={`absolute top-2.5 px-2.5 py-1 bg-stone-900/85 dark:bg-stone-950/90 backdrop-blur-xs text-white dark:text-amber-300 rounded-lg text-xs font-mono font-semibold shadow-xs border border-transparent dark:border-amber-500/20 transition-all ${
+              className={`absolute top-2.5 px-2.5 py-1 bg-stone-900/85 dark:bg-stone-950/90 backdrop-blur-xs text-white dark:text-amber-300 rounded-lg text-xs font-mono font-semibold shadow-2xs border border-transparent dark:border-amber-500/20 transition-all ${
                 isSelectionMode ? 'right-10' : 'right-2.5'
               }`}
             >
@@ -128,7 +128,7 @@ export default function ProductCard({
                   e.stopPropagation();
                   onEdit(product);
                 }}
-                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-white dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
+                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-white dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 rounded-lg shadow-xs backdrop-blur-xs transition-colors"
                 title={t('edit_element')}
               >
                 <Edit3 className="w-3.5 h-3.5" />
@@ -138,7 +138,7 @@ export default function ProductCard({
                   e.stopPropagation();
                   onDelete(product);
                 }}
-                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg shadow-sm backdrop-blur-xs transition-colors"
+                className="p-1.5 bg-white/90 dark:bg-stone-800/90 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-rose-600 dark:text-rose-400 rounded-lg shadow-xs backdrop-blur-xs transition-colors"
                 title={t('delete_element')}
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -157,7 +157,7 @@ export default function ProductCard({
               <h4 className="font-serif font-bold text-stone-900 dark:text-stone-100 text-sm leading-snug group-hover:text-amber-700 dark:group-hover:text-amber-400 transition-colors flex-1 min-w-0">
                 {product.name}
               </h4>
-              <div className="flex items-center gap-1 flex-shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {config.hasPrice && product.price !== null && product.price !== undefined && (
                   <span className="px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-amber-300 rounded-md text-xs font-mono font-semibold mr-1">
                     {Number(product.price).toFixed(2)} €
@@ -246,7 +246,7 @@ export default function ProductCard({
                   className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400 hover:underline bg-stone-50 dark:bg-stone-800/60 px-2 py-0.5 rounded-md border border-stone-200/60 dark:border-stone-750 truncate max-w-[150px]"
                   title={product.url}
                 >
-                  <LinkIcon className="w-3 h-3 flex-shrink-0" />
+                  <LinkIcon className="w-3 h-3 shrink-0" />
                   <span className="truncate">{product.url.replace(/^https?:\/\//, '')}</span>
                 </a>
               )}

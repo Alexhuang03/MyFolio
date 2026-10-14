@@ -310,7 +310,7 @@ export default function AuthScreen() {
       {/* Top Bar with Language and Theme Controls */}
       <div className="fixed top-4 right-4 sm:top-6 sm:right-6 z-20 flex items-center gap-2.5 bg-white/70 dark:bg-stone-900/70 backdrop-blur-md p-1.5 rounded-2xl border border-stone-200/60 dark:border-stone-800/60 shadow-lg">
         <LanguageSwitcher />
-        <div className="w-[1px] h-4 bg-stone-300 dark:bg-stone-700" />
+        <div className="w-px h-4 bg-stone-300 dark:bg-stone-700" />
         <ThemeToggle />
       </div>
 
@@ -318,7 +318,7 @@ export default function AuthScreen() {
       <div className="relative z-10 w-full max-w-[430px] my-auto">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-gradient-to-tr from-amber-600 to-amber-400 text-white shadow-xl shadow-amber-600/30 mb-3 transform hover:scale-105 transition-transform duration-300">
+          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-linear-to-tr from-amber-600 to-amber-400 text-white shadow-xl shadow-amber-600/30 mb-3 transform hover:scale-105 transition-transform duration-300">
             <Library className="w-7 h-7 sm:w-8 sm:h-8" />
           </div>
           <h1 className="font-serif font-bold text-2xl sm:text-3xl tracking-tight text-stone-900 dark:text-white">
@@ -334,7 +334,7 @@ export default function AuthScreen() {
           {/* Account Activated Success Notice */}
           {accountActivatedMsg && (
             <div className="mb-5 p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-2.5 text-emerald-600 dark:text-emerald-400 text-xs">
-              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{accountActivatedMsg}</span>
             </div>
           )}
@@ -342,7 +342,7 @@ export default function AuthScreen() {
           {/* Global Error Notice */}
           {errorMsg && (
             <div className="mb-5 p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center gap-2.5 text-rose-600 dark:text-rose-400 text-xs animate-shake">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
@@ -351,7 +351,7 @@ export default function AuthScreen() {
           {unverifiedEmail && (
             <div className="mb-5 p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl space-y-2.5 text-xs text-stone-700 dark:text-stone-300">
               <div className="flex items-start gap-2 text-amber-700 dark:text-amber-400 font-medium leading-tight">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                 <span>{t('email_not_verified_banner')}</span>
               </div>
               {resendFeedback.message && (
@@ -363,7 +363,7 @@ export default function AuthScreen() {
                 type="button"
                 disabled={isResending}
                 onClick={() => handleResendVerification(unverifiedEmail)}
-                className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-60"
+                className="w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-60"
               >
                 {isResending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 <span>{isResending ? t('verification_resending') : t('resend_verification_btn')}</span>
@@ -391,7 +391,7 @@ export default function AuthScreen() {
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -418,7 +418,7 @@ export default function AuthScreen() {
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder={t('password_placeholder')}
-                    className="w-full pl-10 pr-10 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                   <button
                     type="button"
@@ -434,7 +434,7 @@ export default function AuthScreen() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-2.5 px-4 bg-linear-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isSubmitting ? (
                   <>
@@ -480,7 +480,7 @@ export default function AuthScreen() {
                     value={regName}
                     onChange={(e) => setRegName(e.target.value)}
                     placeholder={t('auth_name_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -498,7 +498,7 @@ export default function AuthScreen() {
                     value={regEmail}
                     onChange={(e) => setRegEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -517,7 +517,7 @@ export default function AuthScreen() {
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
                     placeholder={t('register_password_placeholder')}
-                    className="w-full pl-10 pr-10 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                   <button
                     type="button"
@@ -549,7 +549,7 @@ export default function AuthScreen() {
                   required
                   checked={regTerms}
                   onChange={(e) => setRegTerms(e.target.checked)}
-                  className="mt-1 rounded border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
+                  className="mt-1 rounded-sm border-stone-300 text-amber-600 focus:ring-amber-500 cursor-pointer"
                 />
                 <label htmlFor="register-terms" className="text-xs text-stone-600 dark:text-stone-300 cursor-pointer leading-tight">
                   {t('terms_checkbox_label_1')}{' '}
@@ -576,7 +576,7 @@ export default function AuthScreen() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-2.5 px-4 bg-linear-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isSubmitting ? (
                   <>
@@ -639,7 +639,7 @@ export default function AuthScreen() {
                       setVerificationCodeInput(val);
                     }}
                     placeholder={t('code_placeholder') || 'Ex: 482915'}
-                    className="w-full text-center text-2xl font-mono font-bold tracking-[0.35em] py-3 bg-stone-100/90 dark:bg-stone-800/90 border border-stone-200 dark:border-stone-700/80 rounded-xl text-amber-600 dark:text-amber-400 placeholder:text-stone-300 dark:placeholder:text-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all shadow-inner"
+                    className="w-full text-center text-2xl font-mono font-bold tracking-[0.35em] py-3 bg-stone-100/90 dark:bg-stone-800/90 border border-stone-200 dark:border-stone-700/80 rounded-xl text-amber-600 dark:text-amber-400 placeholder:text-stone-300 dark:placeholder:text-stone-600 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all shadow-inner"
                   />
                 </div>
 
@@ -653,9 +653,9 @@ export default function AuthScreen() {
                     }`}
                   >
                     {resendFeedback.isSuccess ? (
-                      <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
                     ) : (
-                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      <AlertCircle className="w-4 h-4 shrink-0" />
                     )}
                     <span>{resendFeedback.message}</span>
                   </div>
@@ -665,7 +665,7 @@ export default function AuthScreen() {
                 <button
                   type="submit"
                   disabled={isValidatingCode || verificationCodeInput.length !== 6}
-                  className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 px-4 bg-linear-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   {isValidatingCode ? (
                     <>
@@ -740,9 +740,9 @@ export default function AuthScreen() {
                   }`}
                 >
                   {forgotFeedback.isSuccess ? (
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 shrink-0" />
                   )}
                   <span>{forgotFeedback.message}</span>
                 </div>
@@ -752,7 +752,7 @@ export default function AuthScreen() {
               {forgotFeedback.isSuccess && forgotFeedback.resetLink && !forgotFeedback.emailSent && (
                 <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs space-y-2.5 text-stone-700 dark:text-stone-300">
                   <div className="flex items-center gap-2 font-semibold text-amber-700 dark:text-amber-400">
-                    <KeyRound className="w-4 h-4 flex-shrink-0" />
+                    <KeyRound className="w-4 h-4 shrink-0" />
                     <span>{t('forgot_dev_mode_title')}</span>
                   </div>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
@@ -773,7 +773,7 @@ export default function AuthScreen() {
                         window.location.href = forgotFeedback.resetLink;
                       }
                     }}
-                    className="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm cursor-pointer"
+                    className="w-full py-2.5 px-3 bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white font-semibold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                   >
                     <span>{t('reset_now_btn')}</span>
                   </button>
@@ -792,7 +792,7 @@ export default function AuthScreen() {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     placeholder={t('email_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -800,7 +800,7 @@ export default function AuthScreen() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-2.5 px-4 bg-linear-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isSubmitting ? (
                   <>
@@ -842,9 +842,9 @@ export default function AuthScreen() {
                   }`}
                 >
                   {resetFeedback.isSuccess ? (
-                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                   ) : (
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 shrink-0" />
                   )}
                   <span>{resetFeedback.message}</span>
                 </div>
@@ -864,7 +864,7 @@ export default function AuthScreen() {
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder={t('register_password_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -883,7 +883,7 @@ export default function AuthScreen() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder={t('confirm_password_placeholder')}
-                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-stone-100/80 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 rounded-xl text-xs sm:text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all"
                   />
                 </div>
               </div>
@@ -891,7 +891,7 @@ export default function AuthScreen() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-2.5 px-4 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
+                className="w-full py-2.5 px-4 bg-linear-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-md shadow-amber-600/25 hover:shadow-lg hover:shadow-amber-600/35 transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-60"
               >
                 {isSubmitting ? (
                   <>
@@ -922,7 +922,7 @@ export default function AuthScreen() {
             href="https://github.com/Alexhuang03/MyFolio"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/70 dark:bg-stone-900/70 hover:bg-white dark:hover:bg-stone-800 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 text-stone-700 dark:text-stone-200 text-xs font-medium rounded-xl shadow-sm transition-all hover:-translate-y-0.5"
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-white/70 dark:bg-stone-900/70 hover:bg-white dark:hover:bg-stone-800 backdrop-blur-md border border-stone-200/80 dark:border-stone-800 text-stone-700 dark:text-stone-200 text-xs font-medium rounded-xl shadow-xs transition-all hover:-translate-y-0.5"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />

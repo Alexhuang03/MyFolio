@@ -67,7 +67,7 @@ export default function ProductWorkspace({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-xs font-serif font-bold text-base sm:text-lg flex-shrink-0"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-2xs font-serif font-bold text-base sm:text-lg shrink-0"
               style={{ backgroundColor: selectedPrimaryItem.color || '#6366f1' }}
             >
               {selectedPrimaryItem.name.charAt(0).toUpperCase()}
@@ -93,7 +93,7 @@ export default function ProductWorkspace({
           {onOpenMobileCategories && (
             <button
               onClick={onOpenMobileCategories}
-              className="md:hidden px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-200 flex items-center gap-1.5 flex-shrink-0"
+              className="md:hidden px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800 hover:bg-stone-200 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-200 flex items-center gap-1.5 shrink-0"
               title={t('change_category')}
             >
               <Menu className="w-4 h-4" />
@@ -111,7 +111,7 @@ export default function ProductWorkspace({
               value={filterQuery}
               onChange={(e) => setFilterQuery(e.target.value)}
               placeholder={t('filter_elements')}
-              className="w-full pl-10 pr-3 py-1.5 sm:py-2 bg-stone-100/80 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full pl-10 pr-3 py-1.5 sm:py-2 bg-stone-100/80 dark:bg-stone-900/90 border border-stone-200 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
@@ -119,7 +119,7 @@ export default function ProductWorkspace({
           {!isReadOnly && (
             <button
               onClick={() => onAddProduct(selectedPrimaryItem.id)}
-              className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 flex-shrink-0"
+              className="px-3 sm:px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs hover:shadow-sm transition-all flex items-center gap-1.5 shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span className="hidden xs:inline">{t('add_element')}</span>
@@ -145,7 +145,7 @@ export default function ProductWorkspace({
             {!isReadOnly && (
               <button
                 onClick={() => onAddProduct(selectedPrimaryItem.id)}
-                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all"
+                className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all"
               >
                 {t('add_element_btn')}
               </button>

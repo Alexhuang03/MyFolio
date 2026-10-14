@@ -43,7 +43,7 @@ export default function BookCard({
         {/* Collaborators badge (👥 count) */}
         {(collabCount > 0 || !isOwner) && (
           <div
-            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-stone-900/80 dark:bg-black/85 backdrop-blur-xs text-white text-[11px] font-medium shadow-sm pointer-events-none"
+            className="absolute top-2 left-2 z-10 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-stone-900/80 dark:bg-black/85 backdrop-blur-xs text-white text-[11px] font-medium shadow-xs pointer-events-none"
             title={t('shared_collaborators_count', {
               count: collabCount,
               plural: collabCount > 1 ? 's' : '',
@@ -57,7 +57,7 @@ export default function BookCard({
         {/* Read-only badge if viewer */}
         {isViewer && (
           <div
-            className="absolute top-8 left-2 z-10 px-1.5 py-0.5 rounded bg-amber-500/90 text-white text-[9px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none"
+            className="absolute top-8 left-2 z-10 px-1.5 py-0.5 rounded-sm bg-amber-500/90 text-white text-[9px] font-semibold tracking-wider uppercase shadow-xs pointer-events-none"
             title={t('readonly_banner')}
           >
             {t('readonly_badge')}
@@ -80,7 +80,7 @@ export default function BookCard({
         <div className="absolute left-3 sm:left-4 top-0 bottom-0 w-px border-r border-amber-100/30 pointer-events-none" />
 
         {/* Title plate on cover */}
-        <div className="absolute inset-x-2 sm:inset-x-3.5 top-8 sm:top-11 bg-white/95 dark:bg-stone-900/95 backdrop-blur-sm p-1.5 sm:p-2.5 rounded shadow-md text-center border border-amber-900/10 dark:border-amber-400/20">
+        <div className="absolute inset-x-2 sm:inset-x-3.5 top-8 sm:top-11 bg-white/95 dark:bg-stone-900/95 backdrop-blur-xs p-1.5 sm:p-2.5 rounded-sm shadow-md text-center border border-amber-900/10 dark:border-amber-400/20">
           <h3 className="font-serif font-bold text-stone-900 dark:text-stone-100 text-xs sm:text-sm leading-tight line-clamp-2">
             {book.title}
           </h3>
@@ -92,7 +92,7 @@ export default function BookCard({
         </div>
 
         {/* Bottom hover prompt */}
-        <div className="absolute bottom-2.5 sm:bottom-3 inset-x-0 flex justify-center items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-white/90 drop-shadow-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute bottom-2.5 sm:bottom-3 inset-x-0 flex justify-center items-center gap-1 sm:gap-1.5 text-[10px] sm:text-[11px] font-medium text-white/90 drop-shadow-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <BookOpen className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
           <span>{t('open_book')}</span>
         </div>

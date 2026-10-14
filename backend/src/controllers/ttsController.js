@@ -1,4 +1,21 @@
 import { getTtsVoices, synthesizeToFile, MAX_TTS_TEXT_LENGTH } from '../utils/tts.js';
+import { planSpeech, MAX_PLAN_TEXT_LENGTH } from '../utils/speechPlanner.js';
+
+// Découpage d'une description en passages avec leur langue (POST /api/tts/plan)
+export const plan = (req, res) => {
+  try {
+    const { text } = req.body;
+    if (typeof text !== 'string') {
+      return res.status(400).json({ message: 'Texte requis' });
+    }
+    if (text.length > MAX_PLAN_TEXT_LENGTH) {
+      return res.status(400).json({ message: `Texte trop long (${MAX_PLAN_TEXT_LENGTH} caractères maximum)` });
+    }
+    res.json({ chunks: planSpeech(text) });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la préparation de la lecture', error: error.message });
+  }
+};
 
 // Liste des voix (GET /api/tts/voices)
 export const listVoices = async (req, res) => {

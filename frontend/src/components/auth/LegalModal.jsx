@@ -11,7 +11,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -36,7 +36,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
                 onClick={() => setLegalLang('fr')}
                 className={`px-2 py-1 rounded-md transition-colors ${
                   legalLang === 'fr'
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
                     : 'text-stone-500 hover:text-stone-800 dark:text-stone-400'
                 }`}
               >
@@ -47,7 +47,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
                 onClick={() => setLegalLang('en')}
                 className={`px-2 py-1 rounded-md transition-colors ${
                   legalLang === 'en'
-                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
+                    ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-2xs'
                     : 'text-stone-500 hover:text-stone-800 dark:text-stone-400'
                 }`}
               >
@@ -266,7 +266,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+            className="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-xl shadow-2xs transition-colors"
           >
             {t('terms_btn_close')}
           </button>

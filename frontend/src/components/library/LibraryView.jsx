@@ -58,8 +58,8 @@ export default function LibraryView({
         <div className="max-w-7xl mx-auto px-3.5 sm:px-6 py-3 sm:py-3.5 flex flex-wrap md:flex-nowrap items-center justify-between gap-2.5 sm:gap-4">
           
           {/* Brand Logo & Title (Left) */}
-          <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 order-1">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 flex-shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 order-1">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 shrink-0">
               <Library className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div>
@@ -77,16 +77,16 @@ export default function LibraryView({
           </div>
 
           {/* Unified Action Controls: Theme, Settings, User Profile, Logout (Always visible, Right aligned) */}
-          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 order-2 md:order-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 order-2 md:order-3">
             <ThemeToggle />
 
             {/* Settings Button */}
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-1.5 sm:px-3 sm:py-2 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-750 border border-stone-200/80 dark:border-stone-700 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer shadow-2xs"
+              className="p-1.5 sm:px-3 sm:py-2 text-stone-700 dark:text-stone-200 hover:text-stone-900 dark:hover:text-white bg-stone-100 dark:bg-stone-800/80 hover:bg-stone-200 dark:hover:bg-stone-750 border border-stone-200/80 dark:border-stone-700 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 shrink-0 cursor-pointer shadow-2xs"
               title={t('settings')}
             >
-              <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400 flex-shrink-0" />
+              <Settings className="w-4 h-4 text-stone-500 dark:text-stone-400 shrink-0" />
               <span className="hidden lg:inline">{t('settings')}</span>
             </button>
 
@@ -94,15 +94,15 @@ export default function LibraryView({
             {user && (
               <div className="flex items-center gap-1 sm:gap-1.5 pl-1 sm:pl-2 border-l border-stone-200 dark:border-stone-800">
                 <div
-                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700/60 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300 flex-shrink-0"
+                  className="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 bg-stone-100 dark:bg-stone-800/80 border border-stone-200/60 dark:border-stone-700/60 rounded-xl text-xs font-medium text-stone-700 dark:text-stone-300 shrink-0"
                   title={`${user.name} (${user.email})`}
                 >
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
                   <span className="hidden sm:inline-block max-w-[80px] lg:max-w-[120px] truncate">{user.name}</span>
                 </div>
                 <button
                   onClick={logout}
-                  className="p-1.5 sm:p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all flex-shrink-0 cursor-pointer"
+                  className="p-1.5 sm:p-2 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-all shrink-0 cursor-pointer"
                   title={t('logout_btn')}
                 >
                   <LogOut className="w-4 h-4" />
@@ -120,7 +120,7 @@ export default function LibraryView({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t('search_book')}
-                className="w-full pl-10 pr-4 py-2 bg-stone-100 dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                className="w-full pl-10 pr-4 py-2 bg-stone-100 dark:bg-stone-900/90 border border-stone-200/80 dark:border-stone-750 rounded-xl text-xs text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-850 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function LibraryView({
             <p className="text-sm font-medium text-stone-600 dark:text-stone-300">{t('loading_library')}</p>
           </div>
         ) : filteredBooks.length === 0 ? (
-          <div className="py-14 sm:py-20 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-300 dark:border-stone-800 rounded-3xl p-6 sm:p-12 max-w-lg mx-auto shadow-sm">
+          <div className="py-14 sm:py-20 flex flex-col items-center justify-center text-center bg-white/60 dark:bg-stone-900/60 border border-dashed border-stone-300 dark:border-stone-800 rounded-3xl p-6 sm:p-12 max-w-lg mx-auto shadow-xs">
             <div className="w-16 h-16 rounded-2xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-4">
               {filterFavorites ? <Bookmark className="w-8 h-8" /> : <BookMarked className="w-8 h-8" />}
             </div>
@@ -157,7 +157,7 @@ export default function LibraryView({
             {filterFavorites ? (
               <button
                 onClick={() => setFilterFavorites(false)}
-                className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-700 dark:hover:bg-stone-600 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-2"
+                className="px-5 py-2.5 bg-stone-800 hover:bg-stone-900 dark:bg-stone-700 dark:hover:bg-stone-600 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-2"
               >
                 <span>{t('all_books')}</span>
               </button>
@@ -188,7 +188,7 @@ export default function LibraryView({
                   onClick={() => setFilterFavorites(!filterFavorites)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                     filterFavorites
-                      ? 'bg-amber-500 text-white shadow-xs'
+                      ? 'bg-amber-500 text-white shadow-2xs'
                       : 'bg-stone-200/70 hover:bg-stone-200 dark:bg-stone-800 dark:hover:bg-stone-750 text-stone-600 dark:text-stone-300'
                   }`}
                   title={t('filter_favorites')}
@@ -214,7 +214,7 @@ export default function LibraryView({
                   setEditingBook(null);
                   setIsModalOpen(true);
                 }}
-                className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs hover:shadow transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
+                className="px-3.5 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs hover:shadow-sm transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>{t('new_book')}</span>

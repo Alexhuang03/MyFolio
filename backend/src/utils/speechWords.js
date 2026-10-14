@@ -72,10 +72,35 @@ export const WORDS = {
   `),
 };
 
+// Noms de langues (en plusieurs langues) : un en-tête de colonne « Anglais », « English », « 中文 »...
+// indique directement la langue du contenu de la colonne
+const LANGUAGE_NAME_LIST = {
+  en: 'anglais english inglés ingles inglese englisch 英语 英文 英語 영어',
+  fr: 'français francais french francés frances francese französisch 法语 法文 法語 フランス語 프랑스어',
+  zh: 'chinois chinese mandarin chino cinese chinesisch 中文 汉语 漢語 普通话 中国語 중국어',
+  ja: 'japonais japanese japonés japones giapponese japanisch 日语 日文 日本語 일본어',
+  ko: 'coréen coreen korean coreano koreanisch 韩语 韓語 한국어',
+  es: 'espagnol spanish español espanol spagnolo spanisch 西班牙语 スペイン語',
+  it: 'italien italian italiano italienisch 意大利语 イタリア語',
+  de: 'allemand german alemán aleman tedesco deutsch 德语 ドイツ語',
+  pt: 'portugais portuguese portugués portugues português portoghese portugiesisch 葡萄牙语',
+  nl: 'néerlandais neerlandais dutch nederlands holandés olandese niederländisch 荷兰语',
+  ru: 'russe russian ruso russo russisch русский 俄语',
+  ar: 'arabe arabic árabe arabo arabisch العربية 阿拉伯语',
+};
+
+export const LANGUAGE_NAMES = new Map(
+  Object.entries(LANGUAGE_NAME_LIST).flatMap(([lang, names]) => names.split(' ').map((name) => [name, lang]))
+);
+
+// Les noms de langues font aussi partie du vocabulaire courant (« Anglais » est un mot français)
+['anglais', 'français', 'francais', 'chinois', 'japonais', 'espagnol', 'italien', 'allemand', 'portugais', 'langue', 'traduction'].forEach((w) => WORDS.fr.add(w));
+['english', 'french', 'chinese', 'japanese', 'spanish', 'italian', 'german', 'portuguese', 'language', 'translation'].forEach((w) => WORDS.en.add(w));
+
 // Terminaisons typiques, pour départager des mots absents du vocabulaire
 export const ENDINGS = {
   en: /(ing|ness|ful|less|ly|ck|sh|th|ow|ee|oo|ght|y|w)$/,
-  fr: /(eau|eaux|eux|euse|ette|oir|oire|ée|é|ais|ait|ment|ière|ier|ique|eur)$/,
+  fr: /(eau|eaux|eux|euse|ette|oir|oire|ée|é|ais|ait|ment|ière|ier|ique|eur|eille|ouille|ille)$/,
   es: /(ción|ado|ada|ito|ita|mente)$/,
   it: /(zione|ino|ina|etto|etta|issimo)$/,
   de: /(ung|keit|heit|lich|chen|sch)$/,

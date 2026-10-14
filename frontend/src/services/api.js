@@ -115,6 +115,20 @@ export const api = {
     return res.json();
   },
 
+  // Découpe une description en passages { text, lang } (langue détectée par le serveur)
+  async planSpeech(text) {
+    const res = await fetch(`${API_BASE}/tts/plan`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ text }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Impossible de préparer la lecture');
+    }
+    return (await res.json()).chunks;
+  },
+
   async synthesizeSpeech(text, voice, signal) {
     const res = await fetch(`${API_BASE}/tts`, {
       method: 'POST',

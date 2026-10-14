@@ -300,24 +300,24 @@ export default function BookDetailView({
   return (
     <div className="h-screen w-screen flex flex-col bg-[#f5f2eb] dark:bg-stone-950 overflow-hidden transition-colors duration-200">
       {/* Top Application Bar (Inside Book) */}
-      <header className="h-16 px-4 sm:px-6 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex items-center justify-between z-20 flex-shrink-0 shadow-2xs gap-2">
+      <header className="h-16 px-4 sm:px-6 bg-white/90 dark:bg-stone-900/90 backdrop-blur-md border-b border-stone-200 dark:border-stone-800 flex items-center justify-between z-20 shrink-0 shadow-2xs gap-2">
         {/* Left: Back to library & Book info */}
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
           <button
             onClick={onBackToLibrary}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all flex-shrink-0"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 text-xs font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-stone-800 rounded-xl transition-all shrink-0"
             title={t('back_library_tooltip')}
           >
             <ArrowLeft className="w-4 h-4" />
             <span className="hidden sm:inline">{t('back_library')}</span>
           </button>
 
-          <div className="h-5 w-px bg-stone-200 dark:bg-stone-700 flex-shrink-0 hidden sm:block" />
+          <div className="h-5 w-px bg-stone-200 dark:bg-stone-700 shrink-0 hidden sm:block" />
 
           {/* Book title and mini cover icon */}
           <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
             <div
-              className="w-6 h-8 sm:w-7 sm:h-9 rounded-sm overflow-hidden shadow-xs border border-stone-300 dark:border-stone-700 relative flex-shrink-0"
+              className="w-6 h-8 sm:w-7 sm:h-9 rounded-xs overflow-hidden shadow-2xs border border-stone-300 dark:border-stone-700 relative shrink-0"
               style={{ backgroundColor: book.colorTheme || '#3b82f6' }}
             >
               <img src={coverSrc} alt="" className="w-full h-full object-cover" />
@@ -340,7 +340,7 @@ export default function BookDetailView({
         </div>
 
         {/* Right: Quick actions */}
-        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <ThemeToggle />
           {/* Bouton Paramètres du livre */}
           {!isReadOnly && (
@@ -393,7 +393,7 @@ export default function BookDetailView({
           {!isSelectionMode ? (
             <button
               onClick={() => setIsSelectionMode(true)}
-              className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
               title={t('select_mode')}
             >
               <CheckSquare className="w-3.5 h-3.5" />
@@ -404,7 +404,7 @@ export default function BookDetailView({
               {/* Bouton Tout sélectionner */}
               <button
                 onClick={handleSelectAll}
-                className="px-2.5 sm:px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
+                className="px-2.5 sm:px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer"
                 title={
                   allVisibleIds.length > 0 && allVisibleIds.every((id) => selectedProductIds.has(id))
                     ? t('deselect_all')
@@ -604,7 +604,7 @@ export default function BookDetailView({
           <button
             onClick={handleAddToCart}
             disabled={selectedProductIds.size === 0}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer whitespace-nowrap ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer whitespace-nowrap ${
               selectedProductIds.size === 0
                 ? 'bg-stone-800 text-stone-500 cursor-not-allowed opacity-50'
                 : 'bg-amber-600 hover:bg-amber-500 text-white active:scale-95 shadow-amber-600/30'
