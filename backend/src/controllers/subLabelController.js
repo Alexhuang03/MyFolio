@@ -35,8 +35,13 @@ export const createSubLabel = async (req, res) => {
       });
     }
 
+    // Placer le nouvel élément à la fin de la liste
+    const last = await SubLabel.findOne({ bookId }).sort({ order: -1 }).select('order');
+    const order = last ? (last.order || 0) + 1 : 0;
+
     const subLabel = await SubLabel.create({
       name: trimmedName,
+      order,
       color: color || '#10b981',
       bookId,
     });
@@ -154,5 +159,41 @@ export const deleteSubLabel = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Erreur lors de la suppression du sous-label', error: error.message });
+  }
+};
+
+// Réordonner les sublabels d'un livre (PUT /api/sublabels/reorder)
+export const reorderSubLabels = async (req, res) => {
+  try {
+    const { bookId, orderedIds } = req.body;
+    if (!bookId || !Array.isArray(orderedIds) || orderedIds.length === 0) {
+      return res.status(400).json({ message: 'bookId et orderedIds sont requis' });
+    }
+
+    // Vérifier l'accès au livre et les permissions
+    const { hasAccess, book, role } = await getBookAccess(bookId, req.userId);
+    if (!hasAccess || !book) {
+      return res.status(404).json({ message: 'Livre introuvable ou accès non autorisé' });
+    }
+    if (role === 'viewer') {
+      return res.status(403).json({ message: 'Action non autorisée en lecture seule' });
+    }
+
+    // Ne modifier que les éléments appartenant bien à ce livre
+    await SubLabel.bulkWrite(
+      orderedIds.map((id, index) => ({
+        updateOne: {
+          filter: { _id: id, bookId },
+          update: { $set: { order: index } },
+        },
+      }))
+    );
+
+    // Émettre en temps réel
+    emitToBook(bookId, 'sublabel:reordered', { bookId, orderedIds });
+
+    res.json({ bookId, orderedIds });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors du réordonnancement des sous-labels', error: error.message });
   }
 };

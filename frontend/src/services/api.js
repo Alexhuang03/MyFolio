@@ -155,6 +155,19 @@ export const api = {
     return res.json();
   },
 
+  async reorderLabels(bookId, orderedIds) {
+    const res = await fetch(`${API_BASE}/labels/reorder`, {
+      method: 'PUT',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ bookId, orderedIds }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors du réordonnancement des labels');
+    }
+    return res.json();
+  },
+
   // SubLabels
   async createSubLabel(data) {
     const res = await fetch(`${API_BASE}/sublabels`, {
@@ -190,6 +203,19 @@ export const api = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       throw new Error(err.message || 'Erreur lors de la suppression du sous-label');
+    }
+    return res.json();
+  },
+
+  async reorderSubLabels(bookId, orderedIds) {
+    const res = await fetch(`${API_BASE}/sublabels/reorder`, {
+      method: 'PUT',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ bookId, orderedIds }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Erreur lors du réordonnancement des sous-labels');
     }
     return res.json();
   },

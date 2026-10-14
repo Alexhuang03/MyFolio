@@ -11,6 +11,10 @@ const SubLabelSchema = new mongoose.Schema(
       type: String,
       default: '#10b981', // Emerald
     },
+    order: {
+      type: Number,
+      default: 0,
+    },
     bookId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Book',

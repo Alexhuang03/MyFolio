@@ -11,6 +11,10 @@ const LabelSchema = new mongoose.Schema(
       type: String,
       default: '#6366f1', // Indigo
     },
+    order: {
+      type: Number,
+      default: 0,
+    },
     bookId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Book',

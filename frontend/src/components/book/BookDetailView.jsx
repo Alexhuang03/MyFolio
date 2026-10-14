@@ -39,6 +39,8 @@ export default function BookDetailView({
   onCreateSubLabel,
   onUpdateSubLabel,
   onDeleteSubLabel,
+  onReorderLabels,
+  onReorderSubLabels,
   onCreateProduct,
   onUpdateProduct,
   onDeleteProduct,
@@ -450,6 +452,13 @@ export default function BookDetailView({
               return onDeleteLabel(id, mode);
             } else {
               return onDeleteSubLabel(id, mode);
+            }
+          }}
+          onReorderTags={(orderedIds) => {
+            if (pivotMode === PIVOT_MODES.BY_LABEL) {
+              return onReorderLabels(orderedIds);
+            } else {
+              return onReorderSubLabels(orderedIds);
             }
           }}
         />

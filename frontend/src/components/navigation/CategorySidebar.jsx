@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import {
   Shuffle,
   Plus,
@@ -10,9 +10,18 @@ import {
   AlertTriangle,
   MoreHorizontal,
   X,
+  GripVertical,
 } from 'lucide-react';
 import { PIVOT_MODES } from '../../utils/pivotEngine';
 import { useLanguage } from '../../i18n/LanguageContext';
+
+const SLIDE_TRANSITION = 'transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1)';
+
+// Translation verticale actuellement appliquée (y compris pendant une transition CSS en cours)
+const getTranslateY = (el) => {
+  const transform = getComputedStyle(el).transform;
+  return transform && transform !== 'none' ? new DOMMatrixReadOnly(transform).m42 : 0;
+};
 
 export default function CategorySidebar({
   pivotMode,
@@ -23,6 +32,7 @@ export default function CategorySidebar({
   onAddTag,
   onEditTag,
   onDeleteTag,
+  onReorderTags,
   isOpenMobile = false,
   onCloseMobile,
   isReadOnly = false,
@@ -34,6 +44,162 @@ export default function CategorySidebar({
   // Tag en cours de suppression pour confirmation
   const [tagToDelete, setTagToDelete] = useState(null);
   const [deleteMode, setDeleteMode] = useState('cascade'); // 'cascade' ou 'detach'
+
+  // Glisser-déposer (souris + tactile via Pointer Events).
+  // Pendant le déplacement, l'ordre du DOM ne change pas : l'élément saisi suit le pointeur et les autres
+  // s'écartent via des transformations CSS. Le nouvel ordre n'est appliqué qu'au lâcher.
+  const [draggingId, setDraggingId] = useState(null);
+  const dragRef = useRef(null); // État du déplacement en cours, lu par les écouteurs window
+  const navRef = useRef(null);
+  const itemRefs = useRef(new Map());
+  const prevOffsets = useRef(new Map()); // Position de layout de chaque élément au rendu précédent
+  const canReorder = !isReadOnly && !!onReorderTags;
+
+  // Animation FLIP : quand l'ordre change (au lâcher ou via un collaborateur), chaque élément
+  // glisse depuis sa position affichée vers sa nouvelle place
+  useLayoutEffect(() => {
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    itemRefs.current.forEach((el, id) => {
+      const newOffset = el.offsetTop;
+      const oldOffset = prevOffsets.current.get(id) ?? newOffset;
+      prevOffsets.current.set(id, newOffset);
+      if (oldOffset === newOffset && !el.style.transform) return;
+
+      const invert = oldOffset + getTranslateY(el) - newOffset;
+      if (reduceMotion || Math.abs(invert) < 0.5) {
+        el.style.transition = '';
+        el.style.transform = '';
+        return;
+      }
+
+      // Inverser : replacer visuellement l'élément là où il était, puis jouer la transition vers 0
+      el.style.transition = 'none';
+      el.style.transform = `translateY(${invert}px)`;
+      el.getBoundingClientRect(); // Forcer le reflow pour que le point de départ soit pris en compte
+      el.style.transition = SLIDE_TRANSITION;
+      el.style.transform = '';
+      el.addEventListener(
+        'transitionend',
+        () => {
+          if (!el.style.transform) el.style.transition = '';
+        },
+        { once: true }
+      );
+    });
+  }, [primaryItems]);
+
+  // Met à jour les positions affichées (au plus une fois par image)
+  const updateDragPositions = () => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.frame = null;
+    const scrollDelta = (navRef.current?.scrollTop ?? 0) - drag.startScrollTop;
+    const dy = drag.pointerY - drag.startPointerY + scrollDelta;
+
+    const dragged = itemRefs.current.get(drag.id);
+    if (dragged) dragged.style.transform = `translateY(${dy}px) scale(1.02)`;
+
+    // Nouvelle place = nombre d'autres éléments dont le centre est au-dessus du centre de l'élément saisi
+    const draggedCenter = drag.centers[drag.startIndex] + dy;
+    const targetIndex = drag.ids.filter(
+      (id, index) => index !== drag.startIndex && drag.centers[index] < draggedCenter
+    ).length;
+    if (targetIndex === drag.targetIndex) return;
+    drag.targetIndex = targetIndex;
+
+    // Les éléments entre l'ancienne et la nouvelle place s'écartent d'un cran
+    drag.ids.forEach((id, index) => {
+      if (index === drag.startIndex) return;
+      const el = itemRefs.current.get(id);
+      if (!el) return;
+      let shift = 0;
+      if (index > drag.startIndex && index <= targetIndex) shift = -drag.pitch;
+      if (index < drag.startIndex && index >= targetIndex) shift = drag.pitch;
+      el.style.transition = SLIDE_TRANSITION;
+      el.style.transform = shift ? `translateY(${shift}px)` : '';
+    });
+  };
+
+  const handlePointerMove = (e) => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    drag.pointerY = e.clientY;
+    if (!drag.frame) drag.frame = requestAnimationFrame(updateDragPositions);
+  };
+
+  const stopListening = () => {
+    window.removeEventListener('pointermove', handlePointerMove);
+    window.removeEventListener('pointerup', handlePointerUp);
+    window.removeEventListener('pointercancel', handlePointerUp);
+  };
+
+  const handlePointerUp = () => {
+    const drag = dragRef.current;
+    if (!drag) return;
+    if (drag.frame) cancelAnimationFrame(drag.frame);
+    stopListening();
+    dragRef.current = null;
+    setDraggingId(null);
+
+    const ids = drag.ids.filter((id) => id !== drag.id);
+    ids.splice(drag.targetIndex, 0, drag.id);
+
+    if (drag.targetIndex !== drag.startIndex) {
+      // Le changement d'ordre déclenche l'animation FLIP qui pose chaque élément à sa place
+      onReorderTags(ids);
+    } else {
+      // Aucun changement : ramener simplement les éléments à leur position
+      drag.ids.forEach((id) => {
+        const el = itemRefs.current.get(id);
+        if (!el) return;
+        el.style.transition = SLIDE_TRANSITION;
+        el.style.transform = '';
+      });
+    }
+  };
+
+  // Nettoyage si le composant est démonté en plein déplacement
+  useEffect(() => () => dragRef.current?.stopListening(), []);
+
+  const handleDragStart = (e, itemId) => {
+    if (dragRef.current || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    const ids = primaryItems.filter((item) => !item.isSystem).map((item) => item.id);
+    const els = ids.map((id) => itemRefs.current.get(id));
+    if (els.some((el) => !el)) return;
+
+    // Mesures faites une seule fois, au début du déplacement
+    els.forEach((el) => {
+      el.style.transition = 'none';
+      el.style.transform = '';
+    });
+    const centers = els.map((el) => el.offsetTop + el.offsetHeight / 2);
+    const startIndex = ids.indexOf(itemId);
+    const gap = els.length > 1 ? els[1].offsetTop - els[0].offsetTop - els[0].offsetHeight : 0;
+
+    dragRef.current = {
+      id: itemId,
+      ids,
+      centers,
+      startIndex,
+      targetIndex: startIndex,
+      pitch: els[startIndex].offsetHeight + gap,
+      startPointerY: e.clientY,
+      pointerY: e.clientY,
+      startScrollTop: navRef.current?.scrollTop ?? 0,
+      frame: null,
+      stopListening,
+    };
+
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
+    setActiveMenuId(null);
+    setDraggingId(itemId);
+  };
 
   return (
     <>
@@ -112,7 +278,7 @@ export default function CategorySidebar({
         </div>
 
       {/* Category List */}
-      <nav className="flex-1 overflow-y-auto p-3 space-y-1">
+      <nav ref={navRef} className="flex-1 overflow-y-auto p-3 space-y-1">
         {primaryItems.length === 0 ? (
           <div className="p-6 text-center text-xs text-stone-400 dark:text-stone-500">
             {t('no_items_yet')}
@@ -120,14 +286,21 @@ export default function CategorySidebar({
         ) : (
           primaryItems.map((item) => {
             const isSelected = item.id === selectedPrimaryId;
+            const isDragged = draggingId === item.id;
             return (
               <div
                 key={item.id}
+                ref={(el) => {
+                  if (el) itemRefs.current.set(item.id, el);
+                  else itemRefs.current.delete(item.id);
+                }}
                 onClick={() => {
                   onSelectPrimary(item.id);
                   if (onCloseMobile) onCloseMobile();
                 }}
                 className={`group relative flex items-center justify-between px-3.5 py-3 rounded-xl cursor-pointer transition-all ${
+                  isDragged ? 'ring-2 ring-amber-400/70 shadow-lg z-10 will-change-transform ' : ''
+                }${
                   isSelected
                     ? 'bg-white dark:bg-stone-800 shadow-sm border border-stone-200/90 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-semibold'
                     : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-800/50 hover:text-stone-900 dark:hover:text-white'
@@ -135,6 +308,22 @@ export default function CategorySidebar({
               >
                 {/* Left color dot & name */}
                 <div className="flex items-center gap-3 min-w-0 pr-2">
+                  {canReorder && (
+                    <span
+                      onPointerDown={item.isSystem ? undefined : (e) => handleDragStart(e, item.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className={`-ml-2 -mr-1.5 p-0.5 rounded touch-none ${
+                        item.isSystem
+                          ? 'invisible'
+                          : `text-stone-300 dark:text-stone-600 hover:text-stone-500 dark:hover:text-stone-300 ${
+                              isDragged ? 'cursor-grabbing' : 'cursor-grab'
+                            }`
+                      }`}
+                      title={item.isSystem ? undefined : t('drag_to_reorder')}
+                    >
+                      <GripVertical className="w-3.5 h-3.5" />
+                    </span>
+                  )}
                   <span
                     className="w-3 h-3 rounded-full flex-shrink-0 transition-transform group-hover:scale-110 shadow-2xs"
                     style={{ backgroundColor: item.color }}

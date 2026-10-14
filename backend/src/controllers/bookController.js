@@ -214,8 +214,8 @@ export const getBookContent = async (req, res) => {
     }
 
     const [labels, subLabels, products, ownerUser] = await Promise.all([
-      Label.find({ bookId }).sort({ createdAt: 1 }),
-      SubLabel.find({ bookId }).sort({ createdAt: 1 }),
+      Label.find({ bookId }).sort({ order: 1, createdAt: 1 }),
+      SubLabel.find({ bookId }).sort({ order: 1, createdAt: 1 }),
       Product.find({ bookId }).sort({ createdAt: -1 }),
       User.findById(book.userId).select('name email'),
     ]);

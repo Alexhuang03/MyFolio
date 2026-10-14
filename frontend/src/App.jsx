@@ -9,6 +9,14 @@ import { useAuth } from './context/AuthContext';
 import { useWallpaper } from './theme/WallpaperContext';
 import { initSocket, getSocket, disconnectSocket, joinBookRoom, leaveBookRoom } from './services/socket';
 
+// Réordonne une liste d'éléments selon une liste d'ids (les éléments inconnus restent à la fin)
+const sortByIds = (items, orderedIds) => {
+  const rank = new Map(orderedIds.map((id, index) => [String(id), index]));
+  return [...items].sort(
+    (a, b) => (rank.get(String(a._id)) ?? Infinity) - (rank.get(String(b._id)) ?? Infinity)
+  );
+};
+
 export default function App() {
   const { user, loading: authLoading } = useAuth();
   const [books, setBooks] = useState([]);
@@ -273,6 +281,12 @@ export default function App() {
       }));
     };
 
+    const onLabelsReordered = ({ bookId: eventBookId, orderedIds }) => {
+      if (String(eventBookId) === bookId) {
+        setBookContent((prev) => ({ ...prev, labels: sortByIds(prev.labels, orderedIds) }));
+      }
+    };
+
     // Sous-labels en direct
     const onSubLabelCreated = (newSub) => {
       if (String(newSub.bookId) === bookId) {
@@ -314,6 +328,12 @@ export default function App() {
       }));
     };
 
+    const onSubLabelsReordered = ({ bookId: eventBookId, orderedIds }) => {
+      if (String(eventBookId) === bookId) {
+        setBookContent((prev) => ({ ...prev, subLabels: sortByIds(prev.subLabels, orderedIds) }));
+      }
+    };
+
     // Panier partagé en direct
     const onCartUpdated = ({ bookId: eventBookId, cart }) => {
       if (String(eventBookId) === bookId) {
@@ -339,10 +359,12 @@ export default function App() {
     socket.on('label:created', onLabelCreated);
     socket.on('label:updated', onLabelUpdated);
     socket.on('label:deleted', onLabelDeleted);
+    socket.on('label:reordered', onLabelsReordered);
 
     socket.on('sublabel:created', onSubLabelCreated);
     socket.on('sublabel:updated', onSubLabelUpdated);
     socket.on('sublabel:deleted', onSubLabelDeleted);
+    socket.on('sublabel:reordered', onSubLabelsReordered);
 
     socket.on('cart:updated', onCartUpdated);
 
@@ -361,10 +383,12 @@ export default function App() {
       socket.off('label:created', onLabelCreated);
       socket.off('label:updated', onLabelUpdated);
       socket.off('label:deleted', onLabelDeleted);
+      socket.off('label:reordered', onLabelsReordered);
 
       socket.off('sublabel:created', onSubLabelCreated);
       socket.off('sublabel:updated', onSubLabelUpdated);
       socket.off('sublabel:deleted', onSubLabelDeleted);
+      socket.off('sublabel:reordered', onSubLabelsReordered);
 
       socket.off('cart:updated', onCartUpdated);
     };
@@ -640,6 +664,29 @@ export default function App() {
     }
   };
 
+  // --- Réordonnancement des Labels / Sous-Labels (mise à jour optimiste) ---
+  const handleReorderLabels = async (orderedIds) => {
+    const previous = bookContent.labels;
+    setBookContent((prev) => ({ ...prev, labels: sortByIds(prev.labels, orderedIds) }));
+    try {
+      await api.reorderLabels(selectedBook._id, orderedIds);
+    } catch (err) {
+      setBookContent((prev) => ({ ...prev, labels: previous }));
+      showToast(err.message, 'error');
+    }
+  };
+
+  const handleReorderSubLabels = async (orderedIds) => {
+    const previous = bookContent.subLabels;
+    setBookContent((prev) => ({ ...prev, subLabels: sortByIds(prev.subLabels, orderedIds) }));
+    try {
+      await api.reorderSubLabels(selectedBook._id, orderedIds);
+    } catch (err) {
+      setBookContent((prev) => ({ ...prev, subLabels: previous }));
+      showToast(err.message, 'error');
+    }
+  };
+
   // --- Gestion des Produits ---
   const handleCreateProduct = async (productData) => {
     try {
@@ -777,6 +824,8 @@ export default function App() {
             onCreateSubLabel={handleCreateSubLabel}
             onUpdateSubLabel={handleUpdateSubLabel}
             onDeleteSubLabel={handleDeleteSubLabel}
+            onReorderLabels={handleReorderLabels}
+            onReorderSubLabels={handleReorderSubLabels}
             onCreateProduct={handleCreateProduct}
             onUpdateProduct={handleUpdateProduct}
             onDeleteProduct={handleDeleteProduct}
