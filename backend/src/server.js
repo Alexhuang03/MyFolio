@@ -45,6 +45,9 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "blob:", "http:", "https:"],
+        // Lecture à voix haute : l'audio reçu du serveur est joué via une URL blob:,
+        // et un son vide en data: déverrouille le lecteur au moment du clic
+        mediaSrc: ["'self'", "blob:", "data:"],
         connectSrc: ["'self'", "ws:", "wss:", "http:", "https:"],
       },
     },
