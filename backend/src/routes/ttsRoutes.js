@@ -1,6 +1,6 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
-import { listVoices, synthesize } from '../controllers/ttsController.js';
+import { listVoices, synthesize, plan } from '../controllers/ttsController.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -18,6 +18,7 @@ const ttsLimiter = rateLimit({
 });
 
 router.get('/voices', listVoices);
+router.post('/plan', plan);
 router.post('/', ttsLimiter, synthesize);
 
 export default router;
