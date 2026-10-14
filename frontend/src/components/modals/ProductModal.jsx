@@ -10,10 +10,13 @@ import {
   Calendar,
   Star,
   Link as LinkIcon,
+  PenLine,
+  Eye,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { optimizeImageForUpload } from '../../utils/imageOptimizer';
+import MarkdownContent from '../content/MarkdownContent';
 
 export default function ProductModal({
   isOpen,
@@ -43,6 +46,7 @@ export default function ProductModal({
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [descriptionTab, setDescriptionTab] = useState('write'); // 'write' ou 'preview'
   const [price, setPrice] = useState('');
   const [image, setImage] = useState('');
   const [location, setLocation] = useState('');
@@ -99,6 +103,7 @@ export default function ProductModal({
       setSelectedSubLabelIds(defaultSubLabelId ? [defaultSubLabelId] : []);
     }
     setError('');
+    setDescriptionTab('write');
   }, [initialProduct, defaultLabelId, defaultSubLabelId, isOpen]);
 
   if (!isOpen) return null;
@@ -244,16 +249,55 @@ export default function ProductModal({
           {/* Description */}
           {config.hasDescription && (
             <div>
-              <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider mb-1.5">
-                {t('description')}
-              </label>
-              <textarea
-                rows={2}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={t('description_placeholder_product')}
-                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
-              />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 uppercase tracking-wider">
+                  {t('description')}
+                </label>
+
+                {/* Onglets Écrire / Aperçu (Markdown) */}
+                <div className="flex items-center p-0.5 rounded-lg bg-stone-100 dark:bg-stone-800 text-[11px] font-semibold">
+                  {[
+                    { id: 'write', icon: PenLine, label: t('markdown_write') },
+                    { id: 'preview', icon: Eye, label: t('markdown_preview') },
+                  ].map(({ id, icon: Icon, label }) => (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() => setDescriptionTab(id)}
+                      className={`px-2 py-0.5 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
+                        descriptionTab === id
+                          ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+                          : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
+                      }`}
+                    >
+                      <Icon className="w-3 h-3" />
+                      <span>{label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {descriptionTab === 'write' ? (
+                <textarea
+                  rows={6}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={t('description_placeholder_markdown')}
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-mono leading-relaxed resize-y min-h-[120px] placeholder:text-stone-400 dark:placeholder:text-stone-500 placeholder:font-sans"
+                />
+              ) : (
+                <div className="w-full min-h-[120px] max-h-72 overflow-y-auto px-3.5 py-2.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl text-sm leading-relaxed text-stone-800 dark:text-stone-200">
+                  {description.trim() ? (
+                    <MarkdownContent>{description}</MarkdownContent>
+                  ) : (
+                    <span className="text-xs italic text-stone-400 dark:text-stone-500">{t('markdown_nothing_to_preview')}</span>
+                  )}
+                </div>
+              )}
+
+              <p className="mt-1 text-[11px] text-stone-400 dark:text-stone-500 font-mono">
+                {t('markdown_hint')}
+              </p>
             </div>
           )}
 

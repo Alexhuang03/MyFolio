@@ -14,6 +14,7 @@ import labelRoutes from './routes/labelRoutes.js';
 import subLabelRoutes from './routes/subLabelRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import authRoutes from './routes/authRoutes.js';
+import ttsRoutes from './routes/ttsRoutes.js';
 import { setIO } from './utils/socketEmitter.js';
 import { getBookAccess } from './utils/permissionHelper.js';
 
@@ -169,6 +170,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/labels', labelRoutes);
 app.use('/api/sublabels', subLabelRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/tts', ttsRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

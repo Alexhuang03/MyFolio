@@ -10,6 +10,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { stripMarkdown } from '../../utils/markdown';
 
 export default function ProductCard({
   product,
@@ -197,7 +198,7 @@ export default function ProductCard({
           {/* Description */}
           {config.hasDescription && product.description && (
             <p className="mt-1 text-xs text-stone-500 dark:text-stone-300 line-clamp-2 leading-relaxed">
-              {product.description}
+              {stripMarkdown(product.description)}
             </p>
           )}
 

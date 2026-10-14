@@ -10,6 +10,7 @@ import {
   Tag,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { stripMarkdown } from '../../utils/markdown';
 
 export default function CartModal({
   isOpen,
@@ -174,7 +175,7 @@ export default function CartModal({
 
                     {item.description && (
                       <p className="text-xs text-stone-500 dark:text-stone-400 truncate mt-0.5">
-                        {item.description}
+                        {stripMarkdown(item.description)}
                       </p>
                     )}
 

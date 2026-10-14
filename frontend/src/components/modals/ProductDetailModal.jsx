@@ -13,6 +13,8 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import MarkdownContent from '../content/MarkdownContent';
+import ReadAloudButton from '../content/ReadAloudButton';
 
 export default function ProductDetailModal({
   isOpen,
@@ -270,16 +272,19 @@ export default function ProductDetailModal({
           {/* Section Description Complète ("Prescription") */}
           {config.hasDescription && (
             <div className="space-y-2 pt-2">
-              <div className="flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
-                <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  {t('full_description')}
-                </h4>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5 text-stone-700 dark:text-stone-300">
+                  <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                    {t('full_description')}
+                  </h4>
+                </div>
+                {product.description && <ReadAloudButton key={product._id} text={product.description} />}
               </div>
 
-              <div className="bg-stone-50/90 dark:bg-stone-850/80 rounded-xl p-4 border border-stone-200/80 dark:border-stone-750 text-sm leading-relaxed text-stone-800 dark:text-stone-200 font-sans whitespace-pre-wrap select-text break-words">
+              <div className="bg-stone-50/90 dark:bg-stone-850/80 rounded-xl p-4 border border-stone-200/80 dark:border-stone-750 text-sm leading-relaxed text-stone-800 dark:text-stone-200 font-sans select-text break-words">
                 {product.description ? (
-                  product.description
+                  <MarkdownContent>{product.description}</MarkdownContent>
                 ) : (
                   <span className="text-stone-400 dark:text-stone-500 italic text-xs">
                     {t('no_description_provided')}

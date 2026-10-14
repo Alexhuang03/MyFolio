@@ -106,6 +106,29 @@ export const api = {
     return res.json();
   },
 
+  // Synthèse vocale (voix neuronales)
+  async getTtsVoices() {
+    const res = await fetch(`${API_BASE}/tts/voices`, {
+      headers: getAuthHeaders(),
+    });
+    if (!res.ok) throw new Error('Voix indisponibles');
+    return res.json();
+  },
+
+  async synthesizeSpeech(text, voice, signal) {
+    const res = await fetch(`${API_BASE}/tts`, {
+      method: 'POST',
+      headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ text, voice }),
+      signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || 'Échec de la synthèse vocale');
+    }
+    return res.blob();
+  },
+
   // Mega-Fetch : Récupère tout le livre (labels, subLabels, products)
   async getBookContent(bookId) {
     const res = await fetch(`${API_BASE}/books/${bookId}/content`, {
