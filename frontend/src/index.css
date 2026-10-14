@@ -1,6 +1,86 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-stone-650: #4d4744;
+  --color-stone-750: #36322f;
+  --color-stone-850: #231f1d;
+
+  --font-serif: Georgia, Cambria, serif;
+  --font-sans: Inter, system-ui, -apple-system, sans-serif;
+
+  --shadow-book:
+    0 20px 30px -10px rgba(0, 0, 0, 0.3), 0 0 10px rgba(0, 0, 0, 0.1),
+    inset -5px 0 10px rgba(0, 0, 0, 0.1);
+  --shadow-book-hover:
+    0 25px 40px -10px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 0, 0, 0.15),
+    inset -5px 0 15px rgba(0, 0, 0, 0.15);
+  --shadow-page: 0 10px 30px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+
+  --animate-book-open: bookOpen 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-page-flip: pageFlip 0.3s ease-out forwards;
+
+  @keyframes bookOpen {
+    0% {
+      transform: scale(0.95) rotateY(-10deg);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  @keyframes pageFlip {
+    0% {
+      transform: rotateY(-15deg);
+      opacity: 0.9;
+    }
+    100% {
+      transform: rotateY(0deg);
+      opacity: 1;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+/*
+  Compatibilité Tailwind v3 -> v4 : comportements par défaut conservés à l'identique.
+*/
+/* v4 n'applique `hover:` que sur les appareils à souris : les boutons révélés au survol
+   (menu « ... » des labels, etc.) resteraient invisibles sur mobile, où un toucher déclenche le survol. */
+@custom-variant hover (&:hover);
+
+@layer base {
+  /* v4 affiche le curseur par défaut sur les boutons ; v3 affichait la main */
+  button:not(:disabled),
+  [role='button']:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* v4 dérive la couleur des placeholders du texte ; v3 utilisait un gris fixe */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+}
 
 @layer base {
   body {

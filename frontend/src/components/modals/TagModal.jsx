@@ -86,7 +86,7 @@ export default function TagModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-md w-full overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
@@ -134,7 +134,7 @@ export default function TagModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={isLabel ? t('tag_name_placeholder_label') : t('tag_name_placeholder_sublabel')}
-              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
@@ -151,19 +151,19 @@ export default function TagModal({
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
+                    className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-xs ${
                       isSelected
                         ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
                         : 'hover:scale-105'
                     }`}
                     style={{ backgroundColor: c }}
                   >
-                    {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-3" />}
                   </button>
                 );
               })}
               <label
-                className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm relative cursor-pointer overflow-hidden ${
+                className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-xs relative cursor-pointer overflow-hidden ${
                   !TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase())
                     ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
                     : 'hover:scale-105 border border-stone-300 dark:border-stone-600'
@@ -185,9 +185,9 @@ export default function TagModal({
                   className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                 />
                 {!TAG_COLORS.some((c) => c.toLowerCase() === color?.toLowerCase()) ? (
-                  <Check className="w-3.5 h-3.5 text-white stroke-[3] drop-shadow-sm pointer-events-none" />
+                  <Check className="w-3.5 h-3.5 text-white stroke-3 drop-shadow-xs pointer-events-none" />
                 ) : (
-                  <span className="w-2 h-2 rounded-full bg-white shadow-sm pointer-events-none" />
+                  <span className="w-2 h-2 rounded-full bg-white shadow-xs pointer-events-none" />
                 )}
               </label>
             </div>
@@ -205,7 +205,7 @@ export default function TagModal({
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="px-5 py-2 text-xs font-semibold text-white bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 rounded-xl shadow-xs transition-all disabled:opacity-50"
             >
               {loading ? t('saving') : isEditing ? t('update') : t('create')}
             </button>

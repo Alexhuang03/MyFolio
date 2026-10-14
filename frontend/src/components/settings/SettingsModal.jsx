@@ -177,10 +177,10 @@ export default function SettingsModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full h-[580px] sm:h-[620px] max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 flex-shrink-0">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 flex items-center justify-center text-amber-700 dark:text-amber-400">
               <Sparkles className="w-5 h-5" />
@@ -203,7 +203,7 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-4 sm:px-6 bg-stone-50/30 dark:bg-stone-900/30 overflow-x-auto gap-1.5 sm:gap-2 py-2 flex-shrink-0">
+        <div className="flex items-center border-b border-stone-200/80 dark:border-stone-800 px-4 sm:px-6 bg-stone-50/30 dark:bg-stone-900/30 overflow-x-auto gap-1.5 sm:gap-2 py-2 shrink-0">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -214,7 +214,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                   isActive
-                    ? 'bg-amber-500 text-white shadow-xs'
+                    ? 'bg-amber-500 text-white shadow-2xs'
                     : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
@@ -232,7 +232,7 @@ export default function SettingsModal({ isOpen, onClose }) {
             <div className="space-y-6 animate-fade-in">
               {/* User Identity Card */}
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-amber-50/40 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/40">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white font-serif font-bold text-2xl shadow-sm">
+                <div className="w-14 h-14 rounded-2xl bg-linear-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white font-serif font-bold text-2xl shadow-xs">
                   {user?.name?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -256,13 +256,13 @@ export default function SettingsModal({ isOpen, onClose }) {
               <form onSubmit={handleUpdateName} className="space-y-4">
                 {nameSuccess && (
                   <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                     <span>{nameSuccess}</span>
                   </div>
                 )}
                 {nameError && (
                   <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                     <span>{nameError}</span>
                   </div>
                 )}
@@ -276,7 +276,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                    className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
                   />
                 </div>
 
@@ -299,7 +299,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   <button
                     type="submit"
                     disabled={savingName || name.trim() === user?.name}
-                    className="px-4 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-amber-600 dark:hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {savingName ? t('saving') : t('save_changes')}
                   </button>
@@ -332,7 +332,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         setShowDeletePassword(false);
                         setShowDeleteModal(true);
                       }}
-                      className="px-3.5 py-2 bg-white dark:bg-stone-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 flex-shrink-0 cursor-pointer hover:border-rose-300 dark:hover:border-rose-700"
+                      className="px-3.5 py-2 bg-white dark:bg-stone-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80 rounded-xl text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 shrink-0 cursor-pointer hover:border-rose-300 dark:hover:border-rose-700"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>{t('delete_account_btn')}</span>
@@ -357,14 +357,14 @@ export default function SettingsModal({ isOpen, onClose }) {
 
               {passwordSuccess && (
                 <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
                   <span>{passwordSuccess}</span>
                 </div>
               )}
 
               {passwordError && (
                 <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                   <span>{passwordError}</span>
                 </div>
               )}
@@ -382,7 +382,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       value={currentPassword}
                       onChange={(e) => setCurrentPassword(e.target.value)}
                       placeholder={t('current_password_placeholder')}
-                      className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                      className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
                     />
                     <button
                       type="button"
@@ -407,7 +407,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         placeholder={t('new_password_placeholder')}
-                        className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                        className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
                       />
                       <button
                         type="button"
@@ -429,7 +429,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder={t('confirm_new_password_placeholder')}
-                      className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
+                      className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm"
                     />
                   </div>
                 </div>
@@ -438,7 +438,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   <button
                     type="submit"
                     disabled={passwordLoading}
-                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all disabled:opacity-50"
+                    className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all disabled:opacity-50"
                   >
                     {passwordLoading ? t('updating_password') : t('update_password_btn')}
                   </button>
@@ -466,7 +466,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   onClick={() => setWallpaperCategory('image')}
                   className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     wallpaperCategory === 'image'
-                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm border border-stone-300/50 dark:border-stone-700'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs border border-stone-300/50 dark:border-stone-700'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-900/50 border border-transparent'
                   }`}
                 >
@@ -478,7 +478,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                   onClick={() => setWallpaperCategory('ambiance')}
                   className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer ${
                     wallpaperCategory === 'ambiance'
-                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-sm border border-stone-300/50 dark:border-stone-700'
+                      ? 'bg-white dark:bg-stone-800 text-stone-900 dark:text-white shadow-xs border border-stone-300/50 dark:border-stone-700'
                       : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-200/50 dark:hover:bg-stone-900/50 border border-transparent'
                   }`}
                 >
@@ -515,12 +515,12 @@ export default function SettingsModal({ isOpen, onClose }) {
                           onClick={() => setWallpaper(p.id)}
                           className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative cursor-pointer group ${
                             isSelected
-                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-2xs'
                               : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                           }`}
                         >
                           {/* Miniature de l'illustration */}
-                          <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-700 flex-shrink-0 relative overflow-hidden bg-white dark:bg-stone-900 flex items-center justify-center p-1">
+                          <div className="w-14 h-14 rounded-xl shadow-2xs border border-stone-200 dark:border-stone-700 shrink-0 relative overflow-hidden bg-white dark:bg-stone-900 flex items-center justify-center p-1">
                             <img
                               src={p.previewImage}
                               alt=""
@@ -538,8 +538,8 @@ export default function SettingsModal({ isOpen, onClose }) {
                           </div>
 
                           {isSelected && (
-                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
-                              <Check className="w-3 h-3 stroke-[3]" />
+                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                              <Check className="w-3 h-3 stroke-3" />
                             </div>
                           )}
                         </button>
@@ -550,7 +550,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                     <div
                       className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3.5 relative overflow-hidden cursor-pointer group ${
                         wallpaper === 'custom'
-                          ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                          ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-2xs'
                           : 'border-dashed border-stone-300 dark:border-stone-700 bg-stone-50/50 dark:bg-stone-800/30 hover:border-amber-500/60 dark:hover:border-amber-500/60'
                       }`}
                     >
@@ -562,7 +562,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
 
-                      <div className="w-14 h-14 rounded-xl shadow-xs border border-stone-200 dark:border-stone-700 flex-shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
+                      <div className="w-14 h-14 rounded-xl shadow-2xs border border-stone-200 dark:border-stone-700 shrink-0 relative overflow-hidden bg-stone-100 dark:bg-stone-800 flex items-center justify-center">
                         {customWallpaperUrl ? (
                           <img
                             src={customWallpaperUrl}
@@ -611,8 +611,8 @@ export default function SettingsModal({ isOpen, onClose }) {
                       </div>
 
                       {wallpaper === 'custom' && (
-                        <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
-                          <Check className="w-3 h-3 stroke-[3]" />
+                        <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                          <Check className="w-3 h-3 stroke-3" />
                         </div>
                       )}
                     </div>
@@ -647,13 +647,13 @@ export default function SettingsModal({ isOpen, onClose }) {
                           onClick={() => setWallpaper(p.id)}
                           className={`p-3.5 rounded-2xl border text-left transition-all flex items-start gap-3 relative cursor-pointer ${
                             isSelected
-                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                              ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-2xs'
                               : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                           }`}
                         >
                           {/* Pastille double aperçu clair / sombre */}
                           <div
-                            className="w-12 h-12 rounded-xl shadow-xs border border-black/10 flex-shrink-0 flex items-center justify-center relative overflow-hidden"
+                            className="w-12 h-12 rounded-xl shadow-2xs border border-black/10 shrink-0 flex items-center justify-center relative overflow-hidden"
                             style={{
                               backgroundColor: p.previewColor,
                             }}
@@ -674,8 +674,8 @@ export default function SettingsModal({ isOpen, onClose }) {
                           </div>
 
                           {isSelected && (
-                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
-                              <Check className="w-3 h-3 stroke-[3]" />
+                            <div className="absolute top-3.5 right-3.5 w-5 h-5 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                              <Check className="w-3 h-3 stroke-3" />
                             </div>
                           )}
                         </button>
@@ -720,7 +720,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                       }}
                       className={`p-4 rounded-2xl border text-left transition-all flex flex-col items-center justify-center text-center gap-2 relative ${
                         isSelected
-                          ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-xs'
+                          ? 'border-amber-500 bg-amber-50/60 dark:bg-amber-950/40 ring-2 ring-amber-500/20 shadow-2xs'
                           : 'border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800/50 hover:border-stone-300 dark:hover:border-stone-600'
                       }`}
                     >
@@ -729,8 +729,8 @@ export default function SettingsModal({ isOpen, onClose }) {
                         {item.label}
                       </span>
                       {isSelected && (
-                        <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xs">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-2xs">
+                          <Check className="w-2.5 h-2.5 stroke-3" />
                         </div>
                       )}
                     </button>
@@ -742,11 +742,11 @@ export default function SettingsModal({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end bg-stone-50/50 dark:bg-stone-900/50 flex-shrink-0">
+        <div className="px-6 py-4 border-t border-stone-100 dark:border-stone-800 flex items-center justify-end bg-stone-50/50 dark:bg-stone-900/50 shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all cursor-pointer"
+            className="px-5 py-2 bg-stone-900 hover:bg-stone-800 dark:bg-stone-800 dark:hover:bg-stone-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all cursor-pointer"
           >
             {t('close')}
           </button>
@@ -755,11 +755,11 @@ export default function SettingsModal({ isOpen, onClose }) {
 
       {/* Account Deletion Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs animate-fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-stone-200 dark:border-stone-800 animate-scale-up space-y-4">
             {/* Modal Header */}
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-rose-100 dark:bg-rose-950/70 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
@@ -775,7 +775,7 @@ export default function SettingsModal({ isOpen, onClose }) {
             {/* Error Message */}
             {deleteError && (
               <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 rounded-xl text-xs text-rose-700 dark:text-rose-300 flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 flex-shrink-0" />
+                <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
                 <span>{deleteError}</span>
               </div>
             )}
@@ -794,7 +794,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                     value={deletePassword}
                     onChange={(e) => setDeletePassword(e.target.value)}
                     placeholder={t('confirm_delete_account_password_placeholder')}
-                    className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-sm"
+                    className="w-full pl-3.5 pr-10 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500 transition-all text-sm"
                   />
                   <button
                     type="button"
@@ -823,7 +823,7 @@ export default function SettingsModal({ isOpen, onClose }) {
                 <button
                   type="submit"
                   disabled={deleteLoading || !deletePassword}
-                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-2xs transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>{deleteLoading ? t('deleting_account') : t('confirm_delete_account_submit_btn')}</span>

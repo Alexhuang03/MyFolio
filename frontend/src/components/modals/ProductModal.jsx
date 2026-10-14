@@ -170,7 +170,7 @@ export default function ProductModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
@@ -212,7 +212,7 @@ export default function ProductModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder={t('name_placeholder')}
-                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 />
               </div>
               <div>
@@ -225,7 +225,7 @@ export default function ProductModal({
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder={t('price_placeholder')}
-                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 />
               </div>
             </div>
@@ -241,7 +241,7 @@ export default function ProductModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t('name_placeholder')}
-                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
               />
             </div>
           )}
@@ -266,7 +266,7 @@ export default function ProductModal({
                       onClick={() => setDescriptionTab(id)}
                       className={`px-2 py-0.5 rounded-md flex items-center gap-1 transition-colors cursor-pointer ${
                         descriptionTab === id
-                          ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-sm'
+                          ? 'bg-white dark:bg-stone-700 text-stone-900 dark:text-stone-100 shadow-xs'
                           : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                       }`}
                     >
@@ -283,7 +283,7 @@ export default function ProductModal({
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder={t('description_placeholder_markdown')}
-                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-mono leading-relaxed resize-y min-h-[120px] placeholder:text-stone-400 dark:placeholder:text-stone-500 placeholder:font-sans"
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm font-mono leading-relaxed resize-y min-h-[120px] placeholder:text-stone-400 dark:placeholder:text-stone-500 placeholder:font-sans"
                 />
               ) : (
                 <div className="w-full min-h-[120px] max-h-72 overflow-y-auto px-3.5 py-2.5 bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-700 rounded-xl text-sm leading-relaxed text-stone-800 dark:text-stone-200">
@@ -315,7 +315,7 @@ export default function ProductModal({
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder={t('location_placeholder')}
-                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                   />
                 </div>
               )}
@@ -330,7 +330,7 @@ export default function ProductModal({
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     placeholder={t('date_placeholder')}
-                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                   />
                 </div>
               )}
@@ -354,7 +354,7 @@ export default function ProductModal({
                           key={starVal}
                           type="button"
                           onClick={() => setRating(rating === starVal ? null : starVal)}
-                          className="p-1 hover:scale-110 transition-transform focus:outline-none"
+                          className="p-1 hover:scale-110 transition-transform focus:outline-hidden"
                           title={`${starVal}/5`}
                         >
                           <Star
@@ -387,7 +387,7 @@ export default function ProductModal({
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
                     placeholder={t('url_placeholder')}
-                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                   />
                 </div>
               )}
@@ -405,14 +405,14 @@ export default function ProductModal({
                   <button
                     type="button"
                     onClick={() => setImageType('url')}
-                    className={`px-2 py-0.5 rounded ${imageType === 'url' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
+                    className={`px-2 py-0.5 rounded-sm ${imageType === 'url' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                   >
                     {t('url_link')}
                   </button>
                   <button
                     type="button"
                     onClick={() => setImageType('file')}
-                    className={`px-2 py-0.5 rounded ${imageType === 'file' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
+                    className={`px-2 py-0.5 rounded-sm ${imageType === 'file' ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 font-semibold' : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'}`}
                   >
                     {t('local_file')}
                   </button>
@@ -426,7 +426,7 @@ export default function ProductModal({
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
                   placeholder="https://images.unsplash.com/..."
-                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 />
               ) : (
                 <div className="flex items-center gap-3">
@@ -453,7 +453,7 @@ export default function ProductModal({
                   <img
                     src={image}
                     alt={t('preview')}
-                    className="w-12 h-12 object-cover rounded-lg shadow-sm"
+                    className="w-12 h-12 object-cover rounded-lg shadow-xs"
                     onError={(e) => {
                       e.target.style.display = 'none';
                     }}
@@ -493,7 +493,7 @@ export default function ProductModal({
                         }))
                       }
                       placeholder={cf.name}
-                      className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                      className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                     />
                   </div>
                 ))}
@@ -524,7 +524,7 @@ export default function ProductModal({
                       onClick={() => toggleLabel(lbl._id)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
                         isChecked
-                          ? 'shadow-sm ring-1 ring-offset-1'
+                          ? 'shadow-xs ring-1 ring-offset-1'
                           : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
                       }`}
                       style={{
@@ -569,7 +569,7 @@ export default function ProductModal({
                       onClick={() => toggleSubLabel(sub._id)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
                         isChecked
-                          ? 'shadow-sm ring-1 ring-offset-1'
+                          ? 'shadow-xs ring-1 ring-offset-1'
                           : 'bg-stone-50 dark:bg-stone-800 text-stone-600 dark:text-stone-300 border-stone-200 dark:border-stone-700 hover:bg-stone-100 dark:hover:bg-stone-750'
                       }`}
                       style={{
@@ -606,7 +606,7 @@ export default function ProductModal({
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="px-5 py-2 text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-xl shadow-xs transition-all disabled:opacity-50"
             >
               {loading ? t('saving') : isEditing ? t('update') : t('add_to_book')}
             </button>

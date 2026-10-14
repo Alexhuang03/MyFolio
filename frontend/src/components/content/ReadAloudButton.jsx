@@ -282,7 +282,7 @@ export default function ReadAloudButton({ text = '' }) {
               <button
                 type="button"
                 onClick={() => setIsSettingsOpen(false)}
-                className="p-0.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded cursor-pointer"
+                className="p-0.5 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-sm cursor-pointer"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -311,7 +311,7 @@ export default function ReadAloudButton({ text = '' }) {
                         <select
                           value={current || ''}
                           onChange={(e) => changeVoice(lang, e.target.value)}
-                          className="flex-1 min-w-0 px-2 py-1.5 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/30"
+                          className="flex-1 min-w-0 px-2 py-1.5 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-700 text-stone-800 dark:text-stone-100 focus:outline-hidden focus:ring-2 focus:ring-amber-500/30"
                         >
                           {options.map((v) => (
                             <option key={v.shortName} value={v.shortName}>

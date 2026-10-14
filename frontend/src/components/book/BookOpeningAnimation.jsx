@@ -75,7 +75,7 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
           )}
 
           {/* Title plate on cover */}
-          <div className="absolute inset-x-5 sm:inset-x-8 top-12 sm:top-20 bg-white/95 backdrop-blur-sm p-3 sm:p-4 rounded-md shadow-lg text-center border border-amber-900/10">
+          <div className="absolute inset-x-5 sm:inset-x-8 top-12 sm:top-20 bg-white/95 backdrop-blur-xs p-3 sm:p-4 rounded-md shadow-lg text-center border border-amber-900/10">
             <h3 className="font-serif font-bold text-stone-900 text-base sm:text-xl leading-snug line-clamp-3">
               {book.title}
             </h3>

@@ -134,7 +134,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
   const ownerEmail = book.ownerInfo?.email || (isOwner ? user?.email : '');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
@@ -191,7 +191,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="nom@exemple.com"
-                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-900 dark:text-white placeholder-stone-400 focus:outline-hidden focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
 
@@ -199,7 +199,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
                   <select
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
-                    className="px-3 py-2.5 text-xs sm:text-sm font-medium rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
+                    className="px-3 py-2.5 text-xs sm:text-sm font-medium rounded-xl border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer"
                   >
                     <option value="viewer">{t('role_viewer')}</option>
                     <option value="editor">{t('role_editor')}</option>
@@ -208,7 +208,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
                   <button
                     type="submit"
                     disabled={loading || !email.trim()}
-                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-xl transition-colors shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+                    className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-xl transition-colors shadow-xs flex items-center justify-center gap-1.5 shrink-0"
                   >
                     {loading ? (
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -243,7 +243,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
               {/* Owner Item */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-stone-50 dark:bg-stone-850 border border-stone-200/60 dark:border-stone-800">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                  <div className="w-9 h-9 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                     {getInitials(ownerName, ownerEmail)}
                   </div>
                   <div className="min-w-0">
@@ -280,7 +280,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
                     className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700/80 hover:border-stone-300 dark:hover:border-stone-600 transition-colors"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm">
+                      <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                         {getInitials(collab.name, collab.email)}
                       </div>
                       <div className="min-w-0">
@@ -305,7 +305,7 @@ export default function ShareBookModal({ isOpen, onClose, book, onCollaboratorsU
                             disabled={isCollabUpdating}
                             value={collab.role}
                             onChange={(e) => handleRoleChange(collab._id, e.target.value)}
-                            className="px-2.5 py-1 text-xs font-medium rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
+                            className="px-2.5 py-1 text-xs font-medium rounded-lg border border-stone-200 dark:border-stone-700 bg-stone-50 dark:bg-stone-800 text-stone-800 dark:text-stone-200 focus:outline-hidden focus:ring-1 focus:ring-blue-500 cursor-pointer disabled:opacity-50"
                           >
                             <option value="viewer">{t('role_viewer')}</option>
                             <option value="editor">{t('role_editor')}</option>

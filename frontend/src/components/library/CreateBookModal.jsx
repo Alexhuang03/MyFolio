@@ -152,7 +152,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-sm animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
       <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-850/50">
@@ -196,7 +196,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder={t('book_title_placeholder')}
-              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
@@ -210,7 +210,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t('description_placeholder')}
-              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
+              className="w-full px-3.5 py-2.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm resize-none placeholder:text-stone-400 dark:placeholder:text-stone-500"
             />
           </div>
 
@@ -233,15 +233,15 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                         : 'border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600 bg-stone-50 dark:bg-stone-800/60'
                     }`}
                   >
-                    <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden shadow-sm bg-stone-200 dark:bg-stone-700 mb-2">
+                    <div className="relative w-full aspect-3/4 rounded-lg overflow-hidden shadow-xs bg-stone-200 dark:bg-stone-700 mb-2">
                       <img
                         src={cover.src}
                         alt={cover.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                       {isSelected && (
-                        <div className="absolute top-1 right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-white shadow">
-                          <Check className="w-3 h-3 stroke-[3]" />
+                        <div className="absolute top-1 right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-white shadow-sm">
+                          <Check className="w-3 h-3 stroke-3" />
                         </div>
                       )}
                     </div>
@@ -269,7 +269,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                 <div
                   className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
                     isFavorite
-                      ? 'bg-amber-500 text-white shadow-sm'
+                      ? 'bg-amber-500 text-white shadow-xs'
                       : 'bg-stone-200 dark:bg-stone-700 text-stone-500 dark:text-stone-400'
                   }`}
                 >
@@ -292,7 +292,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                 }`}
               >
                 <div
-                  className={`bg-white w-4 h-4 rounded-full shadow-sm transform transition-transform ${
+                  className={`bg-white w-4 h-4 rounded-full shadow-xs transform transition-transform ${
                     isFavorite ? 'translate-x-5' : 'translate-x-0'
                   }`}
                 />
@@ -314,19 +314,19 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                       key={color}
                       type="button"
                       onClick={() => setColorTheme(color)}
-                      className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm ${
+                      className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-xs ${
                         isSelected
                           ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
                           : 'hover:scale-105'
                       }`}
                       style={{ backgroundColor: color }}
                     >
-                      {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3]" />}
+                      {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-3" />}
                     </button>
                   );
                 })}
                 <label
-                  className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-sm relative cursor-pointer overflow-hidden ${
+                  className={`w-7 h-7 rounded-full transition-transform flex items-center justify-center shadow-xs relative cursor-pointer overflow-hidden ${
                     !COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase())
                       ? 'scale-110 ring-2 ring-offset-2 ring-amber-500 dark:ring-amber-400'
                       : 'hover:scale-105 border border-stone-300 dark:border-stone-600'
@@ -348,9 +348,9 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                     className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
                   />
                   {!COLOR_PRESETS.some((c) => c.toLowerCase() === colorTheme?.toLowerCase()) ? (
-                    <Check className="w-3.5 h-3.5 text-white stroke-[3] drop-shadow-sm pointer-events-none" />
+                    <Check className="w-3.5 h-3.5 text-white stroke-3 drop-shadow-xs pointer-events-none" />
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-white shadow-sm pointer-events-none" />
+                    <span className="w-2 h-2 rounded-full bg-white shadow-xs pointer-events-none" />
                   )}
                 </label>
               </div>
@@ -393,19 +393,19 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                     }`}
                   >
                     <IconComponent
-                      className={`w-3.5 h-3.5 flex-shrink-0 ${
+                      className={`w-3.5 h-3.5 shrink-0 ${
                         isChecked ? 'text-amber-600 dark:text-amber-400' : 'text-stone-400'
                       }`}
                     />
                     <span className="truncate flex-1">{f.label}</span>
                     <div
-                      className={`w-3.5 h-3.5 rounded-sm flex items-center justify-center border flex-shrink-0 transition-colors ${
+                      className={`w-3.5 h-3.5 rounded-xs flex items-center justify-center border shrink-0 transition-colors ${
                         isChecked
                           ? 'bg-amber-500 border-amber-500 text-white'
                           : 'border-stone-300 dark:border-stone-600'
                       }`}
                     >
-                      {isChecked && <Check className="w-2.5 h-2.5 stroke-[3]" />}
+                      {isChecked && <Check className="w-2.5 h-2.5 stroke-3" />}
                     </div>
                   </button>
                 );
@@ -451,7 +451,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
                     }
                   }}
                   placeholder={t('custom_field_placeholder')}
-                  className="flex-1 px-3 py-1.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                  className="flex-1 px-3 py-1.5 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 text-xs placeholder:text-stone-400 dark:placeholder:text-stone-500"
                 />
                 <button
                   type="button"
@@ -478,7 +478,7 @@ export default function CreateBookModal({ isOpen, onClose, onSubmit, initialBook
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-2"
+              className="px-5 py-2 text-sm font-medium text-white bg-amber-600 hover:bg-amber-700 active:bg-amber-800 rounded-xl shadow-xs transition-all disabled:opacity-50 flex items-center gap-2"
             >
               {loading ? t('saving') : isEditing ? t('update') : t('create_book')}
             </button>

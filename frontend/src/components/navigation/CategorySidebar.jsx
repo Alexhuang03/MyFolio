@@ -222,7 +222,7 @@ export default function CategorySidebar({
         <div className="p-4 border-b border-stone-200/70 dark:border-stone-800/80 bg-stone-100/50 dark:bg-stone-950/40">
           <button
             onClick={onTogglePivot}
-            className="w-full relative group overflow-hidden bg-stone-900 hover:bg-stone-850 dark:bg-stone-800 dark:hover:bg-stone-750 border border-transparent dark:border-stone-700 text-white p-3 rounded-2xl shadow-sm hover:shadow transition-all flex items-center justify-between"
+            className="w-full relative group overflow-hidden bg-stone-900 hover:bg-stone-850 dark:bg-stone-800 dark:hover:bg-stone-750 border border-transparent dark:border-stone-700 text-white p-3 rounded-2xl shadow-xs hover:shadow-sm transition-all flex items-center justify-between"
             title={t('pivot_tooltip')}
           >
             <div className="flex items-center gap-3">
@@ -302,7 +302,7 @@ export default function CategorySidebar({
                   isDragged ? 'ring-2 ring-amber-400/70 shadow-lg z-10 will-change-transform ' : ''
                 }${
                   isSelected
-                    ? 'bg-white dark:bg-stone-800 shadow-sm border border-stone-200/90 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-semibold'
+                    ? 'bg-white dark:bg-stone-800 shadow-xs border border-stone-200/90 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-semibold'
                     : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-800/50 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
@@ -325,14 +325,14 @@ export default function CategorySidebar({
                     </span>
                   )}
                   <span
-                    className="w-3 h-3 rounded-full flex-shrink-0 transition-transform group-hover:scale-110 shadow-2xs"
+                    className="w-3 h-3 rounded-full shrink-0 transition-transform group-hover:scale-110 shadow-2xs"
                     style={{ backgroundColor: item.color }}
                   />
                   <span className="text-xs truncate">{item.name}</span>
                 </div>
 
                 {/* Right badges & action menu */}
-                <div className="flex items-center gap-1.5 flex-shrink-0">
+                <div className="flex items-center gap-1.5 shrink-0">
                   <span
                     className={`text-[11px] font-mono px-2 py-0.5 rounded-full ${
                       isSelected
@@ -408,7 +408,7 @@ export default function CategorySidebar({
 
       {/* Confirmation Modal Suppression en Cascade */}
       {tagToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-xs">
           <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-sm w-full p-6 border border-stone-200 dark:border-stone-700 animate-scale-up">
             <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3">
               <AlertTriangle className="w-5 h-5" />
@@ -434,7 +434,7 @@ export default function CategorySidebar({
                   await onDeleteTag(tagToDelete.id, deleteMode);
                   setTagToDelete(null);
                 }}
-                className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-sm"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-xs"
               >
                 {t('confirm_delete')}
               </button>

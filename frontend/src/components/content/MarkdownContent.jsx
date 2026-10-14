@@ -37,7 +37,7 @@ const components = {
     />
   ),
   code: ({ node, ...props }) => (
-    <code className="px-1 py-0.5 rounded bg-stone-200/70 dark:bg-stone-800 font-mono text-[0.85em]" {...props} />
+    <code className="px-1 py-0.5 rounded-sm bg-stone-200/70 dark:bg-stone-800 font-mono text-[0.85em]" {...props} />
   ),
   pre: ({ node, ...props }) => (
     <pre
@@ -66,7 +66,7 @@ const components = {
 
 export default function MarkdownContent({ children = '', className = '' }) {
   return (
-    <div className={`break-words ${className}`}>
+    <div className={`wrap-break-word ${className}`}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {children}
       </ReactMarkdown>
