@@ -26,6 +26,12 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
+// Derrière un reverse proxy (Nginx...), faire confiance à l'en-tête X-Forwarded-For pour connaître l'IP réelle
+// du visiteur : sinon tous les visiteurs partagent l'IP du proxy et donc la même limite de requêtes.
+// Par défaut, seul un proxy local (127.0.0.1) est cru ; TRUST_PROXY permet d'adapter (ex : 2 derrière Cloudflare + Nginx).
+const trustProxy = process.env.TRUST_PROXY;
+app.set('trust proxy', trustProxy ? (Number.isNaN(Number(trustProxy)) ? trustProxy : Number(trustProxy)) : 'loopback');
+
 const PORT = process.env.PORT || 5000;
 const HOST = '0.0.0.0';
 
