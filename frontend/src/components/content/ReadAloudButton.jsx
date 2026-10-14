@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Volume2, Pause, Play, Square, Loader2, SlidersHorizontal, X } from 'lucide-react';
+import { Volume2, Pause, Play, Square, Loader2, SlidersHorizontal, X, Smartphone } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../services/api';
 import { stripMarkdown } from '../../utils/markdown';
@@ -19,6 +19,11 @@ const loadVoices = () => {
   }
   return voicesPromise;
 };
+
+// Son vide (WAV de 0 seconde) : joué au moment du clic pour « déverrouiller » le lecteur audio.
+// Les navigateurs (Safari / iOS surtout) n'autorisent le son que pendant un geste de l'utilisateur :
+// sans ça, l'audio arrivé du serveur quelques instants plus tard serait bloqué.
+const SILENT_AUDIO = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
 
 // Code de langue complet pour la voix du navigateur (ex : 'fr' -> 'fr-FR')
 const browserLang = (lang) => DEFAULT_VOICES[lang]?.split('-').slice(0, 2).join('-') || lang;
@@ -47,6 +52,7 @@ export default function ReadAloudButton({ text = '' }) {
   const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'playing' | 'paused'
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settings, setSettings] = useState(null); // { langs, voices }
+  const [deviceVoiceReason, setDeviceVoiceReason] = useState(null); // Raison du repli sur la voix de l'appareil
   const readerRef = useRef(null);
   const planRef = useRef(null); // { text, promise } : découpage déjà demandé au serveur
 
@@ -55,13 +61,21 @@ export default function ReadAloudButton({ text = '' }) {
 
   if (!stripMarkdown(text)) return null;
 
+  // Doit être appelé directement dans le gestionnaire du clic (avant tout `await`)
   const startReader = () => {
     activeReader?.stop();
+    setDeviceVoiceReason(null);
+
+    // Déverrouillage du lecteur audio pendant le geste de l'utilisateur ; il sera réutilisé pour la lecture
+    const audio = new Audio();
+    audio.src = SILENT_AUDIO;
+    audio.play()?.catch(() => {});
+
     const reader = {
       cancelled: false,
       paused: false,
       engine: 'neural',
-      audio: null,
+      audio,
       controller: new AbortController(),
       urls: [],
       stop: () => {
@@ -93,6 +107,7 @@ export default function ReadAloudButton({ text = '' }) {
     }
     if (reader.cancelled) return;
     if (!voices) {
+      setDeviceVoiceReason('Voix naturelles indisponibles (liste des voix inaccessible)');
       setStatus('playing');
       return speakWithBrowser(chunks, reader, finish);
     }
@@ -114,8 +129,8 @@ export default function ReadAloudButton({ text = '' }) {
       return pending.get(index);
     };
 
-    const audio = new Audio();
-    reader.audio = audio;
+    // Lecteur déverrouillé au moment du clic (voir startReader)
+    const { audio } = reader;
 
     const playAt = async (index) => {
       if (reader.cancelled) return;
@@ -133,7 +148,8 @@ export default function ReadAloudButton({ text = '' }) {
         }
       } catch (err) {
         if (reader.cancelled || err.name === 'AbortError') return;
-        console.warn('[TTS] Voix neuronale indisponible, bascule sur la voix du navigateur :', err.message);
+        console.warn('[TTS] Voix neuronale indisponible, bascule sur la voix du navigateur :', err.name, err.message);
+        setDeviceVoiceReason(`${err.name}: ${err.message}`);
         setStatus('playing');
         speakWithBrowser(chunks.slice(index), reader, finish);
       }
@@ -163,6 +179,7 @@ export default function ReadAloudButton({ text = '' }) {
       // Serveur injoignable : lecture du texte entier avec la voix de l'appareil
       console.warn('[TTS] Préparation impossible, voix de l’appareil utilisée :', err.message);
       if (reader.cancelled) return;
+      setDeviceVoiceReason(err.message);
       setStatus('playing');
       speakWithBrowser([{ text: stripMarkdown(text), lang: null }], reader, () => reader.stop());
       return;
@@ -285,6 +302,16 @@ export default function ReadAloudButton({ text = '' }) {
             <Square className="w-3 h-3" />
           </button>
         </>
+      )}
+
+      {deviceVoiceReason && (
+        <span
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 cursor-help"
+          title={`${t('device_voice_used_hint')}\n${deviceVoiceReason}`}
+        >
+          <Smartphone className="w-3 h-3" />
+          <span>{t('device_voice_used')}</span>
+        </span>
       )}
 
       <button

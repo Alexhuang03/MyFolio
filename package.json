@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {
     "install:all": "npm install && npm install --prefix backend --ignore-scripts && npm install --prefix frontend",
+    "install:prod": "npm ci && npm ci --prefix backend --ignore-scripts && npm ci --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "deploy": "git pull --ff-only && npm run install:prod && npm run build && pm2 restart myfolio",
     "dev": "concurrently -n \"BACKEND,FRONTEND\" -c \"blue,green\" \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
