@@ -1,6 +1,7 @@
 # Dépendances (ne jamais pousser sur Git)
+# Les package-lock.json, eux, SONT versionnés : ils garantissent que le serveur installe exactement
+# les mêmes versions (et correctifs de sécurité) que le poste de développement.
 node_modules/
-package-lock.json
 */node_modules/
 
 # Fichiers sensibles et variables d'environnement
