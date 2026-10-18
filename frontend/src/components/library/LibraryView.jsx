@@ -4,7 +4,6 @@ import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
 import ShareBookModal from './ShareBookModal';
 import SettingsModal from '../settings/SettingsModal';
-import BookOpeningAnimation from '../book/BookOpeningAnimation';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../settings/ThemeToggle';
@@ -24,7 +23,6 @@ export default function LibraryView({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
-  const [openingBook, setOpeningBook] = useState(null);
   const [sharingBook, setSharingBook] = useState(null);
 
   const { t } = useLanguage();
@@ -40,15 +38,9 @@ export default function LibraryView({
     return matchesSearch && matchesFavorite;
   });
 
+  // L'animation d'ouverture et le chargement du livre sont gérés par App (chargement pendant l'animation)
   const handleBookClick = (book) => {
-    setOpeningBook(book);
-  };
-
-  const handleAnimationComplete = () => {
-    if (openingBook) {
-      onSelectBook(openingBook);
-      setOpeningBook(null);
-    }
+    onSelectBook(book);
   };
 
   return (
@@ -241,14 +233,6 @@ export default function LibraryView({
           </div>
         )}
       </main>
-
-      {/* Book Opening Animation */}
-      {openingBook && (
-        <BookOpeningAnimation
-          book={openingBook}
-          onAnimationComplete={handleAnimationComplete}
-        />
-      )}
 
       {/* Modal Création / Edition Livre */}
       {isModalOpen && (

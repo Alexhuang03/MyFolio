@@ -20,6 +20,28 @@
 
   --animate-book-open: bookOpen 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-page-flip: pageFlip 0.3s ease-out forwards;
+  /* Retour à la bibliothèque : la page du livre glisse vers la droite, la bibliothèque revient depuis la gauche */
+  --animate-book-leave: bookLeave 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  --animate-library-enter: libraryEnter 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+
+  @keyframes bookLeave {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes libraryEnter {
+    from {
+      transform: translateX(-30%);
+      opacity: 0.6;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
 
   @keyframes bookOpen {
     0% {

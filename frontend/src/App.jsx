@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { api } from './services/api';
 import LibraryView from './components/library/LibraryView';
 import BookDetailView from './components/book/BookDetailView';
+import BookOpeningAnimation from './components/book/BookOpeningAnimation';
 import AuthScreen from './components/auth/AuthScreen';
 import { CheckCircle2, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
@@ -22,6 +23,9 @@ export default function App() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState(null);
+  const [leavingBook, setLeavingBook] = useState(null); // Livre en train de glisser hors de l'écran (retour à la bibliothèque)
+  const [openingBook, setOpeningBook] = useState(null); // { book, closing } : animation d'ouverture affichée
+  const openingRef = useRef(null); // { animationDone, data, error } : ouverture en cours
   const [bookContent, setBookContent] = useState({
     labels: [],
     subLabels: [],
@@ -42,9 +46,10 @@ export default function App() {
   };
 
   // Charger la liste des livres au démarrage quand l'utilisateur est connecté
-  const loadBooks = async () => {
+  // silent : rafraîchir sans remplacer l'étagère par l'indicateur de chargement (retour depuis un livre)
+  const loadBooks = async ({ silent = false } = {}) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const data = await api.getBooks();
       setBooks(data);
     } catch (err) {
@@ -396,45 +401,86 @@ export default function App() {
 
 
 
-  // Ouvrir un livre (Mega-Fetch)
+  // Affiche un livre chargé (Mega-Fetch)
+  const showLoadedBook = (data) => {
+    setSelectedBook(data.book);
+
+    // Déduplication par sécurité
+    const seenLabels = new Set();
+    const uniqueLabels = (data.labels || []).filter((l) => {
+      const key = l.name?.trim().toLowerCase();
+      if (!key || seenLabels.has(key)) return false;
+      seenLabels.add(key);
+      return true;
+    });
+
+    const seenSubLabels = new Set();
+    const uniqueSubLabels = (data.subLabels || []).filter((s) => {
+      const key = s.name?.trim().toLowerCase();
+      if (!key || seenSubLabels.has(key)) return false;
+      seenSubLabels.add(key);
+      return true;
+    });
+
+    setBookContent({
+      labels: uniqueLabels,
+      subLabels: uniqueSubLabels,
+      products: data.products || [],
+    });
+  };
+
+  /**
+   * Ouverture d'un livre, sans écran intermédiaire :
+   * le contenu est chargé PENDANT l'animation d'ouverture (et non après), et l'animation reste affichée
+   * jusqu'à ce que le livre soit prêt ; elle s'efface alors en fondu sur le livre déjà affiché dessous.
+   */
   const handleSelectBook = async (book) => {
+    setLeavingBook(null);
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const opening = { animationDone: reduceMotion, data: null, error: null };
+    openingRef.current = opening;
+    if (!reduceMotion) setOpeningBook({ book, closing: false });
+
     try {
-      setLoading(true);
-      const data = await api.getBookContent(book._id);
-      setSelectedBook(data.book);
-
-      // Déduplication par sécurité
-      const seenLabels = new Set();
-      const uniqueLabels = (data.labels || []).filter((l) => {
-        const key = l.name?.trim().toLowerCase();
-        if (!key || seenLabels.has(key)) return false;
-        seenLabels.add(key);
-        return true;
-      });
-
-      const seenSubLabels = new Set();
-      const uniqueSubLabels = (data.subLabels || []).filter((s) => {
-        const key = s.name?.trim().toLowerCase();
-        if (!key || seenSubLabels.has(key)) return false;
-        seenSubLabels.add(key);
-        return true;
-      });
-
-      setBookContent({
-        labels: uniqueLabels,
-        subLabels: uniqueSubLabels,
-        products: data.products || [],
-      });
+      opening.data = await api.getBookContent(book._id);
     } catch (err) {
-      showToast(err.message, 'error');
-    } finally {
-      setLoading(false);
+      opening.error = err;
     }
+    finishOpening(opening);
+  };
+
+  // Appelé à la fin de l'animation d'ouverture et à la fin du chargement : le livre s'affiche quand les deux sont prêts
+  const finishOpening = (opening) => {
+    if (openingRef.current !== opening) return; // Une autre ouverture a pris le relais
+    if (opening.error) {
+      openingRef.current = null;
+      setOpeningBook(null);
+      showToast(opening.error.message, 'error');
+      return;
+    }
+    if (!opening.animationDone || !opening.data) return;
+    openingRef.current = null;
+    showLoadedBook(opening.data);
+    setOpeningBook((prev) => (prev ? { ...prev, closing: true } : null));
+  };
+
+  const handleOpeningAnimationDone = () => {
+    const opening = openingRef.current;
+    if (!opening) return;
+    opening.animationDone = true;
+    finishOpening(opening);
   };
 
   const handleBackToLibrary = () => {
+    // Transition de retour : le livre reste affiché le temps de glisser vers la droite (sauf animations réduites)
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (!reduceMotion) {
+      setLeavingBook(selectedBook);
+      // Filet de sécurité si la fin d'animation n'est pas signalée (onglet en arrière-plan...)
+      setTimeout(() => setLeavingBook(null), 700);
+    }
     setSelectedBook(null);
-    loadBooks();
+    loadBooks({ silent: true });
   };
 
   // --- Gestion des Livres ---
@@ -810,40 +856,71 @@ export default function App() {
           </div>
         ) : !user ? (
           <AuthScreen />
-        ) : selectedBook ? (
-          <BookDetailView
-            book={selectedBook}
-            labels={bookContent.labels}
-            subLabels={bookContent.subLabels}
-            products={bookContent.products}
-            onBackToLibrary={handleBackToLibrary}
-            onUpdateBook={handleUpdateBook}
-            onCreateLabel={handleCreateLabel}
-            onUpdateLabel={handleUpdateLabel}
-            onDeleteLabel={handleDeleteLabel}
-            onCreateSubLabel={handleCreateSubLabel}
-            onUpdateSubLabel={handleUpdateSubLabel}
-            onDeleteSubLabel={handleDeleteSubLabel}
-            onReorderLabels={handleReorderLabels}
-            onReorderSubLabels={handleReorderSubLabels}
-            onCreateProduct={handleCreateProduct}
-            onUpdateProduct={handleUpdateProduct}
-            onDeleteProduct={handleDeleteProduct}
-            onDeleteMultipleProducts={handleDeleteMultipleProducts}
-            onUpdateCart={handleUpdateCart}
-            showToast={showToast}
-          />
         ) : (
-          <LibraryView
-            books={books}
-            loading={loading}
-            onCreateBook={handleCreateBook}
-            onUpdateBook={handleUpdateBook}
-            onDeleteBook={handleDeleteBook}
-            onSelectBook={handleSelectBook}
-            onToggleFavoriteBook={handleToggleFavoriteBook}
-            onCollaboratorsUpdated={handleCollaboratorsUpdated}
-          />
+          // Bibliothèque et livre sont deux calques à position fixe dans cette liste : au retour, le livre
+          // reste monté (sans se recharger) pendant qu'il glisse vers la droite au-dessus de la bibliothèque
+          <>
+            {!selectedBook && (
+              <div key="library" className={leavingBook ? 'animate-library-enter' : undefined}>
+                <LibraryView
+                  books={books}
+                  loading={loading}
+                  onCreateBook={handleCreateBook}
+                  onUpdateBook={handleUpdateBook}
+                  onDeleteBook={handleDeleteBook}
+                  onSelectBook={handleSelectBook}
+                  onToggleFavoriteBook={handleToggleFavoriteBook}
+                  onCollaboratorsUpdated={handleCollaboratorsUpdated}
+                />
+              </div>
+            )}
+            {(selectedBook || leavingBook) && (
+              <div
+                key="book"
+                className={
+                  !selectedBook
+                    ? 'fixed inset-0 z-30 pointer-events-none shadow-[-24px_0_48px_rgba(0,0,0,0.25)] animate-book-leave'
+                    : undefined
+                }
+                onAnimationEnd={(e) => {
+                  if (e.target === e.currentTarget) setLeavingBook(null);
+                }}
+              >
+                <BookDetailView
+                  book={selectedBook || leavingBook}
+                  labels={bookContent.labels}
+                  subLabels={bookContent.subLabels}
+                  products={bookContent.products}
+                  onBackToLibrary={handleBackToLibrary}
+                  onUpdateBook={handleUpdateBook}
+                  onCreateLabel={handleCreateLabel}
+                  onUpdateLabel={handleUpdateLabel}
+                  onDeleteLabel={handleDeleteLabel}
+                  onCreateSubLabel={handleCreateSubLabel}
+                  onUpdateSubLabel={handleUpdateSubLabel}
+                  onDeleteSubLabel={handleDeleteSubLabel}
+                  onReorderLabels={handleReorderLabels}
+                  onReorderSubLabels={handleReorderSubLabels}
+                  onCreateProduct={handleCreateProduct}
+                  onUpdateProduct={handleUpdateProduct}
+                  onDeleteProduct={handleDeleteProduct}
+                  onDeleteMultipleProducts={handleDeleteMultipleProducts}
+                  onUpdateCart={handleUpdateCart}
+                  showToast={showToast}
+                />
+              </div>
+            )}
+
+            {/* Animation d'ouverture : reste affichée jusqu'à ce que le livre soit chargé, puis s'efface en fondu */}
+            {openingBook && (
+              <BookOpeningAnimation
+                book={openingBook.book}
+                closing={openingBook.closing}
+                onAnimationComplete={handleOpeningAnimationDone}
+                onExited={() => setOpeningBook(null)}
+              />
+            )}
+          </>
         )}
       </div>
     </div>

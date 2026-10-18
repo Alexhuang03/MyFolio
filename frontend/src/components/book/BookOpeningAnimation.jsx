@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { getCoverSrc } from '../../assets/covers';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function BookOpeningAnimation({ book, onAnimationComplete }) {
+const CLOSE_DURATION = 350; // Fondu de sortie, une fois le livre prêt (ms)
+
+/**
+ * Animation d'ouverture d'un livre.
+ * - onAnimationComplete : la couverture est ouverte (le livre peut s'afficher dès que son contenu est chargé)
+ * - closing : le livre est affiché dessous, l'animation s'efface en fondu puis appelle onExited
+ * Tant que le contenu n'est pas chargé, le livre reste ouvert avec son indicateur de chargement.
+ */
+export default function BookOpeningAnimation({ book, closing = false, onAnimationComplete, onExited }) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const coverSrc = getCoverSrc(book.coverImage);
+
+  // Rappels conservés dans des refs : un nouveau rendu du parent ne doit pas relancer les minuteries
+  const callbacks = useRef({ onAnimationComplete, onExited });
+  useLayoutEffect(() => {
+    callbacks.current = { onAnimationComplete, onExited };
+  });
 
   useEffect(() => {
     // Phase 1: book appears centered
@@ -15,22 +29,33 @@ export default function BookOpeningAnimation({ book, onAnimationComplete }) {
 
     // Phase 2: after cover swings open and pages reveal, complete
     const timer2 = setTimeout(() => {
-      onAnimationComplete();
+      callbacks.current.onAnimationComplete?.();
     }, 900);
 
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
     };
-  }, [onAnimationComplete]);
+  }, []);
+
+  // Phase 3 : le livre est prêt, fondu de sortie
+  useEffect(() => {
+    if (!closing) return undefined;
+    const timer = setTimeout(() => callbacks.current.onExited?.(), CLOSE_DURATION);
+    return () => clearTimeout(timer);
+  }, [closing]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-md perspective-1000 overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-md perspective-1000 overflow-hidden transition-opacity ease-out"
+      style={{ opacity: closing ? 0 : 1, transitionDuration: `${CLOSE_DURATION}ms` }}
+    >
       {/* 3D Book Object */}
       <div
         className="relative w-56 sm:w-80 h-[340px] sm:h-[480px] max-w-[85vw] transition-all duration-700 ease-out transform-style-3d shadow-2xl"
         style={{
-          transform: isOpen ? 'scale(1.05)' : 'scale(0.85)',
+          // À la sortie, le livre s'approche légèrement, comme si on « entrait » dedans
+          transform: closing ? 'scale(1.2)' : isOpen ? 'scale(1.05)' : 'scale(0.85)',
         }}
       >
         {/* Right Inside Pages (visible when cover swings open) */}
