@@ -141,7 +141,7 @@ export default function ProductDetailModal({
                 href={product.image}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-stone-900/80 hover:bg-stone-900 text-white text-[11px] font-medium backdrop-blur-xs flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-xs"
+                className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-stone-900/80 hover:bg-stone-900 text-white text-[11px] font-medium backdrop-blur-xs flex items-center gap-1.5 reveal-on-hover shadow-xs"
               >
                 <ExternalLink className="w-3 h-3" />
                 <span>Zoom</span>

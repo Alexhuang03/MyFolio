@@ -86,9 +86,25 @@
 /*
   Compatibilité Tailwind v3 -> v4 : comportements par défaut conservés à l'identique.
 */
-/* v4 n'applique `hover:` que sur les appareils à souris : les boutons révélés au survol
-   (menu « ... » des labels, etc.) resteraient invisibles sur mobile, où un toucher déclenche le survol. */
-@custom-variant hover (&:hover);
+/*
+  Survol : comportement par défaut de Tailwind v4, `hover:` ne s'applique que sur les appareils à souris.
+  (Ne pas le forcer sur écran tactile : sur iPhone, un toucher qui révèle du contenu au survol est « consommé »
+  par le survol, et il faut toucher une seconde fois pour cliquer.)
+
+  Les commandes indispensables révélées au survol (menu « ... » d'un label, bouton Zoom...) utilisent
+  `.reveal-on-hover` : masquées puis révélées au survol avec une souris, toujours visibles sur écran tactile.
+*/
+@media (hover: hover) and (pointer: fine) {
+  .reveal-on-hover {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .group:hover .reveal-on-hover,
+  .group:focus-within .reveal-on-hover,
+  .reveal-on-hover:focus-visible {
+    opacity: 1;
+  }
+}
 
 @layer base {
   /* v4 affiche le curseur par défaut sur les boutons ; v3 affichait la main */

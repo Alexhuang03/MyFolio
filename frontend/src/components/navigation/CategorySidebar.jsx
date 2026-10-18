@@ -298,12 +298,14 @@ export default function CategorySidebar({
                   onSelectPrimary(item.id);
                   if (onCloseMobile) onCloseMobile();
                 }}
-                className={`group relative flex items-center justify-between px-3.5 py-3 rounded-xl cursor-pointer transition-all ${
+                // Bordure toujours présente (transparente hors sélection) : sélectionner un label ne décale rien ;
+                // seules les couleurs sont animées (pas la taille ni la position)
+                className={`group relative flex items-center justify-between px-3.5 py-3 rounded-xl cursor-pointer border transition-[background-color,border-color,color,box-shadow] duration-150 ${
                   isDragged ? 'ring-2 ring-amber-400/70 shadow-lg z-10 will-change-transform ' : ''
                 }${
                   isSelected
-                    ? 'bg-white dark:bg-stone-800 shadow-xs border border-stone-200/90 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-semibold'
-                    : 'text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-800/50 hover:text-stone-900 dark:hover:text-white'
+                    ? 'bg-white dark:bg-stone-800 shadow-xs border-stone-200/90 dark:border-stone-700 text-stone-900 dark:text-stone-100 font-semibold'
+                    : 'border-transparent text-stone-600 dark:text-stone-300 hover:bg-white/60 dark:hover:bg-stone-800/50 hover:text-stone-900 dark:hover:text-white'
                 }`}
               >
                 {/* Left color dot & name */}
@@ -351,7 +353,7 @@ export default function CategorySidebar({
                           e.stopPropagation();
                           setActiveMenuId(activeMenuId === item.id ? null : item.id);
                         }}
-                        className="p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-md hover:bg-stone-100 dark:hover:bg-stone-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="reveal-on-hover p-1 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 rounded-md hover:bg-stone-100 dark:hover:bg-stone-700"
                         title={t('options')}
                       >
                         <MoreHorizontal className="w-3.5 h-3.5" />
