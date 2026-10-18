@@ -20,6 +20,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import ThemeToggle from '../settings/ThemeToggle';
 import LanguageSwitcher from '../settings/LanguageSwitcher';
 import LegalModal from './LegalModal';
+import AboutModal from '../about/AboutModal';
 
 export default function AuthScreen() {
   const { login, register, forgotPassword, resetPassword, verifyEmail, verifyCode, resendVerification } = useAuth();
@@ -64,6 +65,7 @@ export default function AuthScreen() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLegalModalOpen, setIsLegalModalOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [legalModalTab, setLegalModalTab] = useState('terms');
 
   // Check URL query for verify_token or reset_token on mount
@@ -318,9 +320,15 @@ export default function AuthScreen() {
       <div className="relative z-10 w-full max-w-[430px] my-auto">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-linear-to-tr from-amber-600 to-amber-400 text-white shadow-xl shadow-amber-600/30 mb-3 transform hover:scale-105 transition-transform duration-300">
+          <button
+            type="button"
+            onClick={() => setIsAboutOpen(true)}
+            title={t('about_open')}
+            aria-label={t('about_open')}
+            className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-linear-to-tr from-amber-600 to-amber-400 text-white shadow-xl shadow-amber-600/30 mb-3 transform hover:scale-105 active:scale-95 transition-transform duration-300"
+          >
             <Library className="w-7 h-7 sm:w-8 sm:h-8" />
-          </div>
+          </button>
           <h1 className="font-serif font-bold text-2xl sm:text-3xl tracking-tight text-stone-900 dark:text-white">
             {t('auth_title') || 'MyFolio'}
           </h1>
@@ -943,6 +951,8 @@ export default function AuthScreen() {
       </div>
 
       {/* Legal Modal Component */}
+      {isAboutOpen && <AboutModal isOpen onClose={() => setIsAboutOpen(false)} />}
+
       <LegalModal
         isOpen={isLegalModalOpen}
         onClose={() => setIsLegalModalOpen(false)}

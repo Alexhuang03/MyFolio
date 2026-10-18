@@ -4,6 +4,7 @@ import BookCard from './BookCard';
 import CreateBookModal from './CreateBookModal';
 import ShareBookModal from './ShareBookModal';
 import SettingsModal from '../settings/SettingsModal';
+import AboutModal from '../about/AboutModal';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useAuth } from '../../context/AuthContext';
 import ThemeToggle from '../settings/ThemeToggle';
@@ -22,6 +23,7 @@ export default function LibraryView({
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [editingBook, setEditingBook] = useState(null);
   const [sharingBook, setSharingBook] = useState(null);
 
@@ -51,9 +53,15 @@ export default function LibraryView({
           
           {/* Brand Logo & Title (Left) */}
           <div className="flex items-center gap-2.5 sm:gap-3 shrink-0 order-1">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsAboutOpen(true)}
+              title={t('about_open')}
+              aria-label={t('about_open')}
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-600/20 shrink-0 hover:scale-105 active:scale-95 transition-transform duration-200"
+            >
               <Library className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
+            </button>
             <div>
               <h1 className="font-serif font-bold text-lg sm:text-2xl tracking-tight text-stone-900 dark:text-white flex items-center gap-2">
                 MyFolio <span className="text-amber-700 dark:text-amber-300 text-xs sm:text-sm font-sans font-normal px-2 py-0.5 bg-amber-100/60 dark:bg-amber-950/70 rounded-full border border-amber-200 dark:border-amber-800/80">{t('library_badge')}</span>
@@ -284,6 +292,8 @@ export default function LibraryView({
           }}
         />
       )}
+
+      {isAboutOpen && <AboutModal isOpen onClose={() => setIsAboutOpen(false)} />}
     </div>
   );
 }
