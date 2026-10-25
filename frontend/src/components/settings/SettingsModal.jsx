@@ -177,8 +177,8 @@ export default function SettingsModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
-      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full h-[580px] sm:h-[620px] max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
+    <div className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in">
+      <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-2xl w-full h-[580px] sm:h-[620px] max-h-full flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up">
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 sm:py-4 border-b border-stone-100 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/50 shrink-0">
           <div className="flex items-center gap-3">
@@ -755,7 +755,7 @@ export default function SettingsModal({ isOpen, onClose }) {
 
       {/* Account Deletion Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs animate-fade-in">
+        <div className="modal-overlay fixed inset-0 z-60 flex items-center justify-center p-3 sm:p-4 bg-stone-950/70 backdrop-blur-xs animate-fade-in">
           <div className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 border border-stone-200 dark:border-stone-800 animate-scale-up space-y-4">
             {/* Modal Header */}
             <div className="flex items-start gap-3">

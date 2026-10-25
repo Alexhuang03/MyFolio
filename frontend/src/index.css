@@ -380,3 +380,11 @@ input[type="color"]::-moz-color-swatch {
     height: 60%;
   }
 }
+
+/* Fenêtres modales : occupent la zone visible au-dessus du clavier virtuel (voir utils/visualViewport.js).
+   Hors calque Tailwind, cette règle l'emporte sur inset-0. */
+.modal-overlay {
+  top: var(--vv-top, 0px);
+  bottom: auto;
+  height: var(--vv-height, 100dvh);
+}

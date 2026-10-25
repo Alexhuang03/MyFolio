@@ -59,11 +59,11 @@ export default function CartModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in"
+      className="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-stone-900/60 backdrop-blur-xs animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-xl w-full h-[600px] sm:h-[650px] max-h-[90vh] flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up"
+        className="bg-white dark:bg-stone-900 rounded-2xl shadow-2xl max-w-xl w-full h-[600px] sm:h-[650px] max-h-full flex flex-col overflow-hidden border border-stone-200 dark:border-stone-800 animate-scale-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

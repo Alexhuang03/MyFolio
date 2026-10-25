@@ -6,6 +6,9 @@ import { LanguageProvider } from './i18n/LanguageContext'
 import { ThemeProvider } from './theme/ThemeContext'
 import { AuthProvider } from './context/AuthContext'
 import { WallpaperProvider } from './theme/WallpaperContext'
+import { installVisualViewport } from './utils/visualViewport'
+
+installVisualViewport()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
