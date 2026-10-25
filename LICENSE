@@ -1,0 +1,74 @@
+Copyright (c) 2026 Alex Huang (Alexhuang03). Tous droits réservés / All rights reserved.
+
+================================================================================
+FRANÇAIS
+================================================================================
+
+MyFolio, y compris son code source, sa conception, son interface graphique,
+ses illustrations (notamment les couvertures de livres), ses textes et sa
+documentation (ci-après « le Logiciel »), est la propriété exclusive de son
+auteur et est protégé par le Code de la propriété intellectuelle ainsi que par
+les conventions internationales sur le droit d'auteur.
+
+Le code source est rendu public à des fins de consultation uniquement. Le fait
+qu'il soit visible ne confère aucune licence ni aucun droit d'utilisation.
+
+Sauf autorisation préalable et écrite de l'auteur, il est interdit de :
+  - copier ou reproduire tout ou partie du Logiciel ;
+  - modifier, adapter, traduire ou créer des œuvres dérivées du Logiciel ;
+  - distribuer, publier, sous-licencier, louer ou vendre le Logiciel ;
+  - héberger ou exploiter le Logiciel, ou une version modifiée, en tant que
+    service accessible à des tiers ;
+  - utiliser le Logiciel, en tout ou partie, à des fins commerciales.
+
+Est seule autorisée la consultation du code source sur la plateforme où il
+est publié, ainsi que la copie temporaire nécessaire à cette consultation
+(par exemple un « fork » sur GitHub, conformément aux conditions de GitHub),
+sans aucun autre usage.
+
+Les contenus (textes, images, données) importés par les utilisateurs dans
+leurs collections restent la propriété de ces utilisateurs.
+
+Les bibliothèques tierces utilisées par le Logiciel restent soumises à leurs
+licences respectives.
+
+LE LOGICIEL EST FOURNI « EN L'ÉTAT », SANS GARANTIE D'AUCUNE SORTE. EN AUCUN
+CAS L'AUTEUR NE POURRA ÊTRE TENU RESPONSABLE D'UN QUELCONQUE DOMMAGE LIÉ À SON
+UTILISATION.
+
+Pour toute demande d'autorisation : https://github.com/Alexhuang03/MyFolio
+
+================================================================================
+ENGLISH
+================================================================================
+
+MyFolio, including its source code, design, user interface, artwork (including
+book covers), text and documentation (the "Software"), is the exclusive
+property of its author and is protected by copyright law and international
+treaties.
+
+The source code is made publicly available for viewing purposes only. Its
+visibility does not grant any license or right of use.
+
+Without the author's prior written permission, you may not:
+  - copy or reproduce the Software, in whole or in part;
+  - modify, adapt, translate or create derivative works of the Software;
+  - distribute, publish, sublicense, rent or sell the Software;
+  - host or operate the Software, or a modified version, as a service
+    available to third parties;
+  - use the Software, in whole or in part, for commercial purposes.
+
+You may only view the source code on the platform where it is published and
+make the temporary copies needed to do so (for example a "fork" on GitHub, as
+permitted by GitHub's Terms of Service), with no other use.
+
+Content (text, images, data) uploaded by users into their collections remains
+the property of those users.
+
+Third-party libraries used by the Software remain subject to their own
+licenses.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT
+SHALL THE AUTHOR BE LIABLE FOR ANY DAMAGE ARISING FROM ITS USE.
+
+For permission requests: https://github.com/Alexhuang03/MyFolio

@@ -939,14 +939,23 @@ export default function AuthScreen() {
             <ExternalLink className="w-3 h-3 opacity-60" />
           </a>
 
-          {/* Legal Link */}
-          <button
-            type="button"
-            onClick={() => openLegal('terms')}
-            className="text-[11px] sm:text-xs text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 underline underline-offset-2 transition-colors"
-          >
-            {t('legal_and_terms')}
-          </button>
+          {/* Legal & License Links */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => openLegal('terms')}
+              className="text-[11px] sm:text-xs text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 underline underline-offset-2 transition-colors"
+            >
+              {t('legal_and_terms')}
+            </button>
+            <button
+              type="button"
+              onClick={() => openLegal('license')}
+              className="text-[11px] sm:text-xs text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 underline underline-offset-2 transition-colors"
+            >
+              © 2026 MyFolio · {t('license_link')}
+            </button>
+          </div>
         </div>
       </div>
 

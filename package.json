@@ -1,6 +1,7 @@
 {
   "name": "myfolio",
   "version": "1.0.0",
+  "license": "UNLICENSED",
   "description": "Gestionnaire de Collections Personnalisable (Concept Livre)",
   "private": true,
   "scripts": {

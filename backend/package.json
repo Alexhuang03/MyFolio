@@ -1,6 +1,7 @@
 {
   "name": "myfolio-backend",
   "version": "1.0.0",
+  "license": "UNLICENSED",
   "description": "Backend API for MyFolio",
   "main": "src/server.js",
   "type": "module",

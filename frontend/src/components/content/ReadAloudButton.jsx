@@ -28,8 +28,25 @@ const SILENT_AUDIO = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwA
 // Code de langue complet pour la voix du navigateur (ex : 'fr' -> 'fr-FR')
 const browserLang = (lang) => DEFAULT_VOICES[lang]?.split('-').slice(0, 2).join('-') || lang;
 
-// Secours : voix intégrée au navigateur, morceau par morceau
-const speakWithBrowser = (chunks, reader, onDone) => {
+// Certains navigateurs (Chrome) chargent leurs voix en différé : on lance le chargement dès maintenant
+if (typeof window !== 'undefined') window.speechSynthesis?.getVoices();
+
+/**
+ * Voix de l'appareil la plus proche de la voix choisie (ex : 'en-GB-RyanNeural') :
+ * même personne si le navigateur la propose (Edge expose « Microsoft Ryan Online (Natural) »),
+ * sinon même accent (en-GB), sinon null (voix par défaut de la langue).
+ */
+const pickDeviceVoice = (voiceName) => {
+  const all = window.speechSynthesis?.getVoices() || [];
+  if (!voiceName || !all.length) return null;
+  const locale = voiceName.split('-').slice(0, 2).join('-').toLowerCase();
+  const person = voiceName.split('-').pop().replace(/(Multilingual)?Neural$/, '');
+  const sameLocale = all.filter((v) => v.lang.replace('_', '-').toLowerCase() === locale);
+  return sameLocale.find((v) => v.name.includes(person)) || sameLocale[0] || null;
+};
+
+// Secours : voix intégrée au navigateur, morceau par morceau, au plus près de la voix choisie
+const speakWithBrowser = (chunks, reader, onDone, voiceFor = () => null) => {
   const synth = window.speechSynthesis;
   if (!synth) return onDone();
   reader.engine = 'browser';
@@ -38,6 +55,11 @@ const speakWithBrowser = (chunks, reader, onDone) => {
     if (index >= chunks.length) return onDone();
     const utterance = new SpeechSynthesisUtterance(chunks[index].text);
     if (chunks[index].lang) utterance.lang = browserLang(chunks[index].lang);
+    const deviceVoice = pickDeviceVoice(voiceFor(chunks[index]));
+    if (deviceVoice) {
+      utterance.voice = deviceVoice;
+      utterance.lang = deviceVoice.lang;
+    }
     utterance.onend = () => speakAt(index + 1);
     utterance.onerror = (e) => {
       if (e.error !== 'interrupted' && e.error !== 'canceled') speakAt(index + 1);
@@ -99,6 +121,8 @@ export default function ReadAloudButton({ text = '' }) {
   // Lit une liste de morceaux avec les voix neuronales ; bascule sur la voix du navigateur en cas d'échec
   const playChunks = async (chunks, reader, voiceOverride = null) => {
     const finish = () => reader.stop();
+    // Voix choisie pour un morceau (sert aussi au repli sur la voix de l'appareil)
+    const voiceFor = (chunk) => voiceOverride || resolveVoice(chunk.lang, voices || []);
     let voices = null;
     try {
       voices = await loadVoices();
@@ -109,14 +133,14 @@ export default function ReadAloudButton({ text = '' }) {
     if (!voices) {
       setDeviceVoiceReason('Voix naturelles indisponibles (liste des voix inaccessible)');
       setStatus('playing');
-      return speakWithBrowser(chunks, reader, finish);
+      return speakWithBrowser(chunks, reader, finish, voiceFor);
     }
 
     const pending = new Map(); // index -> Promise<objectURL> (préchargement du morceau suivant)
     const fetchChunk = (index) => {
       if (!pending.has(index)) {
-        const { text: chunkText, lang } = chunks[index];
-        const voice = voiceOverride || resolveVoice(lang, voices);
+        const { text: chunkText } = chunks[index];
+        const voice = voiceFor(chunks[index]);
         pending.set(
           index,
           api.synthesizeSpeech(chunkText, voice, reader.controller.signal).then((blob) => {
@@ -151,7 +175,7 @@ export default function ReadAloudButton({ text = '' }) {
         console.warn('[TTS] Voix neuronale indisponible, bascule sur la voix du navigateur :', err.name, err.message);
         setDeviceVoiceReason(`${err.name}: ${err.message}`);
         setStatus('playing');
-        speakWithBrowser(chunks.slice(index), reader, finish);
+        speakWithBrowser(chunks.slice(index), reader, finish, voiceFor);
       }
     };
     playAt(0);

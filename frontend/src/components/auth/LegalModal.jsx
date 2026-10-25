@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { X, ShieldCheck, FileText, Scale } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, ShieldCheck, FileText, Scale, Copyright } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
-  const [activeTab, setActiveTab] = useState(initialTab); // 'terms' | 'privacy' | 'notices'
+  const [activeTab, setActiveTab] = useState(initialTab); // 'terms' | 'privacy' | 'notices' | 'license'
   const [legalLang, setLegalLang] = useState('fr'); // 'fr' | 'en'
   const { t } = useLanguage();
+
+  // Open on the requested tab each time the modal is shown
+  useEffect(() => {
+    if (isOpen) setActiveTab(initialTab);
+  }, [isOpen, initialTab]);
 
   if (!isOpen) return null;
 
@@ -66,7 +71,7 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 px-6 pt-2 gap-2 text-xs font-medium">
+        <div className="flex border-b border-stone-100 dark:border-stone-800 bg-stone-50 dark:bg-stone-900/50 px-6 pt-2 gap-2 text-xs font-medium overflow-x-auto whitespace-nowrap">
           <button
             type="button"
             onClick={() => setActiveTab('terms')}
@@ -102,6 +107,18 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
           >
             <Scale className="w-3.5 h-3.5" />
             <span>{legalLang === 'fr' ? 'Mentions Légales' : 'Legal Notices'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('license')}
+            className={`pb-2.5 px-3 border-b-2 flex items-center gap-1.5 transition-colors ${
+              activeTab === 'license'
+                ? 'border-amber-600 text-amber-600 dark:text-amber-400 font-semibold'
+                : 'border-transparent text-stone-500 hover:text-stone-800 dark:text-stone-400'
+            }`}
+          >
+            <Copyright className="w-3.5 h-3.5" />
+            <span>{legalLang === 'fr' ? 'Licence' : 'License'}</span>
           </button>
         </div>
 
@@ -255,6 +272,93 @@ export default function LegalModal({ isOpen, onClose, initialTab = 'terms' }) {
                 </h4>
                 <p>
                   Modern web architecture built with <strong>React 19</strong>, <strong>Vite</strong>, <strong>Tailwind CSS</strong>, <strong>Node.js</strong> and <strong>MongoDB</strong>.
+                </p>
+              </div>
+            )
+          )}
+
+          {/* LICENSE & COPYRIGHT */}
+          {activeTab === 'license' && (
+            legalLang === 'fr' ? (
+              <div className="space-y-3">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-900 dark:text-amber-200">
+                  <strong>© 2026 Alex Huang (Alexhuang03). Tous droits réservés.</strong>
+                </div>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  1. Propriété du Logiciel
+                </h4>
+                <p>
+                  MyFolio, y compris son code source, sa conception, son interface, ses illustrations (notamment les couvertures de livres), ses textes et sa documentation, est la propriété exclusive de son auteur et est protégé par le Code de la propriété intellectuelle et les conventions internationales sur le droit d'auteur.
+                </p>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  2. Code source consultable, pas libre
+                </h4>
+                <p>
+                  Le code source est public à des fins de consultation uniquement. Sa visibilité ne confère aucune licence. Sauf autorisation écrite préalable de l'auteur, il est interdit de :
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>copier ou reproduire tout ou partie du logiciel ;</li>
+                  <li>le modifier ou en créer des œuvres dérivées ;</li>
+                  <li>le distribuer, le publier, le louer ou le vendre ;</li>
+                  <li>l'héberger ou l'exploiter comme service pour des tiers ;</li>
+                  <li>l'utiliser à des fins commerciales.</li>
+                </ul>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  3. Vos contenus et les bibliothèques tierces
+                </h4>
+                <p>
+                  Les contenus que vous importez dans vos collections restent votre propriété. Les bibliothèques open source utilisées par MyFolio restent soumises à leurs propres licences.
+                </p>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  4. Demande d'autorisation
+                </h4>
+                <p>
+                  Pour toute demande d'utilisation, contactez l'auteur via le <a href="https://github.com/Alexhuang03/MyFolio" target="_blank" rel="noopener noreferrer" className="text-amber-600 dark:text-amber-400 hover:underline">dépôt GitHub</a>. Le texte complet figure dans le fichier <code>LICENSE</code> du dépôt.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-900 dark:text-amber-200">
+                  <strong>© 2026 Alex Huang (Alexhuang03). All rights reserved.</strong>
+                </div>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  1. Ownership
+                </h4>
+                <p>
+                  MyFolio, including its source code, design, interface, artwork (including book covers), text and documentation, is the exclusive property of its author and is protected by copyright law and international treaties.
+                </p>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  2. Source available, not open source
+                </h4>
+                <p>
+                  The source code is public for viewing purposes only. Its visibility does not grant any license. Without the author's prior written permission, you may not:
+                </p>
+                <ul className="list-disc pl-5 space-y-1">
+                  <li>copy or reproduce the software, in whole or in part;</li>
+                  <li>modify it or create derivative works;</li>
+                  <li>distribute, publish, rent or sell it;</li>
+                  <li>host or operate it as a service for third parties;</li>
+                  <li>use it for commercial purposes.</li>
+                </ul>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  3. Your content & third-party libraries
+                </h4>
+                <p>
+                  Content you upload into your collections remains yours. Open source libraries used by MyFolio remain subject to their own licenses.
+                </p>
+
+                <h4 className="font-semibold text-stone-900 dark:text-stone-100 text-base pt-2">
+                  4. Permission requests
+                </h4>
+                <p>
+                  For any usage request, contact the author through the <a href="https://github.com/Alexhuang03/MyFolio" target="_blank" rel="noopener noreferrer" className="text-amber-600 dark:text-amber-400 hover:underline">GitHub repository</a>. The full text is available in the repository's <code>LICENSE</code> file.
                 </p>
               </div>
             )

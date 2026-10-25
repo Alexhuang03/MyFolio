@@ -167,3 +167,9 @@ MyFolio/
     │   ├── App.jsx                # Orchestrateur d'état React
     │   └── main.jsx
 ```
+
+## Licence
+
+© 2026 Alex Huang (Alexhuang03). **Tous droits réservés.**
+
+Le code source est public uniquement pour consultation. Toute copie, modification, redistribution ou utilisation (commerciale ou non) est interdite sans autorisation écrite préalable de l'auteur. Voir le fichier [LICENSE](LICENSE) pour le texte complet.
