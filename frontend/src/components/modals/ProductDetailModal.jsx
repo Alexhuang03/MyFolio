@@ -15,6 +15,7 @@ import {
 import { useLanguage } from '../../i18n/LanguageContext';
 import MarkdownContent from '../content/MarkdownContent';
 import ReadAloudButton from '../content/ReadAloudButton';
+import { formatDisplayDate } from '../../utils/dates';
 
 export default function ProductDetailModal({
   isOpen,
@@ -27,7 +28,7 @@ export default function ProductDetailModal({
   onEdit,
   onBackToCart,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -187,7 +188,7 @@ export default function ProductDetailModal({
               {config.hasDate && product.date && (
                 <span className="inline-flex items-center gap-1.5 bg-stone-100/80 dark:bg-stone-800 px-2.5 py-1 rounded-lg border border-stone-200/80 dark:border-stone-750">
                   <Calendar className="w-3.5 h-3.5 text-stone-400" />
-                  <span>{product.date}</span>
+                  <span>{formatDisplayDate(product.date, lang)}</span>
                 </span>
               )}
 

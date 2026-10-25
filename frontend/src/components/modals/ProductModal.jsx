@@ -17,6 +17,7 @@ import { api } from '../../services/api';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { optimizeImageForUpload } from '../../utils/imageOptimizer';
 import MarkdownContent from '../content/MarkdownContent';
+import DatePicker from '../common/DatePicker';
 
 export default function ProductModal({
   isOpen,
@@ -325,12 +326,11 @@ export default function ProductModal({
                     <Calendar className="w-3.5 h-3.5 text-stone-400" />
                     <span>{t('date_label')}</span>
                   </label>
-                  <input
-                    type="text"
+                  <DatePicker
                     value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    onChange={setDate}
                     placeholder={t('date_placeholder')}
-                    className="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
+                    inputClassName="w-full px-3.5 py-2 bg-stone-50 dark:bg-stone-800/80 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-800 dark:text-stone-100 focus:bg-white dark:focus:bg-stone-800 focus:outline-hidden focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-sm placeholder:text-stone-400 dark:placeholder:text-stone-500"
                   />
                 </div>
               )}

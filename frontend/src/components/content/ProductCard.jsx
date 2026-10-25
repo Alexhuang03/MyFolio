@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { stripMarkdown } from '../../utils/markdown';
+import { formatDisplayDate } from '../../utils/dates';
 
 export default function ProductCard({
   product,
@@ -25,7 +26,7 @@ export default function ProductCard({
   isSelected = false,
   onToggleSelect,
 }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   const config = {
     hasImage: true,
@@ -215,7 +216,7 @@ export default function ProductCard({
               {config.hasDate && product.date && (
                 <span className="inline-flex items-center gap-1 bg-stone-50 dark:bg-stone-800/60 px-2 py-0.5 rounded-md border border-stone-200/60 dark:border-stone-750">
                   <Calendar className="w-3 h-3 text-stone-400" />
-                  <span>{product.date}</span>
+                  <span>{formatDisplayDate(product.date, lang)}</span>
                 </span>
               )}
 
