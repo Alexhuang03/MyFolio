@@ -3,6 +3,17 @@ import Book from '../models/Book.js';
 import { getBookAccess } from '../utils/permissionHelper.js';
 import { emitToBook } from '../utils/socketEmitter.js';
 
+// Cadrage de l'image : valeurs numériques bornées (x, y en %, zoom de 1 à 4)
+const clamp = (value, min, max, fallback) => {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+};
+const sanitizeImageFrame = (frame) => ({
+  x: clamp(frame?.x, 0, 100, 50),
+  y: clamp(frame?.y, 0, 100, 50),
+  zoom: clamp(frame?.zoom, 1, 4, 1),
+});
+
 // Créer un produit
 export const createProduct = async (req, res) => {
   try {
@@ -10,6 +21,7 @@ export const createProduct = async (req, res) => {
       name,
       description,
       image,
+      imageFrame,
       price,
       location,
       date,
@@ -38,6 +50,7 @@ export const createProduct = async (req, res) => {
       name: name.trim(),
       description: description ? description.trim() : '',
       image: image || '',
+      imageFrame: sanitizeImageFrame(imageFrame),
       price: price !== undefined && price !== '' && price !== null ? Number(price) : null,
       location: location ? location.trim() : '',
       date: date ? date.trim() : '',
@@ -65,6 +78,7 @@ export const updateProduct = async (req, res) => {
       name,
       description,
       image,
+      imageFrame,
       price,
       location,
       date,
@@ -93,6 +107,7 @@ export const updateProduct = async (req, res) => {
       ...(name && { name: name.trim() }),
       ...(description !== undefined && { description: description.trim() }),
       ...(image !== undefined && { image }),
+      ...(imageFrame !== undefined && { imageFrame: sanitizeImageFrame(imageFrame) }),
       ...(price !== undefined && { price: price !== '' && price !== null ? Number(price) : null }),
       ...(location !== undefined && { location: location.trim() }),
       ...(date !== undefined && { date: date.trim() }),

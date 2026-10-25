@@ -18,6 +18,8 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { optimizeImageForUpload } from '../../utils/imageOptimizer';
 import MarkdownContent from '../content/MarkdownContent';
 import DatePicker from '../common/DatePicker';
+import ImageFramer from '../common/ImageFramer';
+import { DEFAULT_FRAME } from '../../utils/imageFrame';
 
 export default function ProductModal({
   isOpen,
@@ -59,6 +61,7 @@ export default function ProductModal({
   const [selectedSubLabelIds, setSelectedSubLabelIds] = useState([]);
 
   const [imageType, setImageType] = useState('file'); // 'url' ou 'file'
+  const [imageFrame, setImageFrame] = useState(DEFAULT_FRAME); // Partie de l'image affichée sur la carte
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -70,6 +73,7 @@ export default function ProductModal({
       setPrice(initialProduct.price !== null && initialProduct.price !== undefined ? initialProduct.price : '');
       const prodImage = initialProduct.image || '';
       setImage(prodImage);
+      setImageFrame({ ...DEFAULT_FRAME, ...(initialProduct.imageFrame || {}) });
       const isLocal =
         prodImage.startsWith('/uploads/') ||
         prodImage.startsWith('data:') ||
@@ -94,6 +98,7 @@ export default function ProductModal({
       setDescription('');
       setPrice('');
       setImage('');
+      setImageFrame(DEFAULT_FRAME);
       setImageType('file');
       setLocation('');
       setDate('');
@@ -131,6 +136,7 @@ export default function ProductModal({
       const optimizedFile = await optimizeImageForUpload(file);
       const res = await api.uploadImage(optimizedFile);
       setImage(res.url);
+      setImageFrame(DEFAULT_FRAME); // Nouvelle photo : cadrage centré
     } catch (err) {
       setError(err.message || t('upload_error'));
     } finally {
@@ -154,6 +160,7 @@ export default function ProductModal({
         description: config.hasDescription ? description.trim() : '',
         price: config.hasPrice && price !== '' ? parseFloat(price) : null,
         image: config.hasImage ? image.trim() : '',
+        imageFrame: config.hasImage && image.trim() ? imageFrame : DEFAULT_FRAME,
         location: config.hasLocation ? location.trim() : '',
         date: config.hasDate ? date.trim() : '',
         rating: config.hasRating && rating !== null ? rating : null,
@@ -461,13 +468,18 @@ export default function ProductModal({
                   <span className="text-xs text-stone-500 dark:text-stone-400 truncate flex-1">{image}</span>
                   <button
                     type="button"
-                    onClick={() => setImage('')}
+                    onClick={() => {
+                      setImage('');
+                      setImageFrame(DEFAULT_FRAME);
+                    }}
                     className="p-1 text-stone-400 hover:text-rose-600 dark:hover:text-rose-400"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               )}
+
+              {image && <ImageFramer key={image} src={image} frame={imageFrame} onChange={setImageFrame} />}
             </div>
           )}
 

@@ -16,6 +16,18 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    // Partie de l'image affichée sur la carte : point de cadrage (en %) et zoom
+    imageFrame: {
+      type: new mongoose.Schema(
+        {
+          x: { type: Number, default: 50, min: 0, max: 100 },
+          y: { type: Number, default: 50, min: 0, max: 100 },
+          zoom: { type: Number, default: 1, min: 1, max: 4 },
+        },
+        { _id: false }
+      ),
+      default: () => ({}),
+    },
     price: {
       type: Number,
       default: null,

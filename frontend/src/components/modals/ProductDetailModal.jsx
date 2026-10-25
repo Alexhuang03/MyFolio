@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   X,
   Edit3,
@@ -6,6 +6,7 @@ import {
   MapPin,
   Star,
   ExternalLink,
+  Maximize2,
   Package,
   FileText,
   Tag,
@@ -16,6 +17,8 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import MarkdownContent from '../content/MarkdownContent';
 import ReadAloudButton from '../content/ReadAloudButton';
 import { formatDisplayDate } from '../../utils/dates';
+import { frameStyle } from '../../utils/imageFrame';
+import ImageLightbox from '../common/ImageLightbox';
 
 export default function ProductDetailModal({
   isOpen,
@@ -29,6 +32,10 @@ export default function ProductDetailModal({
   onBackToCart,
 }) {
   const { t, lang } = useLanguage();
+  const [isImageOpen, setIsImageOpen] = useState(false); // Visionneuse plein écran de la photo
+
+  // La fiche se ferme : la visionneuse aussi (ajustement d'état pendant le rendu, recommandé par React)
+  if (!isOpen && isImageOpen) setIsImageOpen(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -136,18 +143,21 @@ export default function ProductDetailModal({
               <img
                 src={product.image}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover scale-[var(--zoom)]"
+                style={frameStyle(product.imageFrame)}
               />
-              <a
-                href={product.image}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                type="button"
+                onClick={() => setIsImageOpen(true)}
                 className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-stone-900/80 hover:bg-stone-900 text-white text-[11px] font-medium backdrop-blur-xs flex items-center gap-1.5 reveal-on-hover shadow-xs"
               >
-                <ExternalLink className="w-3 h-3" />
+                <Maximize2 className="w-3 h-3" />
                 <span>Zoom</span>
-              </a>
+              </button>
             </div>
+          )}
+          {isImageOpen && (
+            <ImageLightbox src={product.image} alt={product.name} onClose={() => setIsImageOpen(false)} />
           )}
 
           {/* Titre & Prix */}
